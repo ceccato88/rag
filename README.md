@@ -78,3 +78,25 @@ streamlit run streamlit_rag_app_producao.py
 
 A aplicação abrirá no navegador padrão em `http://localhost:8501`, permitindo login e consulta ao conteúdo indexado.
 
+## Gerenciamento de usuários
+
+Os dados de autenticação ficam salvos em `production_users.json`, arquivo que **não** é versionado por conter informações sensíveis. Para facilitar a configuração inicial, fornecemos um exemplo em `production_users.example.json` que ilustra o formato esperado:
+
+```json
+{
+  "adminuser": {
+    "password_hash": "examplehash123",
+    "name": "Admin User",
+    "role": "Admin",
+    "organization": "Example Corp",
+    "created_at": "2025-01-01T00:00:00",
+    "last_login": "",
+    "total_conversations": 0,
+    "successful_queries": 0,
+    "failed_queries": 0,
+    "active": true,
+    "notes": ""
+  }
+}
+```
+

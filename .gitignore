@@ -4,3 +4,7 @@ __pycache__/
 *.pyo
 *.pyd
 .env
+production_users.json*
+production_users/
+*.log
+pdf_images/
