@@ -1,0 +1,66 @@
+================================================================================
+RELATÓRIO DE AVALIAÇÃO DO SISTEMA RAG MULTIMODAL
+================================================================================
+
+📊 RESUMO GERAL:
+• Total de perguntas: 10
+• Avaliações bem-sucedidas: 10
+• Avaliações com falha: 0
+• Taxa de sucesso: 100.0%
+
+📈 MÉTRICAS GERAIS:
+• Precisão média: 0.900
+• Recall médio: 0.900
+• F1-Score médio: 0.900
+• Acurácia de páginas (Jaccard): 0.900
+• Cobertura de palavras-chave: 0.827
+• Tempo de resposta médio: 13.57s
+
+🏷️ ANÁLISE POR CATEGORIA:
+• SPECIFIC (3 perguntas):
+  - Precisão: 1.000
+  - Recall: 1.000
+  - F1-Score: 1.000
+  - Tempo médio: 11.95s
+• NEGATIVE (1 perguntas):
+  - Precisão: 1.000
+  - Recall: 1.000
+  - F1-Score: 1.000
+  - Tempo médio: 8.97s
+• VISUAL (1 perguntas):
+  - Precisão: 1.000
+  - Recall: 1.000
+  - F1-Score: 1.000
+  - Tempo médio: 17.82s
+
+📋 RESULTADOS DETALHADOS:
+• tech_001: Quais são os três subgrafos hierárquicos na arquitetura do Zep?
+  ✅ Páginas: [2] (Esperado: [2])
+     P=1.00, R=1.00, F1=1.00
+• tech_002: Como o Graphiti lida com a invalidação de arestas (fatos) no grafo de conhecimento?
+  ✅ Páginas: [3] (Esperado: [3])
+     P=1.00, R=1.00, F1=1.00
+• tech_003: Quais são os três métodos de busca implementados pelo Zep para recuperação de memória?
+  ✅ Páginas: [4] (Esperado: [5])
+     P=0.00, R=0.00, F1=0.00
+• concept_001: Qual é a principal limitação dos frameworks RAG que o Zep visa resolver?
+  ✅ Páginas: [1] (Esperado: [1])
+     P=1.00, R=1.00, F1=1.00
+• concept_002: De que forma a estrutura de memória do Zep se assemelha aos modelos psicológicos da memória humana?
+  ✅ Páginas: [2] (Esperado: [2])
+     P=1.00, R=1.00, F1=1.00
+• specific_001: Qual foi a pontuação de acurácia (Score) do Zep com o modelo gpt-4-turbo na avaliação Deep Memory Retrieval (DMR), conforme a Tabela 1?
+  ✅ Páginas: [6] (Esperado: [6])
+     P=1.00, R=1.00, F1=1.00
+• specific_002: Na Tabela 2, qual foi a redução de latência do Zep em comparação com o baseline 'Full-context' usando o modelo gpt-4o?
+  ✅ Páginas: [7] (Esperado: [7])
+     P=1.00, R=1.00, F1=1.00
+• specific_003: Qual algoritmo de detecção de comunidade o Zep utiliza e por quê?
+  ✅ Páginas: [4] (Esperado: [4])
+     P=1.00, R=1.00, F1=1.00
+• visual_001: O que a Tabela 3 detalha sobre os resultados da avaliação LongMemEval?
+  ✅ Páginas: [7] (Esperado: [7])
+     P=1.00, R=1.00, F1=1.00
+• negative_001: Qual é o custo para licenciar a tecnologia Zep para uso comercial?
+  ✅ Páginas: [] (Esperado: [])
+     P=1.00, R=1.00, F1=1.00
