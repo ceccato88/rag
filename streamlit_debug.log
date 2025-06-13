@@ -1,0 +1,826 @@
+2025-06-13 18:49:07,203 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 18:49:07,213 - __main__ - INFO - [streamlit_rag_app_producao.py:718] - [CHAT] Nova mensagem do usuário ilceccato88: que legal, e o graphiti?...
+2025-06-13 18:49:07,215 - __main__ - DEBUG - [streamlit_rag_app_producao.py:729] - [CHAT] Iniciando processamento da pergunta...
+2025-06-13 18:49:07,215 - __main__ - INFO - [streamlit_rag_app_producao.py:232] - [ASK] Usuário ilceccato88 perguntou: que legal, e o graphiti?...
+2025-06-13 18:49:07,215 - __main__ - DEBUG - [streamlit_rag_app_producao.py:236] - [ASK] Total de perguntas do usuário: 6
+2025-06-13 18:49:07,215 - __main__ - DEBUG - [streamlit_rag_app_producao.py:239] - [ASK] Chamando RAG de produção...
+2025-06-13 18:49:24,782 - __main__ - INFO - [streamlit_rag_app_producao.py:243] - [ASK] Resposta gerada em 17.57s
+2025-06-13 18:49:24,782 - __main__ - DEBUG - [streamlit_rag_app_producao.py:247] - [ASK] Resposta bem-sucedida registrada
+2025-06-13 18:49:24,782 - __main__ - DEBUG - [streamlit_rag_app_producao.py:251] - [ASK] Salvando histórico do usuário...
+2025-06-13 18:49:24,784 - __main__ - INFO - [streamlit_rag_app_producao.py:254] - [ASK] Processo completo em 17.57s
+2025-06-13 18:49:24,784 - __main__ - INFO - [streamlit_rag_app_producao.py:734] - [CHAT] Resposta processada em 17.57s para ilceccato88
+2025-06-13 18:49:24,784 - __main__ - DEBUG - [streamlit_rag_app_producao.py:735] - [CHAT] Resposta: Graphiti é um sistema que utiliza grafos de conhecimento para gerenciar a memória de agentes de linguagem. Ele se destaca por sua capacidade de lidar com informações dinâmicas através de extração temp...
+2025-06-13 18:49:24,785 - __main__ - DEBUG - [streamlit_rag_app_producao.py:742] - [CHAT] Tempo mostrado para admin: 17.57s
+2025-06-13 18:58:24,583 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 18:58:31,059 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 18:58:31,233 - __main__ - INFO - [streamlit_rag_app_producao.py:369] - [LOGIN] Login bem-sucedido: ilceccato88 - Ivan - Admin
+2025-06-13 18:58:31,233 - __main__ - DEBUG - [streamlit_rag_app_producao.py:370] - [LOGIN] Permissões do usuário: ['extract', 'stats', 'clear_all', 'manage_users', 'admin']
+2025-06-13 18:58:32,297 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 18:58:32,305 - __main__ - INFO - [streamlit_rag_app_producao.py:658] - [CHAT] Inicializando RAG para usuário: ilceccato88
+2025-06-13 18:58:32,306 - __main__ - INFO - [streamlit_rag_app_producao.py:165] - [USER] Inicializando ProductionStreamlitRAG para usuário: ilceccato88
+2025-06-13 18:58:32,307 - __main__ - DEBUG - [streamlit_rag_app_producao.py:173] - [USER] Diretório do usuário: production_users/ilceccato88
+2025-06-13 18:58:32,307 - __main__ - INFO - [streamlit_rag_app_producao.py:181] - [USER] ProductionStreamlitRAG inicializado para ilceccato88
+2025-06-13 18:58:32,308 - __main__ - INFO - [streamlit_rag_app_producao.py:667] - [CHAT] RAG do usuário inicializado em 0.00s
+2025-06-13 18:58:41,660 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 18:58:41,671 - __main__ - INFO - [streamlit_rag_app_producao.py:718] - [CHAT] Nova mensagem do usuário ilceccato88: claro...
+2025-06-13 18:58:41,673 - __main__ - DEBUG - [streamlit_rag_app_producao.py:729] - [CHAT] Iniciando processamento da pergunta...
+2025-06-13 18:58:41,674 - __main__ - INFO - [streamlit_rag_app_producao.py:258] - [ASK] Usuário ilceccato88 perguntou: claro...
+2025-06-13 18:58:41,674 - __main__ - DEBUG - [streamlit_rag_app_producao.py:262] - [ASK] Total de perguntas do usuário: 7
+2025-06-13 18:58:41,674 - __main__ - DEBUG - [streamlit_rag_app_producao.py:265] - [ASK] Chamando RAG de produção...
+2025-06-13 18:59:18,506 - __main__ - INFO - [streamlit_rag_app_producao.py:269] - [ASK] Resposta gerada em 36.83s
+2025-06-13 18:59:18,506 - __main__ - WARNING - [streamlit_rag_app_producao.py:275] - [ASK] Resposta com possível erro detectado
+2025-06-13 18:59:18,507 - __main__ - DEBUG - [streamlit_rag_app_producao.py:277] - [ASK] Salvando histórico do usuário...
+2025-06-13 18:59:18,509 - __main__ - INFO - [streamlit_rag_app_producao.py:280] - [ASK] Processo completo em 36.84s
+2025-06-13 18:59:18,510 - __main__ - INFO - [streamlit_rag_app_producao.py:734] - [CHAT] Resposta processada em 36.84s para ilceccato88
+2025-06-13 18:59:18,510 - __main__ - DEBUG - [streamlit_rag_app_producao.py:735] - [CHAT] Resposta: O Zep utiliza grafos de conhecimento dinâmicos para gerenciar documentos acadêmicos através de uma estrutura hierárquica que organiza dados em três níveis: subgrafo de episódios, subgrafo de entidades...
+2025-06-13 18:59:18,512 - __main__ - DEBUG - [streamlit_rag_app_producao.py:742] - [CHAT] Tempo mostrado para admin: 36.84s
+2025-06-13 19:01:21,527 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:01:27,699 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:01:27,953 - __main__ - INFO - [streamlit_rag_app_producao.py:369] - [LOGIN] Login bem-sucedido: ilceccato88 - Ivan - Admin
+2025-06-13 19:01:27,953 - __main__ - DEBUG - [streamlit_rag_app_producao.py:370] - [LOGIN] Permissões do usuário: ['extract', 'stats', 'clear_all', 'manage_users', 'admin']
+2025-06-13 19:01:29,003 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:01:29,010 - __main__ - INFO - [streamlit_rag_app_producao.py:912] - [CHAT] Inicializando RAG para usuário: ilceccato88
+2025-06-13 19:01:29,013 - __main__ - INFO - [streamlit_rag_app_producao.py:165] - [USER] Inicializando ProductionStreamlitRAG para usuário: ilceccato88
+2025-06-13 19:01:29,013 - __main__ - DEBUG - [streamlit_rag_app_producao.py:173] - [USER] Diretório do usuário: production_users/ilceccato88
+2025-06-13 19:01:29,016 - __main__ - INFO - [streamlit_rag_app_producao.py:181] - [USER] ProductionStreamlitRAG inicializado para ilceccato88
+2025-06-13 19:01:29,020 - __main__ - INFO - [streamlit_rag_app_producao.py:921] - [CHAT] RAG do usuário inicializado em 0.01s
+2025-06-13 19:01:34,472 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:01:34,479 - __main__ - INFO - [streamlit_rag_app_producao.py:451] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:01:56,353 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:01:56,365 - __main__ - INFO - [streamlit_rag_app_producao.py:576] - [ADMIN] Usuário admin excluído por ilceccato88
+2025-06-13 19:01:56,408 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:02:00,348 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:02:00,366 - __main__ - INFO - [streamlit_rag_app_producao.py:576] - [ADMIN] Usuário pesquisador excluído por ilceccato88
+2025-06-13 19:02:00,424 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:02:12,689 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:02:12,697 - __main__ - INFO - [streamlit_rag_app_producao.py:292] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:02:12,742 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:02:15,881 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:04:35,035 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:04:58,665 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:04:58,674 - __main__ - INFO - [streamlit_rag_app_producao.py:488] - [MODAL] Estatísticas do sistema fechadas por ilceccato88
+2025-06-13 19:04:58,720 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:00,161 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:00,172 - __main__ - INFO - [streamlit_rag_app_producao.py:548] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:05:00,215 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:05,228 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:08,949 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:08,957 - __main__ - INFO - [streamlit_rag_app_producao.py:488] - [MODAL] Estatísticas do sistema fechadas por ilceccato88
+2025-06-13 19:05:08,998 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:11,523 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:11,530 - __main__ - INFO - [streamlit_rag_app_producao.py:451] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:05:16,213 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:16,222 - __main__ - INFO - [streamlit_rag_app_producao.py:548] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:05:16,265 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:38,291 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:05:38,298 - __main__ - INFO - [streamlit_rag_app_producao.py:451] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:05:41,525 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:33,397 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:33,404 - __main__ - INFO - [streamlit_rag_app_producao.py:292] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:06:33,460 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:33,961 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:33,967 - __main__ - INFO - [streamlit_rag_app_producao.py:292] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:06:34,040 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:35,819 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:35,833 - __main__ - INFO - [streamlit_rag_app_producao.py:488] - [MODAL] Estatísticas do sistema fechadas por ilceccato88
+2025-06-13 19:06:35,916 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:36,666 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:36,677 - __main__ - INFO - [streamlit_rag_app_producao.py:548] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:06:36,737 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:06:50,786 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:08:18,647 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:08:18,652 - __main__ - INFO - [streamlit_rag_app_producao.py:476] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:08:21,563 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:08:21,573 - __main__ - INFO - [streamlit_rag_app_producao.py:576] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:08:21,574 - __main__ - DEBUG - [streamlit_rag_app_producao.py:72] - [MODAL] Fechando modals: Gerenciamento
+2025-06-13 19:08:21,617 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:08:23,117 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:08:23,125 - __main__ - INFO - [streamlit_rag_app_producao.py:476] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:08:24,085 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:08:24,091 - __main__ - DEBUG - [streamlit_rag_app_producao.py:72] - [MODAL] Fechando modals: Gerenciamento
+2025-06-13 19:08:59,722 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:08:59,730 - __main__ - INFO - [streamlit_rag_app_producao.py:516] - [MODAL] Estatísticas do sistema fechadas por ilceccato88
+2025-06-13 19:08:59,731 - __main__ - DEBUG - [streamlit_rag_app_producao.py:72] - [MODAL] Fechando modals: Estatísticas
+2025-06-13 19:08:59,806 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:10:28,497 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:10:28,503 - __main__ - INFO - [streamlit_rag_app_producao.py:468] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:10:58,689 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:10:58,716 - __main__ - INFO - [streamlit_rag_app_producao.py:663] - [ADMIN] Novo usuário ivanceccato criado por ilceccato88
+2025-06-13 19:10:58,778 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:11:08,579 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:11:13,082 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:11:13,089 - __main__ - INFO - [streamlit_rag_app_producao.py:468] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:11:13,089 - __main__ - DEBUG - [streamlit_rag_app_producao.py:74] - [MODAL] Fechando modals: Gerenciamento
+2025-06-13 19:11:32,129 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:11:32,157 - __main__ - INFO - [streamlit_rag_app_producao.py:613] - [ADMIN] Usuário ivanceccato excluído por ilceccato88
+2025-06-13 19:11:32,229 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:11:45,221 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:11:45,240 - __main__ - INFO - [streamlit_rag_app_producao.py:663] - [ADMIN] Novo usuário ivanceccato criado por ilceccato88
+2025-06-13 19:11:45,307 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:13:19,162 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:13:19,171 - __main__ - INFO - [streamlit_rag_app_producao.py:568] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:13:19,171 - __main__ - DEBUG - [streamlit_rag_app_producao.py:74] - [MODAL] Fechando modals: Gerenciamento
+2025-06-13 19:13:19,219 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:13:23,556 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:14:49,327 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:14:49,333 - __main__ - INFO - [streamlit_rag_app_producao.py:292] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:14:49,378 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:14:50,596 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:14:50,604 - __main__ - DEBUG - [streamlit_rag_app_producao.py:74] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:14:53,465 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:14:53,469 - __main__ - INFO - [streamlit_rag_app_producao.py:468] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:14:53,469 - __main__ - DEBUG - [streamlit_rag_app_producao.py:74] - [MODAL] Fechando modals: Estatísticas do Sistema
+2025-06-13 19:15:00,796 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:15:00,813 - __main__ - INFO - [streamlit_rag_app_producao.py:630] - [ADMIN] Usuário ivanceccato excluído por ilceccato88
+2025-06-13 19:15:00,867 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:15:21,043 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:15:21,065 - __main__ - INFO - [streamlit_rag_app_producao.py:680] - [ADMIN] Novo usuário ivanceccato criado por ilceccato88
+2025-06-13 19:15:21,142 - __main__ - INFO - [streamlit_rag_app_producao.py:58] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:16:56,520 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:16:56,530 - __main__ - INFO - [streamlit_rag_app_producao.py:573] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:16:56,530 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Gerenciamento
+2025-06-13 19:16:56,605 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:17:13,145 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:17:16,072 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:17:20,480 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:17:36,409 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:17:45,421 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:17:57,201 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:18:12,869 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:18:12,876 - __main__ - INFO - [streamlit_rag_app_producao.py:473] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:18:16,282 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:18:16,299 - __main__ - INFO - [streamlit_rag_app_producao.py:635] - [ADMIN] Usuário ivanceccato excluído por ilceccato88
+2025-06-13 19:18:16,339 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:18:39,066 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:18:39,087 - __main__ - INFO - [streamlit_rag_app_producao.py:688] - [ADMIN] Novo usuário ivanceccato criado por ilceccato88
+2025-06-13 19:18:39,130 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:19:23,303 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:19:23,319 - __main__ - INFO - [streamlit_rag_app_producao.py:573] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:19:23,320 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Gerenciamento
+2025-06-13 19:19:23,386 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:19:29,330 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:19:39,763 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:19:52,505 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:21:58,677 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:22:10,249 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:22:10,253 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:33:40,632 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:33:40,638 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Estatísticas do Sistema
+2025-06-13 19:33:43,251 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:33:43,263 - __main__ - INFO - [streamlit_rag_app_producao.py:513] - [MODAL] Estatísticas do sistema fechadas por ilceccato88
+2025-06-13 19:33:43,263 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Estatísticas do Sistema
+2025-06-13 19:33:43,307 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:33:50,519 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:33:50,524 - __main__ - INFO - [streamlit_rag_app_producao.py:473] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:33:55,518 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:33:55,524 - __main__ - INFO - [streamlit_rag_app_producao.py:480] - Logout: ilceccato88
+2025-06-13 19:33:55,525 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Gerenciamento
+2025-06-13 19:33:55,568 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:03,056 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:03,292 - __main__ - INFO - [streamlit_rag_app_producao.py:398] - [LOGIN] Login bem-sucedido: ivanceccato - Ivan - Usuário
+2025-06-13 19:34:03,295 - __main__ - DEBUG - [streamlit_rag_app_producao.py:399] - [LOGIN] Permissões do usuário: ['extract', 'stats']
+2025-06-13 19:34:04,345 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:04,352 - __main__ - INFO - [streamlit_rag_app_producao.py:1111] - [CHAT] Inicializando RAG para usuário: ivanceccato
+2025-06-13 19:34:04,353 - __main__ - INFO - [streamlit_rag_app_producao.py:194] - [USER] Inicializando ProductionStreamlitRAG para usuário: ivanceccato
+2025-06-13 19:34:04,354 - __main__ - DEBUG - [streamlit_rag_app_producao.py:202] - [USER] Diretório do usuário: production_users/ivanceccato
+2025-06-13 19:34:04,356 - __main__ - INFO - [streamlit_rag_app_producao.py:176] - [CACHE] Inicializando instância global RAG de produção...
+2025-06-13 19:34:04,425 - __main__ - INFO - [streamlit_rag_app_producao.py:182] - [CACHE] RAG inicializado com sucesso em 0.07s
+2025-06-13 19:34:04,434 - __main__ - INFO - [streamlit_rag_app_producao.py:210] - [USER] ProductionStreamlitRAG inicializado para ivanceccato
+2025-06-13 19:34:04,434 - __main__ - INFO - [streamlit_rag_app_producao.py:1120] - [CHAT] RAG do usuário inicializado em 0.08s
+2025-06-13 19:34:11,521 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:27,671 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:27,677 - __main__ - INFO - [streamlit_rag_app_producao.py:321] - Histórico limpo para usuário ivanceccato
+2025-06-13 19:34:27,717 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:28,308 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:28,312 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Estatísticas do Sistema
+2025-06-13 19:34:37,343 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:34:37,348 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:35:07,057 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:35:07,061 - __main__ - DEBUG - [streamlit_rag_app_producao.py:79] - [MODAL] Fechando modals: Estatísticas do Sistema
+2025-06-13 19:35:11,656 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:35:13,475 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:35:13,499 - __main__ - INFO - [streamlit_rag_app_producao.py:1124] - [MODAL] Estatísticas pessoais fechadas por ivanceccato
+2025-06-13 19:35:13,505 - __main__ - DEBUG - [streamlit_rag_app_producao.py:81] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:35:13,606 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:35:16,174 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:35:16,188 - __main__ - INFO - [streamlit_rag_app_producao.py:489] - Logout: ivanceccato
+2025-06-13 19:35:16,280 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:39:13,086 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:39:24,717 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:41:46,748 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:41:54,204 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:41:54,402 - __main__ - INFO - [streamlit_rag_app_producao.py:390] - [LOGIN] Login bem-sucedido: ilceccato88 - Ivan - Admin
+2025-06-13 19:41:54,402 - __main__ - DEBUG - [streamlit_rag_app_producao.py:391] - [LOGIN] Permissões do usuário: ['extract', 'stats', 'clear_all', 'manage_users', 'admin']
+2025-06-13 19:41:55,449 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:41:55,458 - __main__ - INFO - [streamlit_rag_app_producao.py:1353] - [CHAT] Inicializando RAG para usuário: ilceccato88
+2025-06-13 19:41:55,459 - __main__ - INFO - [streamlit_rag_app_producao.py:197] - [USER] Inicializando ProductionStreamlitRAG para usuário: ilceccato88
+2025-06-13 19:41:55,459 - __main__ - DEBUG - [streamlit_rag_app_producao.py:205] - [USER] Diretório do usuário: production_users/ilceccato88
+2025-06-13 19:41:55,460 - __main__ - INFO - [streamlit_rag_app_producao.py:213] - [USER] ProductionStreamlitRAG inicializado para ilceccato88
+2025-06-13 19:41:55,461 - __main__ - INFO - [streamlit_rag_app_producao.py:1362] - [CHAT] RAG do usuário inicializado em 0.00s
+2025-06-13 19:42:00,898 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:42:00,903 - __main__ - INFO - [streamlit_rag_app_producao.py:458] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 19:42:00,914 - __main__ - CRITICAL - [streamlit_rag_app_producao.py:1500] - Erro crítico na aplicação: name 'os' is not defined
+2025-06-13 19:42:49,088 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:42:49,095 - __main__ - INFO - [streamlit_rag_app_producao.py:843] - [MODAL] Gerenciamento de documentos fechado por ilceccato88
+2025-06-13 19:42:49,096 - __main__ - DEBUG - [streamlit_rag_app_producao.py:81] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 19:42:49,166 - __main__ - INFO - [streamlit_rag_app_producao.py:59] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:44:42,860 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:44:42,866 - __main__ - INFO - [streamlit_rag_app_producao.py:459] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 19:45:45,569 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:45:45,575 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 19:45:49,500 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:45:49,507 - __main__ - INFO - [streamlit_rag_app_producao.py:1210] - [MODAL] Extração de dados fechada por ilceccato88
+2025-06-13 19:45:49,508 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Extração
+2025-06-13 19:45:49,551 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:45:52,376 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:45:52,381 - __main__ - INFO - [streamlit_rag_app_producao.py:459] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 19:46:19,031 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:46:28,241 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:16,232 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:16,240 - __main__ - INFO - [streamlit_rag_app_producao.py:829] - [MODAL] Gerenciamento de documentos fechado por ilceccato88
+2025-06-13 19:49:16,241 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 19:49:16,281 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:17,471 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:33,225 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:33,230 - __main__ - INFO - [streamlit_rag_app_producao.py:324] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:49:33,271 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:34,349 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:34,355 - __main__ - INFO - [streamlit_rag_app_producao.py:324] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:49:34,400 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:37,067 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:49:37,072 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:51:03,468 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:51:03,474 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Extração
+2025-06-13 19:51:50,111 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:51:50,115 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Estatísticas do Sistema
+2025-06-13 19:52:35,456 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:52:35,462 - __main__ - INFO - [streamlit_rag_app_producao.py:459] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 19:52:35,462 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:53:47,676 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:53:49,085 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:54:00,045 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:54:04,966 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:55:12,011 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:55:12,016 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 19:55:16,341 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:55:16,347 - __main__ - INFO - [streamlit_rag_app_producao.py:453] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 19:55:16,348 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:56:09,710 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:09,721 - __main__ - INFO - [streamlit_rag_app_producao.py:602] - [ADMIN] Usuário demo excluído por ilceccato88
+2025-06-13 19:56:09,768 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:15,423 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:15,443 - __main__ - INFO - [streamlit_rag_app_producao.py:602] - [ADMIN] Usuário ivanceccato excluído por ilceccato88
+2025-06-13 19:56:15,486 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:17,529 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:17,598 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:21,231 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:21,291 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:22,933 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:22,990 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:23,870 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:23,925 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:24,520 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:24,579 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:24,700 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:24,754 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:27,265 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:27,284 - __main__ - INFO - [streamlit_rag_app_producao.py:602] - [ADMIN] Usuário pesquisador excluído por ilceccato88
+2025-06-13 19:56:27,328 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:33,464 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:56:33,482 - __main__ - INFO - [streamlit_rag_app_producao.py:602] - [ADMIN] Usuário admin excluído por ilceccato88
+2025-06-13 19:56:33,542 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:26,958 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:26,970 - __main__ - INFO - [streamlit_rag_app_producao.py:544] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 19:58:26,971 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 19:58:27,022 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:39,458 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:47,507 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:47,513 - __main__ - INFO - [streamlit_rag_app_producao.py:324] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:58:47,562 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:51,843 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:51,850 - __main__ - INFO - [streamlit_rag_app_producao.py:1122] - [MODAL] Estatísticas pessoais fechadas por ilceccato88
+2025-06-13 19:58:51,851 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 19:58:51,893 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:53,210 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:58:53,215 - __main__ - INFO - [streamlit_rag_app_producao.py:324] - Histórico limpo para usuário ilceccato88
+2025-06-13 19:58:53,270 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:59:47,940 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:59:47,948 - __main__ - INFO - [streamlit_rag_app_producao.py:459] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 19:59:53,628 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 19:59:58,644 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:01:44,823 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:01:44,825 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 20:01:52,124 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:01:57,333 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:01:57,506 - __main__ - WARNING - [streamlit_rag_app_producao.py:403] - [LOGIN] Tentativa de login falhada para usuário: ivanceccato
+2025-06-13 20:02:05,315 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:02:05,547 - __main__ - INFO - [streamlit_rag_app_producao.py:391] - [LOGIN] Login bem-sucedido: ilceccato88 - Ivan - Admin
+2025-06-13 20:02:05,548 - __main__ - DEBUG - [streamlit_rag_app_producao.py:392] - [LOGIN] Permissões do usuário: ['extract', 'stats', 'clear_all', 'manage_users', 'admin']
+2025-06-13 20:02:06,617 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:02:06,628 - __main__ - INFO - [streamlit_rag_app_producao.py:1375] - [CHAT] Inicializando RAG para usuário: ilceccato88
+2025-06-13 20:02:06,629 - __main__ - INFO - [streamlit_rag_app_producao.py:198] - [USER] Inicializando ProductionStreamlitRAG para usuário: ilceccato88
+2025-06-13 20:02:06,630 - __main__ - DEBUG - [streamlit_rag_app_producao.py:206] - [USER] Diretório do usuário: production_users/ilceccato88
+2025-06-13 20:02:06,632 - __main__ - INFO - [streamlit_rag_app_producao.py:214] - [USER] ProductionStreamlitRAG inicializado para ilceccato88
+2025-06-13 20:02:06,633 - __main__ - INFO - [streamlit_rag_app_producao.py:1384] - [CHAT] RAG do usuário inicializado em 0.00s
+2025-06-13 20:03:42,423 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:03:42,431 - __main__ - INFO - [streamlit_rag_app_producao.py:453] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:07:21,761 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:21,766 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:07:23,301 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:23,308 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Estatísticas do Sistema
+2025-06-13 20:07:24,734 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:24,739 - __main__ - INFO - [streamlit_rag_app_producao.py:1246] - [MODAL] Extração de dados fechada por ilceccato88
+2025-06-13 20:07:24,742 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Extração
+2025-06-13 20:07:24,794 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:29,127 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:29,132 - __main__ - INFO - [streamlit_rag_app_producao.py:453] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:07:34,651 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:34,659 - __main__ - INFO - [streamlit_rag_app_producao.py:544] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 20:07:34,660 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:07:34,713 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:36,748 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:36,756 - __main__ - INFO - [streamlit_rag_app_producao.py:459] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 20:07:44,974 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:07:44,979 - __main__ - DEBUG - [streamlit_rag_app_producao.py:82] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 20:08:55,418 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:08:55,423 - __main__ - INFO - [streamlit_rag_app_producao.py:325] - Histórico limpo para usuário ilceccato88
+2025-06-13 20:08:55,494 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:08:55,500 - __main__ - CRITICAL - [streamlit_rag_app_producao.py:1422] - Erro crítico na aplicação: name 'user_manager' is not defined
+2025-06-13 20:09:02,348 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:09:02,355 - __main__ - INFO - [streamlit_rag_app_producao.py:325] - Histórico limpo para usuário ilceccato88
+2025-06-13 20:09:02,428 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:09:02,433 - __main__ - CRITICAL - [streamlit_rag_app_producao.py:1422] - Erro crítico na aplicação: name 'user_manager' is not defined
+2025-06-13 20:09:09,575 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:10:53,342 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:10:53,642 - __main__ - INFO - [streamlit_rag_app_producao.py:364] - [LOGIN] Login bem-sucedido: ilceccato88 - Ivan - Admin
+2025-06-13 20:10:53,643 - __main__ - DEBUG - [streamlit_rag_app_producao.py:365] - [LOGIN] Permissões do usuário: ['extract', 'stats', 'clear_all', 'manage_users', 'admin']
+2025-06-13 20:10:54,737 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:10:54,745 - __main__ - INFO - [streamlit_rag_app_producao.py:1137] - [CHAT] Inicializando RAG para usuário: ilceccato88
+2025-06-13 20:10:54,747 - __main__ - INFO - [streamlit_rag_app_producao.py:192] - [USER] Inicializando ProductionStreamlitRAG para usuário: ilceccato88
+2025-06-13 20:10:54,747 - __main__ - DEBUG - [streamlit_rag_app_producao.py:200] - [USER] Diretório do usuário: production_users/ilceccato88
+2025-06-13 20:10:54,748 - __main__ - INFO - [streamlit_rag_app_producao.py:208] - [USER] ProductionStreamlitRAG inicializado para ilceccato88
+2025-06-13 20:10:54,749 - __main__ - INFO - [streamlit_rag_app_producao.py:1146] - [CHAT] RAG do usuário inicializado em 0.00s
+2025-06-13 20:10:58,626 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:11:04,842 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:11:04,850 - __main__ - INFO - [streamlit_rag_app_producao.py:318] - Histórico limpo para usuário ilceccato88
+2025-06-13 20:11:04,925 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:11:06,780 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:11:06,789 - __main__ - INFO - [streamlit_rag_app_producao.py:1020] - [MODAL] Estatísticas pessoais fechadas por ilceccato88
+2025-06-13 20:11:06,790 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 20:11:06,865 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:11:07,663 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:11:07,670 - __main__ - INFO - [streamlit_rag_app_producao.py:412] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:11:10,844 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:11:10,850 - __main__ - INFO - [streamlit_rag_app_producao.py:418] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 20:11:10,850 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:15:11,434 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:15:11,439 - __main__ - INFO - [streamlit_rag_app_producao.py:412] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:15:11,440 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 20:16:33,038 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:16:33,042 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:16:34,716 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:16:34,721 - __main__ - INFO - [streamlit_rag_app_producao.py:381] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:16:34,721 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 20:18:56,217 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:18:56,234 - __main__ - INFO - [streamlit_rag_app_producao.py:483] - [ADMIN] Usuário admin excluído por ilceccato88
+2025-06-13 20:18:56,301 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:18:59,365 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:18:59,380 - __main__ - INFO - [streamlit_rag_app_producao.py:483] - [ADMIN] Usuário pesquisador excluído por ilceccato88
+2025-06-13 20:18:59,420 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:02,139 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:02,153 - __main__ - INFO - [streamlit_rag_app_producao.py:483] - [ADMIN] Usuário demo excluído por ilceccato88
+2025-06-13 20:19:02,196 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:06,193 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:06,245 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:10,207 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:10,215 - __main__ - INFO - [streamlit_rag_app_producao.py:413] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 20:19:10,216 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:19:10,258 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:17,255 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:17,260 - __main__ - INFO - [streamlit_rag_app_producao.py:381] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:19:39,873 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:19:39,892 - __main__ - INFO - [streamlit_rag_app_producao.py:536] - [ADMIN] Novo usuário ivanceccato criado por ilceccato88
+2025-06-13 20:19:40,936 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:25,951 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:25,955 - __main__ - INFO - [streamlit_rag_app_producao.py:394] - Logout: ilceccato88
+2025-06-13 20:22:25,957 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:22:26,018 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:31,614 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:31,825 - __main__ - INFO - [streamlit_rag_app_producao.py:333] - [LOGIN] Login bem-sucedido: ivanceccato - Ivan - Usuário
+2025-06-13 20:22:31,826 - __main__ - DEBUG - [streamlit_rag_app_producao.py:334] - [LOGIN] Permissões do usuário: ['extract', 'stats']
+2025-06-13 20:22:32,875 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:32,881 - __main__ - INFO - [streamlit_rag_app_producao.py:1118] - [CHAT] Inicializando RAG para usuário: ivanceccato
+2025-06-13 20:22:32,882 - __main__ - INFO - [streamlit_rag_app_producao.py:161] - [USER] Inicializando ProductionStreamlitRAG para usuário: ivanceccato
+2025-06-13 20:22:32,883 - __main__ - DEBUG - [streamlit_rag_app_producao.py:169] - [USER] Diretório do usuário: production_users/ivanceccato
+2025-06-13 20:22:32,883 - __main__ - INFO - [streamlit_rag_app_producao.py:177] - [USER] ProductionStreamlitRAG inicializado para ivanceccato
+2025-06-13 20:22:32,884 - __main__ - INFO - [streamlit_rag_app_producao.py:1127] - [CHAT] RAG do usuário inicializado em 0.00s
+2025-06-13 20:22:37,411 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:37,419 - __main__ - INFO - [streamlit_rag_app_producao.py:287] - Histórico limpo para usuário ivanceccato
+2025-06-13 20:22:37,467 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:49,550 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:49,555 - __main__ - INFO - [streamlit_rag_app_producao.py:394] - Logout: ivanceccato
+2025-06-13 20:22:49,605 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:55,202 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:55,446 - __main__ - INFO - [streamlit_rag_app_producao.py:333] - [LOGIN] Login bem-sucedido: ilceccato88 - Ivan - Admin
+2025-06-13 20:22:55,446 - __main__ - DEBUG - [streamlit_rag_app_producao.py:334] - [LOGIN] Permissões do usuário: ['extract', 'stats', 'clear_all', 'manage_users', 'admin']
+2025-06-13 20:22:56,507 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:56,516 - __main__ - INFO - [streamlit_rag_app_producao.py:1118] - [CHAT] Inicializando RAG para usuário: ilceccato88
+2025-06-13 20:22:56,517 - __main__ - INFO - [streamlit_rag_app_producao.py:161] - [USER] Inicializando ProductionStreamlitRAG para usuário: ilceccato88
+2025-06-13 20:22:56,517 - __main__ - DEBUG - [streamlit_rag_app_producao.py:169] - [USER] Diretório do usuário: production_users/ilceccato88
+2025-06-13 20:22:56,518 - __main__ - INFO - [streamlit_rag_app_producao.py:177] - [USER] ProductionStreamlitRAG inicializado para ilceccato88
+2025-06-13 20:22:56,521 - __main__ - INFO - [streamlit_rag_app_producao.py:1127] - [CHAT] RAG do usuário inicializado em 0.00s
+2025-06-13 20:22:59,262 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:22:59,267 - __main__ - INFO - [streamlit_rag_app_producao.py:381] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:23:03,054 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:23:03,072 - __main__ - INFO - [streamlit_rag_app_producao.py:479] - [ADMIN] Dados da pasta removidos para ivanceccato
+2025-06-13 20:23:03,072 - __main__ - INFO - [streamlit_rag_app_producao.py:483] - [ADMIN] Usuário ivanceccato excluído por ilceccato88
+2025-06-13 20:23:03,119 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:29:07,475 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:29:07,492 - __main__ - INFO - [streamlit_rag_app_producao.py:381] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:29:07,494 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:31:40,727 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:31:47,826 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:31:48,080 - __main__ - INFO - [streamlit_rag_app_producao.py:333] - [LOGIN] Login bem-sucedido: ilceccato88 - Ivan - Admin
+2025-06-13 20:31:48,081 - __main__ - DEBUG - [streamlit_rag_app_producao.py:334] - [LOGIN] Permissões do usuário: []
+2025-06-13 20:31:49,159 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:31:49,164 - __main__ - INFO - [streamlit_rag_app_producao.py:1090] - [CHAT] Inicializando RAG para usuário: ilceccato88
+2025-06-13 20:31:49,167 - __main__ - INFO - [streamlit_rag_app_producao.py:161] - [USER] Inicializando ProductionStreamlitRAG para usuário: ilceccato88
+2025-06-13 20:31:49,167 - __main__ - DEBUG - [streamlit_rag_app_producao.py:169] - [USER] Diretório do usuário: production_users/ilceccato88
+2025-06-13 20:31:49,168 - __main__ - INFO - [streamlit_rag_app_producao.py:177] - [USER] ProductionStreamlitRAG inicializado para ilceccato88
+2025-06-13 20:31:49,169 - __main__ - INFO - [streamlit_rag_app_producao.py:1099] - [CHAT] RAG do usuário inicializado em 0.00s
+2025-06-13 20:31:52,119 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:31:52,128 - __main__ - INFO - [streamlit_rag_app_producao.py:381] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:32:48,506 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:32:48,514 - __main__ - INFO - [streamlit_rag_app_producao.py:413] - [MODAL] Gerenciamento de usuários fechado por ilceccato88
+2025-06-13 20:32:48,514 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:32:48,606 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:32:53,311 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:32:53,316 - __main__ - INFO - [streamlit_rag_app_producao.py:387] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 20:33:35,619 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:33:35,629 - __main__ - INFO - [streamlit_rag_app_producao.py:381] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:33:35,630 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 20:33:39,898 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:33:39,904 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:40:50,759 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:40:50,763 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 20:41:02,291 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:41:02,296 - __main__ - INFO - [streamlit_rag_app_producao.py:381] - [ADMIN] Painel de gerenciamento acessado por ilceccato88
+2025-06-13 20:41:02,296 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 20:41:10,684 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:41:10,690 - __main__ - INFO - [streamlit_rag_app_producao.py:387] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 20:41:10,691 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Usuários
+2025-06-13 20:43:14,429 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:43:17,667 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:46:46,195 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:46:46,204 - __main__ - INFO - [streamlit_rag_app_producao.py:387] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 20:46:46,205 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 20:46:52,232 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:46:52,563 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:46:59,543 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:47:00,076 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:47:50,589 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:47:52,280 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:47:54,263 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:47:55,274 - __main__ - INFO - [streamlit_rag_app_producao.py:805] - [ADMIN] Documento indexado por ilceccato88: url=https://arxiv.org/pdf/2506.10811
+2025-06-13 20:57:00,443 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:00,447 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 20:57:02,081 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:02,084 - __main__ - INFO - [streamlit_rag_app_producao.py:387] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 20:57:02,085 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 20:57:07,572 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:07,638 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:12,042 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:12,246 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:21,153 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:21,204 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:23,186 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:24,363 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:27,777 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 20:57:27,829 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:03:11,525 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:03:11,598 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:03:16,357 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:03:18,075 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:23,787 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:23,791 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Gerenciamento de Documentos
+2025-06-13 21:05:25,554 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:25,561 - __main__ - INFO - [streamlit_rag_app_producao.py:387] - [ADMIN] Painel de documentos acessado por ilceccato88
+2025-06-13 21:05:25,562 - __main__ - DEBUG - [streamlit_rag_app_producao.py:78] - [MODAL] Fechando modals: Estatísticas Pessoais
+2025-06-13 21:05:29,721 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:29,847 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:33,759 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:34,929 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:50,263 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:51,699 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:52,975 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:05:52,987 - __main__ - INFO - [streamlit_rag_app_producao.py:868] - [INDEXING] Executando indexador com URL: https://arxiv.org/pdf/2506.10811
+2025-06-13 21:06:49,288 - __main__ - INFO - [streamlit_rag_app_producao.py:875] - [INDEXING] Indexador finalizado com código: 0
+2025-06-13 21:06:49,288 - __main__ - WARNING - [streamlit_rag_app_producao.py:879] - [INDEXING] STDERR: 2025-06-13 21:05:53,673 - INFO - Indexando documento: 2506
+2025-06-13 21:05:53,674 - INFO - PDF URL/Path: https://arxiv.org/pdf/2506.10811
+2025-06-13 21:05:53,674 - INFO - Baixando PDF (streaming)…
+2025-06-13 21:05:53,789 - INFO - PDF baixado (29 páginas)
+
+Páginas:   0%|          | 0/29 [00:00<?, ?it/s]
+Páginas:   3%|▎         | 1/29 [00:00<00:13,  2.13it/s]
+Páginas:   7%|▋         | 2/29 [00:00<00:12,  2.11it/s]
+Páginas:  10%|█         | 3/29 [00:01<00:14,  1.77it/s]
+Páginas:  14%|█▍        | 4/29 [00:02<00:13,  1.80it/s]
+Páginas:  17%|█▋        | 5/29 [00:02<00:14,  1.63it/s]
+Páginas:  21%|██        | 6/29 [00:03<00:13,  1.72it/s]
+Páginas:  24%|██▍       | 7/29 [00:03<00:11,  1.86it/s]
+Páginas:  28%|██▊       | 8/29 [00:04<00:10,  2.06it/s]
+Páginas:  31%|███       | 9/29 [00:05<00:17,  1.15it/s]
+Páginas:  34%|███▍      | 10/29 [00:06<00:14,  1.29it/s]
+Páginas:  38%|███▊      | 11/29 [00:07<00:13,  1.31it/s]
+Páginas:  41%|████▏     | 12/29 [00:08<00:14,  1.20it/s]
+Páginas:  45%|████▍     | 13/29 [00:08<00:11,  1.45it/s]
+Páginas:  48%|████▊     | 14/29 [00:09<00:09,  1.63it/s]
+Páginas:  52%|█████▏    | 15/29 [00:09<00:07,  1.79it/s]
+Páginas:  55%|█████▌    | 16/29 [00:09<00:07,  1.85it/s]
+Páginas:  59%|█████▊    | 17/29 [00:10<00:06,  1.83it/s]
+Páginas:  62%|██████▏   | 18/29 [00:11<00:07,  1.45it/s]
+Páginas:  66%|██████▌   | 19/29 [00:11<00:05,  1.70it/s]
+Páginas:  69%|██████▉   | 20/29 [00:12<00:05,  1.79it/s]
+Páginas:  72%|███████▏  | 21/29 [00:12<00:04,  1.77it/s]
+Páginas:  76%|███████▌  | 22/29 [00:14<00:05,  1.26it/s]
+Páginas:  79%|███████▉  | 23/29 [00:16<00:06,  1.16s/it]
+Páginas:  83%|████████▎ | 24/29 [00:16<00:05,  1.00s/it]
+Páginas:  86%|████████▌ | 25/29 [00:17<00:04,  1.00s/it]
+Páginas:  90%|████████▉ | 26/29 [00:18<00:03,  1.01s/it]
+Páginas:  93%|█████████▎| 27/29 [00:20<00:02,  1.12s/it]
+Páginas:  97%|█████████▋| 28/29 [00:20<00:00,  1.03it/s]
+Páginas: 100%|██████████| 29/29 [00:21<00:00,  1.20it/s]
+Páginas: 100%|██████████| 29/29 [00:21<00:00,  1.35it/s]
+2025-06-13 21:06:15,248 - INFO - Gerando embeddings (5 concorrentes)…
+2025-06-13 21:06:16,721 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:16,837 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:17,090 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:17,438 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:17,591 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:18,118 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:18,472 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:18,838 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:19,180 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:19,547 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:20,024 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:20,708 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:20,882 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:21,555 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:22,278 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:22,397 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:22,712 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:22,950 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:23,072 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:23,411 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:23,525 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:23,765 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:24,005 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:24,156 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:24,368 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:24,484 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:24,726 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:25,096 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:25,227 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:25,559 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:25,928 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:26,419 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:27,040 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:27,192 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:27,707 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:27,852 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:28,055 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:28,225 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:28,424 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:28,590 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:29,053 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:29,156 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:29,405 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:29,597 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:29,823 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:30,014 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:30,184 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:30,567 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:30,802 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:30,926 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:31,145 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:31,635 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:31,991 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:32,167 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:32,350 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:32,522 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:32,882 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:33,232 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:33,571 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:33,693 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:33,933 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:34,291 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:34,440 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:34,650 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:35,003 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:35,104 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:35,372 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:35,499 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:35,749 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:35,978 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:36,089 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:36,410 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:36,559 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:36,774 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:36,929 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:37,116 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:37,463 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:37,591 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:37,832 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:37,948 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:38,226 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:38,524 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:38,650 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:38,867 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:39,013 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:39,215 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:39,485 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:39,608 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:39,830 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:39,961 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:40,182 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:40,554 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:40,677 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:40,925 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:41,040 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:41,257 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:41,530 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:41,650 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:41,938 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:42,065 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:42,290 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:42,582 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:42,719 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:42,935 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:43,047 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:43,284 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:43,556 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:43,682 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:43,953 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:44,064 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:44,299 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:44,554 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:44,686 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:44,922 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:45,047 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:45,264 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:45,567 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:45,705 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:46,039 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:46,309 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:46,511 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:46,709 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:46,725 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:47,090 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:47,158 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:47,451 - INFO - message='Voyage API response' path=https://api.voyageai.com/v1/multimodalembeddings processing_ms=None request_id=None response_code=200
+2025-06-13 21:06:47,461 - INFO - getting database info
+2025-06-13 21:06:47,716 - INFO - HTTP Request: GET https://api.astra.datastax.com/v2/databases/56a9509a-6442-4d83-9207-898734fa9cc2 "HTTP/1.1 200 OK"
+2025-06-13 21:06:47,718 - INFO - finished getting database info
+2025-06-13 21:06:47,718 - INFO - Conectado ao database agenciawow
+2025-06-13 21:06:47,718 - INFO - findCollections
+2025-06-13 21:06:47,838 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace "HTTP/1.1 200 OK"
+2025-06-13 21:06:47,838 - INFO - finished findCollections
+2025-06-13 21:06:47,838 - INFO - Collections existentes: ['pdf_documents']
+2025-06-13 21:06:47,838 - INFO - Collection 'pdf_documents' já existe
+2025-06-13 21:06:47,849 - INFO - starting delete_many on 'pdf_documents'
+2025-06-13 21:06:47,849 - INFO - deleteMany on 'pdf_documents'
+2025-06-13 21:06:47,885 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:47,885 - INFO - finished deleteMany on 'pdf_documents'
+2025-06-13 21:06:47,885 - INFO - finished delete_many on 'pdf_documents'
+2025-06-13 21:06:47,885 - INFO - Nenhum documento antigo encontrado para remover (2506)
+2025-06-13 21:06:47,885 - INFO - Inserindo em lotes de 100…
+
+Astra DB:   0%|          | 0/1 [00:00<?, ?it/s]2025-06-13 21:06:47,885 - INFO - inserting 29 documents in 'pdf_documents'
+2025-06-13 21:06:47,886 - INFO - insertMany(chunk) on 'pdf_documents'
+2025-06-13 21:06:48,056 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,056 - INFO - finished insertMany(chunk) on 'pdf_documents'
+2025-06-13 21:06:48,057 - ERROR - Erro ao inserir lote 1: CollectionInsertManyException([2 errors collected] [1] Document size limitation violated: Document size limitation violated: indexed String value (field 'markdown_text') length (8598 bytes) exceeds maximum allowed (8000 bytes) (SHRED_DOC_LIMIT_VIOLATION); [2] Document size limitation violated: Document size limitation violated: indexed String value (field 'markdown_text') length (8758 bytes) exceeds maximum allowed (8000 bytes) (SHRED_DOC_LIMIT_VIOLATION) [with 27 inserted ids])
+2025-06-13 21:06:48,057 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,111 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,111 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '5aba6f53-a7e7-4389-917e-c0c044dd53bb', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,111 - ERROR - Erro ao inserir documento individual 1 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,111 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,148 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,148 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '1f00470b-2acf-4737-9308-2972c555aefe', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,148 - ERROR - Erro ao inserir documento individual 2 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,149 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,189 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,190 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '644bc5ef-1513-4bcb-aac1-5fee66514b31', 'title': 'Document already exists with the given _id', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,190 - ERROR - Erro ao inserir documento individual 3 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,190 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,227 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,227 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'da2daeb5-c2af-4df1-bae0-7939491ec45f', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,227 - ERROR - Erro ao inserir documento individual 4 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,227 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,261 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,261 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '4bb5386a-4cee-4f7f-9be7-cefa3a31c27e', 'title': 'Document already exists with the given _id', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,262 - ERROR - Erro ao inserir documento individual 5 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,262 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,300 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,300 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '0fd95704-d446-4b85-bf16-83c9acee7c26', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,300 - ERROR - Erro ao inserir documento individual 6 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,300 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,346 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,346 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '61498f93-d70a-4b60-b344-d670d07b7c49', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,346 - ERROR - Erro ao inserir documento individual 7 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,346 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,386 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,386 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'b1c45c80-55aa-4c6b-8758-460085a74f9b', 'title': 'Document already exists with the given _id', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,386 - ERROR - Erro ao inserir documento individual 8 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,386 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,423 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,423 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '302c091b-0877-4b73-9df9-0c848765d01a', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,423 - ERROR - Erro ao inserir documento individual 9 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,423 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,461 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,461 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '832cbad8-288c-4a98-8cc8-4f9986a67fb6', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,461 - ERROR - Erro ao inserir documento individual 10 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,461 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,499 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,499 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '8960375e-c4e8-4b72-bb84-dd69776507c7', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,499 - ERROR - Erro ao inserir documento individual 11 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,500 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,535 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,536 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '80e3a2fc-0b94-42df-be08-68bb16ab768f', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,536 - ERROR - Erro ao inserir documento individual 12 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,536 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,571 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,571 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '5a95c8d2-cace-4888-8dad-90f4c9248f00', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,571 - ERROR - Erro ao inserir documento individual 13 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,571 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,613 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,613 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'acfe82d2-c7ae-4589-8f9c-3161ce79778e', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,613 - ERROR - Erro ao inserir documento individual 14 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,613 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,655 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,655 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'b56e810d-33fd-4ec7-aa18-9f1df932a1a3', 'title': 'Document already exists with the given _id', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,655 - ERROR - Erro ao inserir documento individual 15 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,655 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,690 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,691 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '4a0a243e-fabe-4e53-bf91-9175f49d2a74', 'title': 'Document already exists with the given _id', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,691 - ERROR - Erro ao inserir documento individual 16 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,691 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,730 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,730 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'f9225bdb-4202-4e7f-af7c-0fc1523d2e62', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,730 - ERROR - Erro ao inserir documento individual 17 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,730 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,770 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,770 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '17bb465d-9df2-4243-8c78-ff9d6dc5904e', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,770 - ERROR - Erro ao inserir documento individual 18 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,770 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,806 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,806 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'afbf1fa6-664b-4784-8e98-165866933465', 'title': 'Document already exists with the given _id', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,806 - ERROR - Erro ao inserir documento individual 19 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,806 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,845 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,845 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '926ee49b-29a3-4e8e-ad44-5152b8ec7887', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,845 - ERROR - Erro ao inserir documento individual 20 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,845 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,879 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,880 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '354df944-91fd-42ea-bb3d-6aa1b6143497', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,880 - ERROR - Erro ao inserir documento individual 21 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,880 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,917 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,918 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'eaa84d24-af15-4fd0-aa4b-efaf16453f51', 'title': 'Document already exists with the given _id', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,918 - ERROR - Erro ao inserir documento individual 22 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,918 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,960 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:48,961 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'f9f9cc25-9a2e-4f4c-b370-efbc0df9a02f', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:48,961 - ERROR - Erro ao inserir documento individual 23 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:48,961 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:48,999 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:49,000 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '963bb504-849b-421a-bc58-48c8d9424354', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:49,000 - ERROR - Erro ao inserir documento individual 24 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:49,000 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:49,042 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:49,042 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'e0168b9b-dffd-4e6b-8424-0bbf1f2139a6', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:49,042 - ERROR - Erro ao inserir documento individual 25 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:49,042 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:49,079 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:49,079 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': '4c0621df-f53c-4b09-b9bd-a0eb1e3ff9ea', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:49,079 - ERROR - Erro ao inserir documento individual 26 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:49,079 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:49,116 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:49,116 - WARNING - APICommander about to raise from: [{'message': 'Document already exists with the given _id', 'errorCode': 'DOCUMENT_ALREADY_EXISTS', 'id': 'd4ef9f79-c9bd-46ed-9ef5-e9a1834d97f7', 'family': 'REQUEST', 'title': 'Document already exists with the given _id', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:49,116 - ERROR - Erro ao inserir documento individual 27 do lote 1: Document already exists with the given _id: Document already exists with the given _id (DOCUMENT_ALREADY_EXISTS)
+2025-06-13 21:06:49,116 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:49,145 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:49,145 - WARNING - APICommander about to raise from: [{'message': "Document size limitation violated: indexed String value (field 'markdown_text') length (8598 bytes) exceeds maximum allowed (8000 bytes)", 'errorCode': 'SHRED_DOC_LIMIT_VIOLATION', 'id': '4f62b052-1af6-4932-8a7b-5749df80986b', 'title': 'Document size limitation violated', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:49,145 - ERROR - Erro ao inserir documento individual 28 do lote 1: Document size limitation violated: Document size limitation violated: indexed String value (field 'markdown_text') length (8598 bytes) exceeds maximum allowed (8000 bytes) (SHRED_DOC_LIMIT_VIOLATION)
+2025-06-13 21:06:49,145 - INFO - insertOne on 'pdf_documents'
+2025-06-13 21:06:49,174 - INFO - HTTP Request: POST https://56a9509a-6442-4d83-9207-898734fa9cc2-us-east-2.apps.astra.datastax.com/api/json/v1/default_keyspace/pdf_documents "HTTP/1.1 200 OK"
+2025-06-13 21:06:49,174 - WARNING - APICommander about to raise from: [{'message': "Document size limitation violated: indexed String value (field 'markdown_text') length (8758 bytes) exceeds maximum allowed (8000 bytes)", 'errorCode': 'SHRED_DOC_LIMIT_VIOLATION', 'id': '126b46f6-ebe1-4169-82ff-d9006c6eaa23', 'title': 'Document size limitation violated', 'family': 'REQUEST', 'scope': 'DOCUMENT'}]
+2025-06-13 21:06:49,174 - ERROR - Erro ao inserir documento individual 29 do lote 1: Document size limitation violated: Document size limitation violated: indexed String value (field 'markdown_text') length (8758 bytes) exceeds maximum allowed (8000 bytes) (SHRED_DOC_LIMIT_VIOLATION)
+
+Astra DB: 100%|██████████| 1/1 [00:01<00:00,  1.29s/it]
+Astra DB: 100%|██████████| 1/1 [00:01<00:00,  1.29s/it]
+2025-06-13 21:06:49,175 - INFO - ✅ Indexação finalizada: 0/29 páginas inseridas
+
+2025-06-13 21:06:49,291 - __main__ - INFO - [streamlit_rag_app_producao.py:904] - [ADMIN] Documento indexado por ilceccato88: url=https://arxiv.org/pdf/2506.10811
+2025-06-13 21:06:59,711 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:07:05,164 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado

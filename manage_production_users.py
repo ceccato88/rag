@@ -3,36 +3,25 @@
 import json
 import hashlib
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from pathlib import Path
 import sys
 import shutil
 
+def get_sao_paulo_time():
+    """Retorna datetime atual no fuso horário de São Paulo"""
+    return datetime.now(ZoneInfo("America/Sao_Paulo"))
+
 class ProductionUserManager:
-    """Gerenciador de usuários para o sistema RAG de produção"""
+    """Gerenciador de usuários para o sistema RAG"""
     
     def __init__(self, users_file="production_users.json"):
         self.users_file = Path(users_file)
         self.users = self.load_users()
-        self.salt = "streamlit_rag_production_2025"  # Mesmo salt da versão de produção
+        self.salt = "streamlit_rag_production_2025"  # Salt do sistema
         
-        # Permissões disponíveis
-        self.available_permissions = [
-            "extract",      # Extração de dados
-            "stats",        # Estatísticas do sistema
-            "clear_all",    # Limpar dados de outros usuários
-            "manage_users", # Gerenciar outros usuários
-            "admin"         # Acesso administrativo completo
-        ]
-        
-        # Perfis pré-definidos com permissões
-        self.role_permissions = {
-            "Admin": ["extract", "stats", "clear_all", "manage_users", "admin"],
-            "Pesquisador": ["extract", "stats"],
-            "Demonstração": [],
-            "Estudante": ["extract"],
-            "Professor": ["extract", "stats"],
-            "Convidado": []
-        }
+        # Apenas dois tipos de usuários
+        self.available_roles = ["Admin", "Usuário"]
     
     def load_users(self):
         """Carrega usuários do arquivo"""
@@ -61,11 +50,11 @@ class ProductionUserManager:
             return False
     
     def hash_password(self, password: str) -> str:
-        """Cria hash da senha com salt (compatível com produção)"""
+        """Cria hash da senha com salt"""
         return hashlib.sha256((password + self.salt).encode()).hexdigest()
     
-    def add_user(self, username: str, name: str, password: str, role: str = "Pesquisador", 
-                 organization: str = "", custom_permissions: list = None):
+    def add_user(self, username: str, name: str, password: str, role: str = "Usuário", 
+                 organization: str = ""):
         """Adiciona novo usuário"""
         if username in self.users:
             return False, "Usuário já existe!"
@@ -76,24 +65,20 @@ class ProductionUserManager:
         if len(password) < 4:
             return False, "Senha deve ter pelo menos 4 caracteres!"
         
-        # Define permissões baseadas no perfil ou customizadas
-        if custom_permissions is not None:
-            permissions = [p for p in custom_permissions if p in self.available_permissions]
-        else:
-            permissions = self.role_permissions.get(role, [])
+        # Valida role
+        if role not in self.available_roles:
+            role = "Usuário"
         
         self.users[username] = {
             "password_hash": self.hash_password(password),
             "name": name,
             "role": role,
             "organization": organization,
-            "permissions": permissions,
-            "created_at": datetime.now().isoformat(),
+            "created_at": get_sao_paulo_time().isoformat(),
             "last_login": "",
             "total_conversations": 0,
             "successful_queries": 0,
             "failed_queries": 0,
-            "extractions_count": 0,
             "active": True,
             "notes": ""
         }
@@ -116,17 +101,12 @@ class ProductionUserManager:
                 self.users[username][field] = value
             elif field == 'password':
                 self.users[username]['password_hash'] = self.hash_password(value)
-            elif field == 'permissions':
-                # Valida permissões
-                valid_permissions = [p for p in value if p in self.available_permissions]
-                self.users[username]['permissions'] = valid_permissions
             elif field == 'role':
-                # Atualiza permissões baseadas no novo perfil
-                self.users[username]['role'] = value
-                if value in self.role_permissions:
-                    self.users[username]['permissions'] = self.role_permissions[value]
+                # Valida role
+                if value in self.available_roles:
+                    self.users[username]['role'] = value
         
-        self.users[username]['updated_at'] = datetime.now().isoformat()
+        self.users[username]['updated_at'] = get_sao_paulo_time().isoformat()
         
         if self.save_users():
             return True, f"Usuário '{username}' atualizado com sucesso!"
@@ -171,17 +151,16 @@ class ProductionUserManager:
         if not show_inactive:
             users_to_show = {k: v for k, v in self.users.items() if v.get('active', True)}
         
-        print("📋 USUÁRIOS CADASTRADOS (SISTEMA DE PRODUÇÃO):")
+        print("📋 USUÁRIOS CADASTRADOS:")
         print("=" * 100)
-        print(f"{'Username':<15} {'Nome':<25} {'Perfil':<15} {'Organização':<20} {'Permissões':<15} {'Status':<8}")
-        print("-" * 100)
+        print(f"{'Username':<15} {'Nome':<25} {'Tipo':<15} {'Organização':<20} {'Status':<8}")
+        print("-" * 80)
         
         for username, info in users_to_show.items():
             status = "Ativo" if info.get('active', True) else "Inativo"
-            permissions_str = str(len(info.get('permissions', [])))
             org = info.get('organization', 'N/A')[:19]  # Trunca se muito longo
             
-            print(f"{username:<15} {info['name']:<25} {info['role']:<15} {org:<20} {permissions_str:<15} {status:<8}")
+            print(f"{username:<15} {info['name']:<25} {info['role']:<15} {org:<20} {status:<8}")
         
         total_shown = len(users_to_show)
         total_all = len(self.users)
@@ -209,16 +188,13 @@ class ProductionUserManager:
         print(f"Criado em: {user['created_at']}")
         print(f"Último login: {user.get('last_login', 'Nunca')}")
         
-        # Permissões
-        permissions = user.get('permissions', [])
-        print(f"Permissões ({len(permissions)}): {', '.join(permissions) if permissions else 'Nenhuma'}")
+        print(f"Tipo: {user['role']}")
         
         # Estatísticas de uso
         print(f"\n📊 Estatísticas de Uso:")
         print(f"  Conversas totais: {user.get('total_conversations', 0)}")
         print(f"  Consultas bem-sucedidas: {user.get('successful_queries', 0)}")
         print(f"  Consultas falhadas: {user.get('failed_queries', 0)}")
-        print(f"  Extrações realizadas: {user.get('extractions_count', 0)}")
         
         # Taxa de sucesso
         total_queries = user.get('successful_queries', 0) + user.get('failed_queries', 0)
@@ -262,18 +238,16 @@ class ProductionUserManager:
 
 def show_menu():
     """Mostra menu principal"""
-    print("\n🚀 GERENCIADOR DE USUÁRIOS - SISTEMA RAG PRODUÇÃO")
+    print("\n🚀 GERENCIADOR DE USUÁRIOS - SISTEMA RAG")
     print("=" * 60)
     print("1. 👤 Adicionar usuário")
     print("2. 📋 Listar usuários")
     print("3. 🔍 Detalhes do usuário")
     print("4. ✏️  Editar usuário")
     print("5. 🔒 Alterar senha")
-    print("6. 🔑 Gerenciar permissões")
-    print("7. ❌ Remover usuário")
-    print("8. 📊 Estatísticas")
-    print("9. 🔧 Ferramentas")
-    print("10. 🚪 Sair")
+    print("6. ❌ Remover usuário")
+    print("7. 🔧 Ferramentas")
+    print("8. 🚪 Sair")
     print("-" * 60)
 
 def add_user_interactive(manager):
@@ -285,40 +259,21 @@ def add_user_interactive(manager):
     name = input("Nome completo: ").strip()
     password = input("Senha: ").strip()
     
-    print(f"\nPerfis disponíveis:")
-    roles = list(manager.role_permissions.keys())
+    print(f"\nTipos de usuário disponíveis:")
+    roles = manager.available_roles
     for i, role in enumerate(roles, 1):
-        perms = manager.role_permissions[role]
-        print(f"{i}. {role} ({len(perms)} permissões)")
+        print(f"{i}. {role}")
     
-    role_choice = input(f"Escolha o perfil (1-{len(roles)}): ").strip()
+    role_choice = input(f"Escolha o tipo (1-{len(roles)}): ").strip()
     try:
         role = roles[int(role_choice) - 1]
     except (ValueError, IndexError):
-        role = "Pesquisador"
-        print(f"⚠️ Opção inválida, usando perfil padrão: {role}")
+        role = "Usuário"
+        print(f"⚠️ Opção inválida, usando tipo padrão: {role}")
     
     organization = input("Organização (opcional): ").strip()
     
-    # Opção de personalizar permissões
-    custom_perms = input("\nPersonalizar permissões? (s/n): ").strip().lower()
-    permissions = None
-    
-    if custom_perms == 's':
-        print(f"\nPermissões disponíveis:")
-        for i, perm in enumerate(manager.available_permissions, 1):
-            print(f"{i}. {perm}")
-        
-        perm_input = input("Digite os números das permissões (ex: 1,3,5): ").strip()
-        if perm_input:
-            try:
-                perm_indices = [int(x.strip()) - 1 for x in perm_input.split(',')]
-                permissions = [manager.available_permissions[i] for i in perm_indices 
-                             if 0 <= i < len(manager.available_permissions)]
-            except:
-                print("⚠️ Formato inválido, usando permissões do perfil")
-    
-    success, message = manager.add_user(username, name, password, role, organization, permissions)
+    success, message = manager.add_user(username, name, password, role, organization)
     
     if success:
         print(f"✅ {message}")
@@ -328,8 +283,7 @@ def add_user_interactive(manager):
         print(f"\n📋 Resumo do usuário criado:")
         print(f"  Username: {username}")
         print(f"  Nome: {name}")
-        print(f"  Perfil: {role}")
-        print(f"  Permissões: {', '.join(user['permissions']) if user['permissions'] else 'Nenhuma'}")
+        print(f"  Tipo: {role}")
     else:
         print(f"❌ {message}")
 
@@ -347,24 +301,23 @@ def edit_user_interactive(manager):
     user = manager.users[username]
     print(f"\nDados atuais de '{username}':")
     print(f"Nome: {user['name']}")
-    print(f"Perfil: {user['role']}")
+    print(f"Tipo: {user['role']}")
     print(f"Organização: {user.get('organization', 'N/A')}")
     print(f"Status: {'Ativo' if user.get('active', True) else 'Inativo'}")
-    print(f"Permissões: {', '.join(user.get('permissions', []))}")
     print(f"Notas: {user.get('notes', 'Nenhuma')}")
     
     print("\nDeixe em branco para manter o valor atual:")
     
     new_name = input(f"Novo nome [{user['name']}]: ").strip()
     
-    # Perfis
-    print(f"\nPerfis disponíveis:")
-    roles = list(manager.role_permissions.keys())
+    # Tipos
+    print(f"\nTipos disponíveis:")
+    roles = manager.available_roles
     for i, role in enumerate(roles, 1):
         print(f"{i}. {role}")
     
     current_role_idx = roles.index(user['role']) + 1 if user['role'] in roles else 0
-    new_role_input = input(f"Novo perfil [{current_role_idx}={user['role']}]: ").strip()
+    new_role_input = input(f"Novo tipo [{current_role_idx}={user['role']}]: ").strip()
     
     new_org = input(f"Nova organização [{user.get('organization', 'N/A')}]: ").strip()
     
@@ -401,92 +354,6 @@ def edit_user_interactive(manager):
     else:
         print("ℹ️ Nenhuma alteração feita.")
 
-def manage_permissions_interactive(manager):
-    """Gerencia permissões do usuário"""
-    print("\n🔑 GERENCIAR PERMISSÕES")
-    print("-" * 30)
-    
-    username = input("Username: ").strip()
-    
-    if username not in manager.users:
-        print("❌ Usuário não encontrado!")
-        return
-    
-    user = manager.users[username]
-    current_perms = user.get('permissions', [])
-    
-    print(f"\nPermissões atuais de '{username}':")
-    if current_perms:
-        for i, perm in enumerate(current_perms, 1):
-            print(f"  {i}. {perm}")
-    else:
-        print("  Nenhuma permissão")
-    
-    print(f"\nPermissões disponíveis:")
-    for i, perm in enumerate(manager.available_permissions, 1):
-        status = "✓" if perm in current_perms else " "
-        print(f"  {i}. [{status}] {perm}")
-    
-    print(f"\nOpções:")
-    print("1. Adicionar permissões")
-    print("2. Remover permissões")
-    print("3. Definir permissões do perfil")
-    print("4. Limpar todas as permissões")
-    
-    choice = input("Escolha (1-4): ").strip()
-    
-    if choice == "1":
-        # Adicionar
-        available = [p for p in manager.available_permissions if p not in current_perms]
-        if not available:
-            print("✅ Usuário já tem todas as permissões!")
-            return
-        
-        print("Permissões para adicionar:")
-        for i, perm in enumerate(available, 1):
-            print(f"  {i}. {perm}")
-        
-        selections = input("Digite os números (ex: 1,3): ").strip()
-        try:
-            indices = [int(x.strip()) - 1 for x in selections.split(',')]
-            to_add = [available[i] for i in indices if 0 <= i < len(available)]
-            new_perms = current_perms + to_add
-        except:
-            print("❌ Formato inválido!")
-            return
-    
-    elif choice == "2":
-        # Remover
-        if not current_perms:
-            print("ℹ️ Usuário não tem permissões para remover!")
-            return
-        
-        selections = input("Digite os números para remover (ex: 1,3): ").strip()
-        try:
-            indices = [int(x.strip()) - 1 for x in selections.split(',')]
-            to_remove = [current_perms[i] for i in indices if 0 <= i < len(current_perms)]
-            new_perms = [p for p in current_perms if p not in to_remove]
-        except:
-            print("❌ Formato inválido!")
-            return
-    
-    elif choice == "3":
-        # Usar permissões do perfil
-        role = user['role']
-        new_perms = manager.role_permissions.get(role, [])
-        print(f"Aplicando permissões do perfil '{role}': {', '.join(new_perms) if new_perms else 'Nenhuma'}")
-    
-    elif choice == "4":
-        # Limpar todas
-        new_perms = []
-        print("Removendo todas as permissões...")
-    
-    else:
-        print("❌ Opção inválida!")
-        return
-    
-    success, message = manager.update_user(username, permissions=new_perms)
-    print(f"✅ {message}" if success else f"❌ {message}")
 
 def change_password_interactive(manager):
     """Altera senha do usuário"""
@@ -515,80 +382,6 @@ def change_password_interactive(manager):
     success, message = manager.update_user(username, password=new_password)
     print(f"✅ {message}" if success else f"❌ {message}")
 
-def show_statistics(manager):
-    """Mostra estatísticas do sistema"""
-    print("\n📊 ESTATÍSTICAS DO SISTEMA DE PRODUÇÃO")
-    print("=" * 50)
-    
-    if not manager.users:
-        print("Nenhum usuário cadastrado.")
-        return
-    
-    total_users = len(manager.users)
-    active_users = sum(1 for user in manager.users.values() if user.get('active', True))
-    
-    # Conta por perfil
-    roles = {}
-    permissions_count = {}
-    for user in manager.users.values():
-        role = user['role']
-        roles[role] = roles.get(role, 0) + 1
-        
-        for perm in user.get('permissions', []):
-            permissions_count[perm] = permissions_count.get(perm, 0) + 1
-    
-    print(f"📈 Usuários:")
-    print(f"  Total: {total_users}")
-    print(f"  Ativos: {active_users}")
-    print(f"  Inativos: {total_users - active_users}")
-    
-    print(f"\n👥 Por perfil:")
-    for role, count in sorted(roles.items()):
-        print(f"  {role}: {count}")
-    
-    print(f"\n🔑 Permissões mais usadas:")
-    for perm, count in sorted(permissions_count.items(), key=lambda x: x[1], reverse=True):
-        print(f"  {perm}: {count} usuários")
-    
-    # Estatísticas de uso
-    total_conversations = sum(u.get('total_conversations', 0) for u in manager.users.values())
-    total_extractions = sum(u.get('extractions_count', 0) for u in manager.users.values())
-    
-    print(f"\n💬 Uso do sistema:")
-    print(f"  Total de conversas: {total_conversations}")
-    print(f"  Total de extrações: {total_extractions}")
-    
-    # Verifica diretórios de usuários
-    users_with_data = 0
-    total_messages = 0
-    
-    for username in manager.users:
-        user_dir = Path(f"production_users/{username}")
-        if user_dir.exists():
-            memory_file = user_dir / "chat_history.json"
-            if memory_file.exists():
-                users_with_data += 1
-                try:
-                    with open(memory_file, 'r') as f:
-                        data = json.load(f)
-                        total_messages += data.get('total_messages', 0)
-                except:
-                    pass
-    
-    print(f"\n💾 Dados salvos:")
-    print(f"  Usuários com dados: {users_with_data}")
-    print(f"  Total de mensagens: {total_messages}")
-    
-    # Usuários mais ativos
-    if total_conversations > 0:
-        print(f"\n🏆 Usuários mais ativos:")
-        active_users_list = [(username, user.get('total_conversations', 0)) 
-                           for username, user in manager.users.items() 
-                           if user.get('total_conversations', 0) > 0]
-        active_users_list.sort(key=lambda x: x[1], reverse=True)
-        
-        for username, conversations in active_users_list[:5]:
-            print(f"  {username}: {conversations} conversas")
 
 def tools_menu(manager):
     """Menu de ferramentas"""
@@ -604,7 +397,7 @@ def tools_menu(manager):
     
     if choice == "1":
         # Backup
-        backup_file = f"production_users_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+        backup_file = f"production_users_backup_{get_sao_paulo_time().strftime('%Y%m%d_%H%M%S')}.json"
         try:
             shutil.copy2(manager.users_file, backup_file)
             print(f"✅ Backup criado: {backup_file}")
@@ -641,7 +434,6 @@ def tools_menu(manager):
                     user['total_conversations'] = 0
                     user['successful_queries'] = 0
                     user['failed_queries'] = 0
-                    user['extractions_count'] = 0
                 
                 if manager.save_users():
                     print("✅ Estatísticas resetadas para todos os usuários!")
@@ -652,8 +444,7 @@ def tools_menu(manager):
             manager.users[username].update({
                 'total_conversations': 0,
                 'successful_queries': 0,
-                'failed_queries': 0,
-                'extractions_count': 0
+                'failed_queries': 0
             })
             
             if manager.save_users():
@@ -696,12 +487,11 @@ def tools_menu(manager):
                                 "role": new_role,
                                 "organization": old_user.get("organization", ""),
                                 "permissions": manager.role_permissions.get(new_role, []),
-                                "created_at": old_user.get("created_at", datetime.now().isoformat()),
+                                "created_at": old_user.get("created_at", get_sao_paulo_time().isoformat()),
                                 "last_login": old_user.get("last_login", ""),
                                 "total_conversations": old_user.get("total_conversations", 0),
                                 "successful_queries": 0,
                                 "failed_queries": 0,
-                                "extractions_count": 0,
                                 "active": old_user.get("active", True),
                                 "notes": f"Migrado de {old_file}"
                             }
@@ -715,7 +505,7 @@ def tools_menu(manager):
                         # Pergunta se quer fazer backup do arquivo antigo
                         backup = input("Fazer backup do arquivo antigo? (s/n): ").strip().lower()
                         if backup == 's':
-                            backup_name = f"streamlit_users_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+                            backup_name = f"streamlit_users_backup_{get_sao_paulo_time().strftime('%Y%m%d_%H%M%S')}.json"
                             shutil.copy2(old_file, backup_name)
                             print(f"📁 Backup criado: {backup_name}")
                     else:
@@ -730,22 +520,7 @@ def main():
     """Função principal"""
     manager = ProductionUserManager()
     
-    # Cria usuários padrão se não existirem
-    if not manager.users:
-        print("🏗️ Criando usuários padrão...")
-        
-        default_users = [
-            ("admin", "Administrador", "admin123", "Admin", "Sistema"),
-            ("pesquisador", "Dr. Pesquisador", "pesquisa123", "Pesquisador", "Universidade"),
-            ("demo", "Usuário Demo", "demo123", "Demonstração", "Demo")
-        ]
-        
-        for username, name, password, role, org in default_users:
-            success, message = manager.add_user(username, name, password, role, org)
-            if success:
-                print(f"✅ {message}")
-            else:
-                print(f"⚠️ {message}")
+    # Não cria mais usuários padrão automaticamente
     
     # Modo não-interativo para automação
     if len(sys.argv) > 1:
@@ -757,7 +532,7 @@ def main():
         
         elif command == "add" and len(sys.argv) >= 5:
             username, name, password = sys.argv[2:5]
-            role = sys.argv[5] if len(sys.argv) > 5 else "Pesquisador"
+            role = sys.argv[5] if len(sys.argv) > 5 else "Usuário"
             organization = sys.argv[6] if len(sys.argv) > 6 else ""
             
             success, message = manager.add_user(username, name, password, role, organization)
@@ -777,11 +552,9 @@ def main():
             success, message = manager.update_user(username, password=new_password)
             print(message)
         
-        elif command == "stats":
-            show_statistics(manager)
         
         elif command == "backup":
-            backup_file = f"production_users_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            backup_file = f"production_users_backup_{get_sao_paulo_time().strftime('%Y%m%d_%H%M%S')}.json"
             try:
                 shutil.copy2(manager.users_file, backup_file)
                 print(f"✅ Backup criado: {backup_file}")
@@ -789,19 +562,18 @@ def main():
                 print(f"❌ Erro no backup: {e}")
         
         elif command == "help":
-            print("🚀 GERENCIADOR DE USUÁRIOS RAG PRODUÇÃO")
+            print("🚀 GERENCIADOR DE USUÁRIOS RAG")
             print("\nComandos disponíveis:")
             print("  list [--include-inactive]  - Lista usuários")
             print("  add <user> <nome> <senha> [role] [org] - Adiciona usuário")
             print("  remove <user>              - Remove usuário")
             print("  details <user>             - Detalhes do usuário")
             print("  password <user> <senha>    - Altera senha")
-            print("  stats                      - Estatísticas")
             print("  backup                     - Backup dos usuários")
             print("  help                       - Esta ajuda")
-            print("\nPerfis disponíveis: Admin, Pesquisador, Demonstração, Estudante, Professor, Convidado")
+            print("\nTipos disponíveis: Admin, Usuário")
             print("\nExemplos:")
-            print("  python manage_production_users.py add joao 'João Silva' senha123 Pesquisador 'UFMG'")
+            print("  python manage_production_users.py add joao 'João Silva' senha123 Usuário 'UFMG'")
             print("  python manage_production_users.py list --include-inactive")
             print("  python manage_production_users.py details admin")
         
@@ -813,7 +585,7 @@ def main():
     # Modo interativo
     while True:
         show_menu()
-        choice = input("\nEscolha uma opção (1-10): ").strip()
+        choice = input("\nEscolha uma opção (1-8): ").strip()
         
         if choice == "1":
             add_user_interactive(manager)
@@ -833,9 +605,6 @@ def main():
             change_password_interactive(manager)
         
         elif choice == "6":
-            manage_permissions_interactive(manager)
-        
-        elif choice == "7":
             username = input("\nUsername para remover: ").strip()
             
             if username in manager.users:
@@ -856,15 +625,13 @@ def main():
             else:
                 print("❌ Usuário não encontrado!")
         
-        elif choice == "8":
-            show_statistics(manager)
         
-        elif choice == "9":
+        elif choice == "7":
             tools_menu(manager)
         
-        elif choice == "10":
+        elif choice == "8":
             print("\n👋 Até logo!")
-            print("🚀 Sistema RAG de Produção - Usuários gerenciados com sucesso!")
+            print("🚀 Sistema RAG - Usuários gerenciados com sucesso!")
             break
         
         else:

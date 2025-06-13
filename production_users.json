@@ -1,76 +1,14 @@
 {
-  "admin": {
-    "password_hash": "04f7a56cde39e34277a19ebea83eb186740325b784702e69bea4da63a8deb0af",
-    "name": "Administrador",
-    "role": "Admin",
-    "organization": "Sistema",
-    "permissions": [
-      "extract",
-      "stats",
-      "clear_all",
-      "manage_users",
-      "admin"
-    ],
-    "created_at": "2025-06-13T17:48:22.941168",
-    "last_login": "",
-    "total_conversations": 0,
-    "successful_queries": 0,
-    "failed_queries": 0,
-    "extractions_count": 0,
-    "active": true,
-    "notes": ""
-  },
-  "pesquisador": {
-    "password_hash": "cddf2aedb9cc2cbd220477763a43096c53f3fb3280e34fce123f2358b0b6e64e",
-    "name": "Dr. Pesquisador",
-    "role": "Pesquisador",
-    "organization": "Universidade",
-    "permissions": [
-      "extract",
-      "stats"
-    ],
-    "created_at": "2025-06-13T17:48:22.941498",
-    "last_login": "",
-    "total_conversations": 0,
-    "successful_queries": 0,
-    "failed_queries": 0,
-    "extractions_count": 0,
-    "active": true,
-    "notes": ""
-  },
-  "demo": {
-    "password_hash": "bf128d5c2eea6fe47030c0012efacfbd442294f2099b496f7d85bbc277e54a9c",
-    "name": "Usuário Demo",
-    "role": "Demonstração",
-    "organization": "Demo",
-    "permissions": [],
-    "created_at": "2025-06-13T17:48:22.942182",
-    "last_login": "",
-    "total_conversations": 0,
-    "successful_queries": 0,
-    "failed_queries": 0,
-    "extractions_count": 0,
-    "active": true,
-    "notes": ""
-  },
   "ilceccato88": {
     "password_hash": "27e2e8b121fa1ff4dfd6c666c85c9dc9bd93f8f3c43840e01a9e8b1ed60bf23f",
     "name": "Ivan",
     "role": "Admin",
     "organization": "Agência WOW",
-    "permissions": [
-      "extract",
-      "stats",
-      "clear_all",
-      "manage_users",
-      "admin"
-    ],
     "created_at": "2025-06-13T17:49:19.387235",
     "last_login": "",
     "total_conversations": 0,
     "successful_queries": 0,
     "failed_queries": 0,
-    "extractions_count": 0,
     "active": true,
     "notes": ""
   }

@@ -5,6 +5,8 @@ import re
 import base64
 import json
 import logging
+from datetime import datetime
+from zoneinfo import ZoneInfo
 from typing import List, Tuple, Optional, Dict, Any
 from dotenv import load_dotenv
 
@@ -13,7 +15,7 @@ from openai import OpenAI
 from PIL import Image
 from astrapy import DataAPIClient
 
-# Configurações para produção
+# Configurações do sistema
 LLM_MODEL = "gpt-4o" 
 MAX_CANDIDATES = 5
 MAX_TOKENS_RERANK = 512
@@ -21,16 +23,50 @@ MAX_TOKENS_ANSWER = 2048
 MAX_TOKENS_QUERY_TRANSFORM = 150  # Reduzido para eficiência
 COLLECTION_NAME = "pdf_documents"
 
-# Logging estruturado para produção
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-)
-logger = logging.getLogger(__name__)
+# Configuração de logging específica para o buscador
+def setup_rag_logging():
+    """Configura logging específico para o RAG"""
+    rag_logger = logging.getLogger(__name__)
+    rag_logger.setLevel(logging.DEBUG)
+    
+    # Remove handlers existentes para evitar duplicação
+    for handler in rag_logger.handlers[:]:
+        rag_logger.removeHandler(handler)
+    
+    # Formatter detalhado
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
+    )
+    
+    # Handler para console
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)
+    console_handler.setFormatter(formatter)
+    rag_logger.addHandler(console_handler)
+    
+    # Handler para arquivo específico do RAG
+    file_handler = logging.FileHandler("rag_production_debug.log", encoding='utf-8')
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(formatter)
+    rag_logger.addHandler(file_handler)
+    
+    # Não propagar para o logger pai para evitar duplicação
+    rag_logger.propagate = False
+    
+    return rag_logger
+
+logger = setup_rag_logging()
+
+# Log inicial para confirmar que o sistema de logging está funcionando
+logger.info("🚀 [INIT] Sistema de logging do RAG inicializado")
+
+def get_sao_paulo_time():
+    """Retorna datetime atual no fuso horário de São Paulo"""
+    return datetime.now(ZoneInfo("America/Sao_Paulo"))
 
 class ProductionQueryTransformer:
     """
-    Transformador de queries otimizado para produção
+    Transformador de queries otimizado
     - Menos chamadas LLM (economia de custos)
     - Lógica determinística quando possível
     - Fallbacks robustos
@@ -81,36 +117,59 @@ class ProductionQueryTransformer:
         """
         Transformação principal com múltiplas estratégias
         """
+        import time
+        transform_start = time.time()
+        
         try:
             if not chat_history:
+                logger.debug(f"[TRANSFORM] Histórico vazio, retornando 'Not applicable'")
                 return "Not applicable"
             
             last_message = self._get_last_user_message(chat_history)
             if not last_message:
+                logger.debug(f"[TRANSFORM] Nenhuma mensagem de usuário encontrada")
                 return "Not applicable"
+            
+            logger.debug(f"[TRANSFORM] Processando: '{last_message[:50]}...'")
             
             # Cache para transformações já feitas
             cache_key = self._create_cache_key(last_message, chat_history)
             if cache_key in self.transformation_cache:
-                logger.debug(f"Cache hit para: {last_message[:30]}...")
-                return self.transformation_cache[cache_key]
+                cached_result = self.transformation_cache[cache_key]
+                logger.info(f"[TRANSFORM] 💾 Cache hit: '{cached_result[:50]}...'")
+                return cached_result
+            
+            logger.debug(f"[TRANSFORM] Cache miss, processando...")
             
             # 1. Verificações determinísticas (sem LLM)
+            logger.debug(f"[TRANSFORM] Tentando classificação determinística...")
             deterministic_result = self._deterministic_classification(last_message, chat_history)
             if deterministic_result != "NEEDS_LLM":
                 self.transformation_cache[cache_key] = deterministic_result
+                transform_time = time.time() - transform_start
+                logger.info(f"[TRANSFORM] ✅ Determinística em {transform_time:.2f}s: '{deterministic_result[:50]}...'")
                 return deterministic_result
             
             # 2. Transformação com LLM (apenas quando necessário)
+            logger.info(f"[TRANSFORM] 🤖 Usando LLM para transformação complexa...")
+            llm_start = time.time()
             llm_result = self._llm_transformation(last_message, chat_history)
+            llm_time = time.time() - llm_start
+            
             self.transformation_cache[cache_key] = llm_result
+            
+            total_time = time.time() - transform_start
+            logger.info(f"[TRANSFORM] ✅ LLM em {llm_time:.2f}s (total: {total_time:.2f}s): '{llm_result[:50]}...'")
             
             return llm_result
             
         except Exception as e:
-            logger.error(f"Erro na transformação de query: {e}")
+            error_time = time.time() - transform_start
+            logger.error(f"[TRANSFORM] ❌ Erro após {error_time:.2f}s: {e}")
             # Fallback seguro
-            return self._safe_fallback(last_message)
+            fallback = self._safe_fallback(last_message if 'last_message' in locals() else "erro")
+            logger.info(f"[TRANSFORM] 🔄 Fallback: '{fallback[:50]}...'")
+            return fallback
     
     def _deterministic_classification(self, message: str, chat_history: List[Dict[str, str]]) -> str:
         """
@@ -307,11 +366,11 @@ RESPONDA APENAS COM A PERGUNTA TRANSFORMADA:"""
 
 class ProductionConversationalRAG:
     """
-    Sistema RAG conversacional otimizado para produção
+    Sistema RAG conversacional otimizado
     """
     
     def __init__(self) -> None:
-        """Inicializa com configurações de produção"""
+        """Inicializa com configurações do sistema"""
         load_dotenv()
 
         # Validação de ambiente
@@ -328,7 +387,7 @@ class ProductionConversationalRAG:
         self.voyage_client = voyageai.Client()
         self.openai_client = OpenAI()
         
-        # Transformador otimizado para produção
+        # Transformador otimizado
         self.query_transformer = ProductionQueryTransformer(self.openai_client)
         
         # Histórico da conversa
@@ -337,7 +396,7 @@ class ProductionConversationalRAG:
         # Conexão com Astra DB
         self._initialize_database()
         
-        logger.info("Sistema RAG de produção inicializado com sucesso")
+        logger.info("Sistema RAG inicializado com sucesso")
 
     def _initialize_database(self):
         """Inicializa conexão com base de dados"""
@@ -360,39 +419,71 @@ class ProductionConversationalRAG:
 
     def ask(self, user_message: str) -> str:
         """Interface conversacional principal otimizada"""
+        import time
+        start_time = time.time()
+        
+        logger.info(f"[ASK] === INICIANDO PROCESSAMENTO ===")
+        logger.info(f"[ASK] Pergunta do usuário: {user_message}")
+        
         try:
             # Adiciona mensagem do usuário ao histórico
             self.chat_history.append({"role": "user", "content": user_message})
+            logger.debug(f"[ASK] Mensagem adicionada ao histórico. Total: {len(self.chat_history)} mensagens")
             
             # Transforma em query RAG
+            logger.info(f"[ASK] 🔄 ETAPA 1: Transformando query com IA...")
+            transform_start = time.time()
+            
             transformed_query = self.query_transformer.transform_query(self.chat_history)
             
+            transform_time = time.time() - transform_start
+            logger.info(f"[ASK] ✅ Query transformada em {transform_time:.2f}s: '{transformed_query}'")
+            
             # Verifica se precisa fazer RAG
-            if not self.query_transformer.needs_rag(transformed_query):
+            needs_rag = self.query_transformer.needs_rag(transformed_query)
+            logger.info(f"[ASK] 🤔 ETAPA 2: Precisa fazer RAG? {needs_rag}")
+            
+            if not needs_rag:
+                logger.info(f"[ASK] 💬 Gerando resposta conversacional simples...")
                 response = self._generate_non_rag_response(user_message)
+                logger.info(f"[ASK] ✅ Resposta simples gerada")
             else:
                 # Limpa a query e faz RAG
                 clean_query = self.query_transformer.clean_query(transformed_query)
-                logger.info(f"Fazendo RAG para: '{clean_query}'")
+                logger.info(f"[ASK] 🧹 Query limpa: '{clean_query}'")
+                logger.info(f"[ASK] 🔍 ETAPA 3: Iniciando busca RAG...")
                 
+                rag_start = time.time()
                 rag_result = self.search_and_answer(clean_query)
+                rag_time = time.time() - rag_start
                 
                 if "error" in rag_result:
+                    logger.warning(f"[ASK] ❌ RAG retornou erro em {rag_time:.2f}s: {rag_result['error']}")
                     response = f"Desculpe, não consegui encontrar informações sobre isso. {rag_result['error']}"
                 else:
+                    logger.info(f"[ASK] ✅ RAG completado em {rag_time:.2f}s")
+                    logger.info(f"[ASK] 📊 Páginas selecionadas: {rag_result.get('selected_pages_count', 0)}")
+                    logger.info(f"[ASK] 📚 Fonte: {rag_result.get('selected_pages', 'N/A')}")
                     response = rag_result["answer"]
             
             # Adiciona resposta ao histórico
             self.chat_history.append({"role": "assistant", "content": response})
+            logger.debug(f"[ASK] Resposta adicionada ao histórico")
             
             # Limita histórico para controle de memória
             if len(self.chat_history) > 20:
+                old_len = len(self.chat_history)
                 self.chat_history = self.chat_history[-16:]
+                logger.debug(f"[ASK] Histórico limitado: {old_len} -> {len(self.chat_history)} mensagens")
+            
+            total_time = time.time() - start_time
+            logger.info(f"[ASK] ✅ === PROCESSAMENTO COMPLETO em {total_time:.2f}s ===")
             
             return response
             
         except Exception as e:
-            logger.error(f"Erro no processamento: {e}")
+            error_time = time.time() - start_time
+            logger.error(f"[ASK] ❌ Erro no processamento após {error_time:.2f}s: {e}", exc_info=True)
             return "Desculpe, ocorreu um erro interno. Tente novamente."
 
     def _generate_non_rag_response(self, user_message: str) -> str:
@@ -438,7 +529,7 @@ class ProductionConversationalRAG:
     def search_candidates(self, query_embedding: List[float], limit: int = MAX_CANDIDATES) -> List[dict]:
         """Busca candidatos no Astra DB"""
         try:
-            logger.debug("Buscando similaridade no Astra DB...")
+            logger.debug(f"[SEARCH] Buscando similaridade no Astra DB com limite de {limit}...")
             
             cursor = self.collection.find(
                 {},
@@ -464,7 +555,7 @@ class ProductionConversationalRAG:
                     "similarity_score": doc.get("$similarity", 0.0),
                 })
             
-            logger.info(f"Busca retornou {len(candidates)} candidatos")
+            logger.info(f"[SEARCH] Busca retornou {len(candidates)} candidatos")
             return candidates
         except Exception as e:
             logger.error(f"Erro busca Astra DB: {e}")
@@ -476,7 +567,7 @@ class ProductionConversationalRAG:
             return False
 
         try:
-            logger.debug("Verificando relevância do contexto...")
+            logger.debug(f"[RELEVANCE] Verificando relevância com {len(selected)} páginas selecionadas...")
             context_text = "\n\n".join(
                 f"=== PÁGINA {c['page_num']} ===\n{c['markdown_text']}"
                 for c in selected
@@ -643,30 +734,82 @@ class ProductionConversationalRAG:
 
     def search_and_answer(self, query: str) -> dict:
         """Pipeline completo RAG"""
-        logger.info(f"Consulta: '{query}'")
+        import time
+        pipeline_start = time.time()
+        
+        logger.info(f"[RAG] === PIPELINE RAG INICIADO ===")
+        logger.info(f"[RAG] Query: '{query}'")
+        
+        # ETAPA 1: Gerar embedding
+        logger.info(f"[RAG] 🧮 ETAPA 1: Gerando embedding da query...")
+        embedding_start = time.time()
         
         try:
             embedding = self.get_query_embedding(query)
+            embedding_time = time.time() - embedding_start
+            logger.info(f"[RAG] ✅ Embedding gerado em {embedding_time:.2f}s (dimensão: {len(embedding)})")
         except Exception as e:
+            logger.error(f"[RAG] ❌ Embedding falhou: {e}")
             return {"error": f"Embedding falhou: {e}"}
 
+        # ETAPA 2: Buscar candidatos
+        logger.info(f"[RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...")
+        search_start = time.time()
+        
         candidates = self.search_candidates(embedding)
+        search_time = time.time() - search_start
+        
         if not candidates:
+            logger.warning(f"[RAG] ❌ Nenhum candidato encontrado em {search_time:.2f}s")
             return {"error": "Nenhuma página relevante encontrada."}
+        
+        logger.info(f"[RAG] ✅ {len(candidates)} candidatos encontrados em {search_time:.2f}s")
+        
+        # Log dos candidatos com scores
+        for i, cand in enumerate(candidates[:3]):  # Mostra top 3
+            logger.debug(f"[RAG] Candidato {i+1}: Página {cand['page_num']} (score: {cand['similarity_score']:.3f})")
 
-        logger.debug("Re-rankeando candidatos...")
+        # ETAPA 3: Re-ranking
+        logger.info(f"[RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...")
+        rerank_start = time.time()
+        
         selected, justification = self.rerank_with_gpt(query, candidates)
+        rerank_time = time.time() - rerank_start
+        
         if not selected:
+            logger.error(f"[RAG] ❌ Re-ranking falhou em {rerank_time:.2f}s")
             return {"error": "Re-ranking falhou."}
+        
+        logger.info(f"[RAG] ✅ Re-ranking completo em {rerank_time:.2f}s")
+        logger.info(f"[RAG] 📋 {len(selected)} páginas selecionadas")
+        logger.debug(f"[RAG] Justificativa: {justification}")
 
-        if not self.verify_relevance(query, selected):
-            logger.warning("Verificação de relevância indicou baixa relevância")
+        # ETAPA 4: Verificar relevância
+        logger.info(f"[RAG] ✅ ETAPA 4: Verificando relevância...")
+        relevance_start = time.time()
+        
+        is_relevant = self.verify_relevance(query, selected)
+        relevance_time = time.time() - relevance_start
+        
+        if not is_relevant:
+            logger.warning(f"[RAG] ❌ Verificação de relevância falhou em {relevance_time:.2f}s")
             return {
                 "error": "A informação solicitada não foi encontrada de forma explícita no documento."
             }
+        
+        logger.info(f"[RAG] ✅ Relevância confirmada em {relevance_time:.2f}s")
 
-        logger.debug("Gerando resposta final...")
+        # ETAPA 5: Gerar resposta
+        logger.info(f"[RAG] 💬 ETAPA 5: Gerando resposta final...")
+        answer_start = time.time()
+        
         answer = self.generate_conversational_answer(query, selected)
+        answer_time = time.time() - answer_start
+        
+        logger.info(f"[RAG] ✅ Resposta gerada em {answer_time:.2f}s")
+        
+        total_pipeline_time = time.time() - pipeline_start
+        logger.info(f"[RAG] 🏁 === PIPELINE COMPLETO em {total_pipeline_time:.2f}s ===")
 
         # Prepara detalhes da resposta
         sel_details = [
@@ -839,15 +982,15 @@ class SimpleRAG:
         """Limpa histórico"""
         self.rag.clear_history()
 
-# Interface CLI otimizada para produção
+# Interface CLI otimizada
 def main() -> None:
     """Interface CLI com tratamento de erros robusto"""
     try:
         rag = ProductionConversationalRAG()
         
-        print("🚀 SISTEMA RAG CONVERSACIONAL - PRODUÇÃO 🚀")
+        print("🚀 SISTEMA RAG CONVERSACIONAL 🚀")
         print("=" * 70)
-        print("✨ Otimizações de produção ativas:")
+        print("✨ Otimizações ativas:")
         print("  • Query transformer inteligente")
         print("  • Cache de transformações")
         print("  • Logging estruturado")
@@ -912,16 +1055,16 @@ def main() -> None:
         print("3. Documentos indexados")
 
 def print_production_help():
-    """Ajuda para versão de produção"""
+    """Ajuda do sistema"""
     print("""
-📚 COMANDOS DE PRODUÇÃO:
+📚 COMANDOS:
 • /help     - Esta ajuda
 • /clear    - Limpa histórico
 • /stats    - Estatísticas do sistema
 • /extract  - Extração de dados
   Exemplo: /extract {"title": "", "authors": []}
 
-💡 RECURSOS DE PRODUÇÃO:
+💡 RECURSOS:
 • Cache de transformações (economia de custos)
 • Fallbacks automáticos (maior robustez)
 • Logging estruturado (monitoramento)
@@ -935,7 +1078,7 @@ def print_production_help():
 """)
 
 def handle_production_extract_command(rag, command):
-    """Manipula extração de dados na versão de produção"""
+    """Manipula extração de dados do sistema"""
     try:
         if len(command.split(" ", 1)) < 2:
             print("💡 Uso: /extract {\"campo\": \"valor\"}")
@@ -961,7 +1104,7 @@ def handle_production_extract_command(rag, command):
         logger.error(f"Erro na extração: {e}")
         print(f"❌ Erro: {e}")
 
-# Para monitoramento em produção
+# Para monitoramento do sistema
 def health_check() -> Dict[str, str]:
     """Health check para monitoramento"""
     try:
@@ -972,13 +1115,13 @@ def health_check() -> Dict[str, str]:
             "status": "healthy" if stats["system_health"] == "operational" else "degraded",
             "database": stats["database_status"],
             "cache_size": str(stats["transformer_stats"]["cache_size"]),
-            "timestamp": str(datetime.now())
+            "timestamp": get_sao_paulo_time().isoformat()
         }
     except Exception as e:
         return {
             "status": "error",
             "error": str(e),
-            "timestamp": str(datetime.now())
+            "timestamp": get_sao_paulo_time().isoformat()
         }
 
 # Aliases para compatibilidade

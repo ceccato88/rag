@@ -1,0 +1,476 @@
+2025-06-13 18:49:07,202 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 18:49:07,216 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:381] - Fazendo RAG para: 'que legal, e o graphiti?'
+2025-06-13 18:49:07,216 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:651] - Consulta: 'que legal, e o graphiti?'
+2025-06-13 18:49:07,402 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:446] - Buscando similaridade no Astra DB...
+2025-06-13 18:49:07,645 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:472] - Busca retornou 5 candidatos
+2025-06-13 18:49:07,645 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:662] - Re-rankeando candidatos...
+2025-06-13 18:49:15,939 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:564] - Re-ranker: Páginas_Selecionadas: [3, 11]
+
+Justificativa: A página 3 fornece uma explicação detalhada sobre o Graphiti, incluindo suas funcionalidades e características, como a extração temporal e a invalidação de arestas. A página 11 menciona o Graphiti no contexto de referências, indicando sua relevância e aplicação em agentes de conhecimento. Ambas as páginas juntas oferecem uma visão abrangente sobre o que é o Graphiti e como ele é utilizado.
+2025-06-13 18:49:15,940 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:484] - Verificando relevância do contexto...
+2025-06-13 18:49:16,522 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:505] - Verificação de relevância: 'Sim.'
+2025-06-13 18:49:16,522 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:673] - Gerando resposta final...
+2025-06-13 18:55:15,541 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 18:55:15,552 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 18:55:15,968 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 18:55:15,969 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 18:55:15,969 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:55:15,970 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'teste'
+2025-06-13 18:55:15,970 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:55:16,234 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.26s (dimensão: 1024)
+2025-06-13 18:55:16,234 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:55:16,235 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:55:16,463 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:55:16,464 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.23s
+2025-06-13 18:55:16,464 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 10 (score: 0.564)
+2025-06-13 18:55:16,464 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 12 (score: 0.554)
+2025-06-13 18:55:16,464 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 11 (score: 0.552)
+2025-06-13 18:55:16,464 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:55:26,381 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [10]
+
+Justificativa: A página 10 contém informações sobre "Fact Resolution" e "Temporal Extraction", que são relevantes para o conceito de "teste" no contexto de resolução de fatos e extração temporal, ambos relacionados a processos de verificação e análise. As outras páginas não abordam diretamente o conceito de "teste" de maneira tão clara ou relevante.
+2025-06-13 18:55:26,381 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 9.92s
+2025-06-13 18:55:26,381 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:55:26,382 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 10 contém informações sobre "Fact Resolution" e "Temporal Extraction", que são relevantes para o conceito de "teste" no contexto de resolução de fatos e extração temporal, ambos relacionados a processos de verificação e análise. As outras páginas não abordam diretamente o conceito de "teste" de maneira tão clara ou relevante.
+2025-06-13 18:55:26,382 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:55:26,382 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:55:27,795 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Não.'
+2025-06-13 18:55:27,795 - buscador_conversacional_producao - WARNING - [buscador_conversacional_producao.py:790] - [RAG] ❌ Verificação de relevância falhou em 1.41s
+2025-06-13 18:56:21,345 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 18:56:21,355 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 18:56:21,508 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 18:56:21,509 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 18:56:21,515 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:56:21,515 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Quais são os três subgrafos hierárquicos na arquitetura do Zep?'
+2025-06-13 18:56:21,515 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:56:21,730 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.21s (dimensão: 1024)
+2025-06-13 18:56:21,730 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:56:21,731 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:56:21,891 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:56:21,891 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.16s
+2025-06-13 18:56:21,891 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 4 (score: 0.718)
+2025-06-13 18:56:21,891 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 2 (score: 0.713)
+2025-06-13 18:56:21,891 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 1 (score: 0.677)
+2025-06-13 18:56:21,891 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:56:31,620 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [2]
+
+Justificativa: A página 2 descreve claramente os três subgrafos hierárquicos na arquitetura do Zep: o subgrafo episódico, o subgrafo semântico e o subgrafo de comunidade.
+2025-06-13 18:56:31,620 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 9.73s
+2025-06-13 18:56:31,620 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:56:31,620 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 2 descreve claramente os três subgrafos hierárquicos na arquitetura do Zep: o subgrafo episódico, o subgrafo semântico e o subgrafo de comunidade.
+2025-06-13 18:56:31,620 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:56:31,620 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:56:32,161 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:56:32,161 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 0.54s
+2025-06-13 18:56:32,161 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:56:37,029 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 4.87s
+2025-06-13 18:56:37,029 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 15.51s ===
+2025-06-13 18:56:37,030 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:56:37,030 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Como o Graphiti lida com a invalidação de arestas (fatos) no grafo de conhecimento?'
+2025-06-13 18:56:37,030 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:56:37,202 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.17s (dimensão: 1024)
+2025-06-13 18:56:37,202 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:56:37,202 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:56:37,435 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:56:37,435 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.23s
+2025-06-13 18:56:37,435 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 3 (score: 0.720)
+2025-06-13 18:56:37,436 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 10 (score: 0.696)
+2025-06-13 18:56:37,436 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 9 (score: 0.654)
+2025-06-13 18:56:37,436 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:56:52,414 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [3]
+
+Justificativa: A página 3 aborda diretamente o processo de invalidação de arestas no grafo de conhecimento do Graphiti, explicando como a extração temporal e a invalidação de arestas são geridas. Ela detalha como novas informações podem invalidar arestas existentes e como o sistema prioriza informações novas ao determinar a invalidação de arestas.
+2025-06-13 18:56:52,414 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 14.98s
+2025-06-13 18:56:52,414 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:56:52,415 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 3 aborda diretamente o processo de invalidação de arestas no grafo de conhecimento do Graphiti, explicando como a extração temporal e a invalidação de arestas são geridas. Ela detalha como novas informações podem invalidar arestas existentes e como o sistema prioriza informações novas ao determinar a invalidação de arestas.
+2025-06-13 18:56:52,415 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:56:52,415 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:56:52,869 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:56:52,869 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 0.45s
+2025-06-13 18:56:52,870 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:57:01,704 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 8.83s
+2025-06-13 18:57:01,705 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 24.67s ===
+2025-06-13 18:57:01,705 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:57:01,705 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Quais são os três métodos de busca implementados pelo Zep para recuperação de memória?'
+2025-06-13 18:57:01,705 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:57:01,878 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.17s (dimensão: 1024)
+2025-06-13 18:57:01,878 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:57:01,878 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:57:02,044 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:57:02,044 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.17s
+2025-06-13 18:57:02,044 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 4 (score: 0.713)
+2025-06-13 18:57:02,044 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 5 (score: 0.675)
+2025-06-13 18:57:02,045 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 11 (score: 0.663)
+2025-06-13 18:57:02,045 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:57:10,623 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [4]
+
+Justificativa: A página 4 contém a seção "3.1 Search", que descreve especificamente os três métodos de busca implementados pelo Zep para recuperação de memória: busca de similaridade semântica, busca de texto completo Okapi BM25 e busca em largura. Essa informação é diretamente relevante para a pergunta sobre os métodos de busca do Zep.
+2025-06-13 18:57:10,623 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 8.58s
+2025-06-13 18:57:10,623 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:57:10,623 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 4 contém a seção "3.1 Search", que descreve especificamente os três métodos de busca implementados pelo Zep para recuperação de memória: busca de similaridade semântica, busca de texto completo Okapi BM25 e busca em largura. Essa informação é diretamente relevante para a pergunta sobre os métodos de busca do Zep.
+2025-06-13 18:57:10,623 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:57:10,623 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:57:11,142 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:57:11,142 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 0.52s
+2025-06-13 18:57:11,143 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:57:14,529 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 3.39s
+2025-06-13 18:57:14,529 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 12.82s ===
+2025-06-13 18:57:14,530 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:57:14,530 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Qual é a principal limitação dos frameworks RAG que o Zep visa resolver?'
+2025-06-13 18:57:14,530 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:57:14,674 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.14s (dimensão: 1024)
+2025-06-13 18:57:14,675 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:57:14,675 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:57:14,850 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:57:14,850 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.18s
+2025-06-13 18:57:14,850 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 1 (score: 0.701)
+2025-06-13 18:57:14,850 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 8 (score: 0.670)
+2025-06-13 18:57:14,851 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 2 (score: 0.669)
+2025-06-13 18:57:14,851 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:57:23,085 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [1]
+
+Justificativa: A página 1 contém informações relevantes sobre a principal limitação dos frameworks RAG que o Zep visa resolver. O texto menciona que os frameworks RAG existentes são limitados à recuperação de documentos estáticos, enquanto o Zep aborda essa limitação através de sua arquitetura de grafo de conhecimento temporal, permitindo a integração dinâmica de conhecimento de diversas fontes.
+2025-06-13 18:57:23,085 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 8.23s
+2025-06-13 18:57:23,085 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:57:23,086 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 1 contém informações relevantes sobre a principal limitação dos frameworks RAG que o Zep visa resolver. O texto menciona que os frameworks RAG existentes são limitados à recuperação de documentos estáticos, enquanto o Zep aborda essa limitação através de sua arquitetura de grafo de conhecimento temporal, permitindo a integração dinâmica de conhecimento de diversas fontes.
+2025-06-13 18:57:23,086 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:57:23,086 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:57:23,494 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:57:23,494 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 0.41s
+2025-06-13 18:57:23,494 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:57:28,299 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 4.81s
+2025-06-13 18:57:28,300 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 13.77s ===
+2025-06-13 18:57:28,300 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:57:28,300 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'De que forma a estrutura de memória do Zep se assemelha aos modelos psicológicos da memória humana?'
+2025-06-13 18:57:28,300 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:57:28,449 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.15s (dimensão: 1024)
+2025-06-13 18:57:28,449 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:57:28,449 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:57:28,665 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:57:28,665 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.22s
+2025-06-13 18:57:28,665 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 2 (score: 0.690)
+2025-06-13 18:57:28,665 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 1 (score: 0.683)
+2025-06-13 18:57:28,666 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 4 (score: 0.679)
+2025-06-13 18:57:28,666 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:57:38,572 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [2]
+
+Justificativa: A página 2 descreve a estrutura de memória do Zep, destacando como ela se assemelha aos modelos psicológicos da memória humana. Ela menciona a distinção entre memória episódica e semântica, que são conceitos fundamentais nos modelos psicológicos da memória humana.
+2025-06-13 18:57:38,572 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 9.91s
+2025-06-13 18:57:38,572 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:57:38,572 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 2 descreve a estrutura de memória do Zep, destacando como ela se assemelha aos modelos psicológicos da memória humana. Ela menciona a distinção entre memória episódica e semântica, que são conceitos fundamentais nos modelos psicológicos da memória humana.
+2025-06-13 18:57:38,572 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:57:38,572 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:57:39,246 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:57:39,246 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 0.67s
+2025-06-13 18:57:39,246 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:57:45,673 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 6.43s
+2025-06-13 18:57:45,674 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 17.37s ===
+2025-06-13 18:57:45,674 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:57:45,674 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Qual foi a pontuação de acurácia (Score) do Zep com o modelo gpt-4-turbo na avaliação Deep Memory Retrieval (DMR), conforme a Tabela 1?'
+2025-06-13 18:57:45,674 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:57:45,827 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.15s (dimensão: 1024)
+2025-06-13 18:57:45,827 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:57:45,827 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:57:46,063 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:57:46,064 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.24s
+2025-06-13 18:57:46,065 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 6 (score: 0.768)
+2025-06-13 18:57:46,066 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 7 (score: 0.718)
+2025-06-13 18:57:46,067 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 1 (score: 0.692)
+2025-06-13 18:57:46,069 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:57:50,947 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [6]
+
+Justificativa: A página 6 contém a Tabela 1, que apresenta a pontuação de acurácia do Zep com o modelo gpt-4-turbo na avaliação Deep Memory Retrieval (DMR), que é exatamente a informação solicitada.
+2025-06-13 18:57:50,947 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 4.88s
+2025-06-13 18:57:50,947 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:57:50,947 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 6 contém a Tabela 1, que apresenta a pontuação de acurácia do Zep com o modelo gpt-4-turbo na avaliação Deep Memory Retrieval (DMR), que é exatamente a informação solicitada.
+2025-06-13 18:57:50,948 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:57:50,948 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:57:52,754 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:57:52,754 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 1.81s
+2025-06-13 18:57:52,755 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:57:57,431 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 4.68s
+2025-06-13 18:57:57,431 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 11.76s ===
+2025-06-13 18:57:57,432 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:57:57,432 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Na Tabela 2, qual foi a redução de latência do Zep em comparação com o baseline 'Full-context' usando o modelo gpt-4o?'
+2025-06-13 18:57:57,432 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:57:57,576 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.14s (dimensão: 1024)
+2025-06-13 18:57:57,576 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:57:57,576 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:57:57,733 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:57:57,733 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.16s
+2025-06-13 18:57:57,733 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 7 (score: 0.769)
+2025-06-13 18:57:57,733 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 6 (score: 0.703)
+2025-06-13 18:57:57,733 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 8 (score: 0.699)
+2025-06-13 18:57:57,733 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:58:08,984 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [7]
+
+Justificativa: A página 7 contém a Tabela 2, que apresenta os dados de latência do Zep em comparação com o baseline 'Full-context' usando o modelo gpt-4o. A informação necessária para responder à pergunta está claramente destacada nesta página.
+2025-06-13 18:58:08,984 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 11.25s
+2025-06-13 18:58:08,984 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:58:08,985 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 7 contém a Tabela 2, que apresenta os dados de latência do Zep em comparação com o baseline 'Full-context' usando o modelo gpt-4o. A informação necessária para responder à pergunta está claramente destacada nesta página.
+2025-06-13 18:58:08,985 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:58:08,985 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:58:09,988 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:58:09,989 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 1.00s
+2025-06-13 18:58:09,989 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:58:12,471 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 2.48s
+2025-06-13 18:58:12,471 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 15.04s ===
+2025-06-13 18:58:12,472 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:58:12,472 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Qual algoritmo de detecção de comunidade o Zep utiliza e por quê?'
+2025-06-13 18:58:12,472 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:58:12,622 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.15s (dimensão: 1024)
+2025-06-13 18:58:12,622 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:58:12,622 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:58:12,769 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:58:12,769 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.15s
+2025-06-13 18:58:12,769 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 4 (score: 0.736)
+2025-06-13 18:58:12,769 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 2 (score: 0.655)
+2025-06-13 18:58:12,769 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 5 (score: 0.642)
+2025-06-13 18:58:12,769 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:58:20,430 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [4]
+
+Justificativa: A página 4 contém informações específicas sobre o algoritmo de detecção de comunidade utilizado pelo Zep, mencionando a abordagem de propagação de rótulos e a técnica de GraphRAG, além de explicar a escolha e as vantagens dessa abordagem.
+2025-06-13 18:58:20,431 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 7.66s
+2025-06-13 18:58:20,431 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:58:20,431 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 4 contém informações específicas sobre o algoritmo de detecção de comunidade utilizado pelo Zep, mencionando a abordagem de propagação de rótulos e a técnica de GraphRAG, além de explicar a escolha e as vantagens dessa abordagem.
+2025-06-13 18:58:20,431 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:58:20,431 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:58:21,028 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:58:21,029 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 0.60s
+2025-06-13 18:58:21,029 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:58:24,595 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 18:58:24,766 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 18:58:24,767 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 18:58:26,015 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 4.99s
+2025-06-13 18:58:26,015 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 13.54s ===
+2025-06-13 18:58:26,016 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:58:26,016 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'O que a Tabela 3 detalha sobre os resultados da avaliação LongMemEval?'
+2025-06-13 18:58:26,016 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:58:26,162 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.15s (dimensão: 1024)
+2025-06-13 18:58:26,162 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:58:26,163 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:58:26,343 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:58:26,343 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.18s
+2025-06-13 18:58:26,343 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 7 (score: 0.765)
+2025-06-13 18:58:26,343 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 6 (score: 0.759)
+2025-06-13 18:58:26,344 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 11 (score: 0.672)
+2025-06-13 18:58:26,344 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:58:31,069 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 18:58:31,187 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 18:58:31,188 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 18:58:35,484 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [7]
+
+Justificativa: A página 7 contém a Tabela 3, que detalha os resultados da avaliação LongMemEval, incluindo a análise por tipo de pergunta e os ganhos de desempenho do modelo Zep em comparação com o modelo full-context.
+2025-06-13 18:58:35,484 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 9.14s
+2025-06-13 18:58:35,484 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:58:35,484 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 7 contém a Tabela 3, que detalha os resultados da avaliação LongMemEval, incluindo a análise por tipo de pergunta e os ganhos de desempenho do modelo Zep em comparação com o modelo full-context.
+2025-06-13 18:58:35,485 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:58:35,485 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:58:35,836 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Sim.'
+2025-06-13 18:58:35,836 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:795] - [RAG] ✅ Relevância confirmada em 0.35s
+2025-06-13 18:58:35,836 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:798] - [RAG] 💬 ETAPA 5: Gerando resposta final...
+2025-06-13 18:58:42,449 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:235] - LLM transform: 'claro' → 'Sobre o Zep: Como os documentos acadêmicos são gerenciados utilizando grafos de conhecimento dinâmicos?'
+2025-06-13 18:58:42,449 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:381] - Fazendo RAG para: 'Sobre o Zep: Como os documentos acadêmicos são gerenciados utilizando grafos de conhecimento dinâmicos?'
+2025-06-13 18:58:42,449 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:651] - Consulta: 'Sobre o Zep: Como os documentos acadêmicos são gerenciados utilizando grafos de conhecimento dinâmicos?'
+2025-06-13 18:58:42,644 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:446] - Buscando similaridade no Astra DB...
+2025-06-13 18:58:42,836 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:472] - Busca retornou 5 candidatos
+2025-06-13 18:58:42,836 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:662] - Re-rankeando candidatos...
+2025-06-13 18:58:47,166 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:804] - [RAG] ✅ Resposta gerada em 11.33s
+2025-06-13 18:58:47,166 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:807] - [RAG] 🏁 === PIPELINE COMPLETO em 21.15s ===
+2025-06-13 18:58:47,167 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:735] - [RAG] === PIPELINE RAG INICIADO ===
+2025-06-13 18:58:47,168 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:736] - [RAG] Query: 'Qual é o custo para licenciar a tecnologia Zep para uso comercial?'
+2025-06-13 18:58:47,168 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:739] - [RAG] 🧮 ETAPA 1: Gerando embedding da query...
+2025-06-13 18:58:47,319 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:745] - [RAG] ✅ Embedding gerado em 0.15s (dimensão: 1024)
+2025-06-13 18:58:47,319 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:751] - [RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...
+2025-06-13 18:58:47,319 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:527] - [SEARCH] Buscando similaridade no Astra DB com limite de 5...
+2025-06-13 18:58:47,568 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:553] - [SEARCH] Busca retornou 5 candidatos
+2025-06-13 18:58:47,569 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:761] - [RAG] ✅ 5 candidatos encontrados em 0.25s
+2025-06-13 18:58:47,569 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 1: Página 1 (score: 0.649)
+2025-06-13 18:58:47,569 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 2: Página 4 (score: 0.630)
+2025-06-13 18:58:47,569 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:765] - [RAG] Candidato 3: Página 8 (score: 0.623)
+2025-06-13 18:58:47,569 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:768] - [RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...
+2025-06-13 18:58:52,556 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:564] - Re-ranker: Páginas_Selecionadas: [2, 3]
+
+Justificativa: A página 2 introduz o uso de grafos de conhecimento dinâmicos no Zep, explicando a construção do grafo e como ele gerencia informações episódicas e semânticas. A página 3 continua essa explicação, detalhando a extração de entidades e fatos, além de como o sistema lida com a extração temporal e a invalidação de arestas, aspectos cruciais para o gerenciamento de documentos acadêmicos.
+2025-06-13 18:58:52,556 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:484] - Verificando relevância do contexto...
+2025-06-13 18:58:52,717 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:645] - Re-ranker: Páginas_Selecionadas: [11]
+
+Justificativa: A página 11 menciona "Zep: Commercial memory layer for AI applications" e fornece um link para mais informações, o que sugere que pode conter detalhes sobre licenciamento ou uso comercial. As outras páginas não abordam diretamente o custo ou licenciamento da tecnologia Zep.
+2025-06-13 18:58:52,718 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:778] - [RAG] ✅ Re-ranking completo em 5.15s
+2025-06-13 18:58:52,718 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:779] - [RAG] 📋 1 páginas selecionadas
+2025-06-13 18:58:52,718 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:780] - [RAG] Justificativa: A página 11 menciona "Zep: Commercial memory layer for AI applications" e fornece um link para mais informações, o que sugere que pode conter detalhes sobre licenciamento ou uso comercial. As outras páginas não abordam diretamente o custo ou licenciamento da tecnologia Zep.
+2025-06-13 18:58:52,718 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:783] - [RAG] ✅ ETAPA 4: Verificando relevância...
+2025-06-13 18:58:52,718 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:565] - [RELEVANCE] Verificando relevância com 1 páginas selecionadas...
+2025-06-13 18:58:53,134 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:586] - Verificação de relevância: 'Não.'
+2025-06-13 18:58:53,134 - buscador_conversacional_producao - WARNING - [buscador_conversacional_producao.py:790] - [RAG] ❌ Verificação de relevância falhou em 0.42s
+2025-06-13 18:58:53,243 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:505] - Verificação de relevância: 'Sim.'
+2025-06-13 18:58:53,243 - buscador_conversacional_producao - DEBUG - [buscador_conversacional_producao.py:673] - Gerando resposta final...
+2025-06-13 19:01:21,526 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:01:21,539 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:01:21,661 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:01:21,662 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:01:27,717 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:01:27,908 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:01:27,909 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:02:12,695 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 19:02:16,082 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:02:16,200 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:02:16,201 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:04:35,034 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:04:35,286 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:04:35,402 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:04:35,403 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:05:05,392 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:05:05,446 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:05:05,447 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:05:41,757 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:05:41,824 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:05:41,825 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:06:33,402 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 19:06:33,668 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:06:33,728 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:06:33,729 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:06:33,966 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 19:06:34,103 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:06:34,161 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:06:34,162 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:06:50,785 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:08:18,645 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:08:24,220 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:08:24,272 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:08:24,272 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:08:59,720 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:10:28,496 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:11:45,220 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:13:19,161 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:14:49,326 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:14:49,332 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 19:14:50,873 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:14:50,928 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:14:50,929 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:16:56,519 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:17:13,143 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:17:20,479 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:17:36,403 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:17:45,419 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:17:57,197 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:19:29,328 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:19:39,762 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:19:52,502 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:60] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:22:10,502 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:22:10,645 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:22:10,646 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:33:40,919 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:33:40,981 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:33:40,981 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:33:55,582 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:33:55,807 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:33:55,808 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:34:03,068 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:34:03,222 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:34:03,223 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:34:04,366 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:34:04,423 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:34:04,425 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:34:11,671 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:34:11,724 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:34:11,725 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:34:27,675 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:932] - Histórico de conversa limpo
+2025-06-13 19:34:27,833 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:34:27,895 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:34:27,896 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:34:37,491 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Conectando ao Astra DB...
+2025-06-13 19:34:37,543 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:409] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:34:37,543 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:394] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:35:11,653 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:35:16,309 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:35:16,473 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:35:16,475 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:39:13,083 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:39:13,102 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:39:13,315 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:39:13,320 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:39:24,728 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:39:24,862 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:39:24,863 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:41:46,746 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:41:46,758 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:41:47,009 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:41:47,010 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:41:54,216 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:41:54,356 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:41:54,357 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:44:42,859 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:45:45,568 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:46:19,060 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:46:19,279 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:46:19,280 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:49:33,229 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 19:49:34,354 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 19:51:03,966 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:51:04,030 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:51:04,031 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:51:50,110 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:52:35,455 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:53:49,110 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 19:53:49,357 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 19:53:49,358 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 19:56:09,707 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:58:26,957 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 19:58:47,511 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 19:58:53,214 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 20:01:52,136 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:01:52,399 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:01:52,400 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:01:57,344 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:01:57,403 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:01:57,404 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:02:05,330 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:02:05,497 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:02:05,498 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:07:21,983 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:07:22,058 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:07:22,059 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:07:34,650 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:07:36,746 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:07:44,973 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:08:55,416 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:08:55,422 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 20:09:02,354 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 20:09:09,588 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:09:09,814 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:09:09,817 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:10:53,340 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:10:53,353 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:10:53,598 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:10:53,599 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:11:04,848 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 20:16:33,037 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:18:56,216 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:22:26,032 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:22:26,307 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:22:26,308 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:22:31,633 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:22:31,779 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:22:31,780 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:22:37,416 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:799] - Histórico de conversa limpo
+2025-06-13 20:22:49,618 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:22:49,814 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:22:49,816 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:22:55,213 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:22:55,401 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:22:55,402 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:29:07,471 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:31:40,726 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:31:40,739 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:31:40,966 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:31:40,967 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:31:47,837 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 20:31:48,031 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 20:31:48,032 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG de produção inicializado com sucesso
+2025-06-13 20:40:50,758 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:46:46,193 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 20:57:00,439 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:61] - 🚀 [INIT] Sistema de logging do RAG inicializado
+2025-06-13 21:03:16,463 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:404] - Conectando ao Astra DB...
+2025-06-13 21:03:16,601 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:414] - Conectado ao Astra DB - Collection 'pdf_documents' acessível
+2025-06-13 21:03:16,602 - buscador_conversacional_producao - INFO - [buscador_conversacional_producao.py:399] - Sistema RAG inicializado com sucesso

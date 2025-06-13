@@ -8,16 +8,17 @@ from typing import List, Dict, Any, Optional, Tuple
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import statistics
 
 from tqdm import tqdm
 
-# Importa a classe RAG real do seu arquivo 'buscador.py'.
+# Importa a classe RAG de produção
 try:
-    from buscador import MultimodalRagSearcher
+    from buscador_conversacional_producao import ProductionConversationalRAG as MultimodalRagSearcher
 except ImportError:
-    print("ERRO: O arquivo 'buscador.py' com a classe 'MultimodalRagSearcher' não foi encontrado.")
-    print("Por favor, certifique-se de que todos os arquivos (avaliador e buscador) estão na mesma pasta.")
+    print("ERRO: O arquivo 'buscador_conversacional_producao.py' não foi encontrado.")
+    print("Por favor, certifique-se de que todos os arquivos estão na mesma pasta.")
     exit()
 
 
@@ -313,7 +314,7 @@ class RAGEvaluator:
             "overall_metrics": overall_metrics,
             "category_breakdown": category_stats,
             "detailed_results": [asdict(r) for r in self.results],
-            "evaluation_timestamp": datetime.now().isoformat(),
+            "evaluation_timestamp": datetime.now(ZoneInfo("America/Sao_Paulo")).isoformat(),
         }
         
         return report
