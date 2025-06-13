@@ -824,3 +824,7 @@ Astra DB: 100%|██████████| 1/1 [00:01<00:00,  1.29s/it]
 2025-06-13 21:06:49,291 - __main__ - INFO - [streamlit_rag_app_producao.py:904] - [ADMIN] Documento indexado por ilceccato88: url=https://arxiv.org/pdf/2506.10811
 2025-06-13 21:06:59,711 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
 2025-06-13 21:07:05,164 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:09:45,928 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:09:46,230 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:09:47,222 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
+2025-06-13 21:09:48,476 - __main__ - INFO - [streamlit_rag_app_producao.py:60] - 🌐 [INIT] Sistema de logging do Streamlit inicializado
