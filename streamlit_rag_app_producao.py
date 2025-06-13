@@ -699,14 +699,13 @@ def document_management_modal():
             
             if input_method == "🔗 URL do PDF":
                 # Lógica de limpeza de campos
-                url_value = ""
-                if st.session_state.get('clear_url_field', False):
+                if st.session_state.get("clear_url_field", False):
                     st.session_state.clear_url_field = False
-                    url_value = ""
-                
+                    st.session_state.pdf_url_input = ""
+
                 pdf_url = st.text_input(
                     "URL do documento PDF:",
-                    value=url_value,
+                    key="pdf_url_input",
                     placeholder="https://arxiv.org/pdf/2501.13956",
                     help="Cole aqui o link direto para o arquivo PDF"
                 )
