@@ -14,24 +14,24 @@ RELATÓRIO DE AVALIAÇÃO DO SISTEMA RAG MULTIMODAL
 • F1-Score médio: 0.900
 • Acurácia de páginas (Jaccard): 0.900
 • Cobertura de palavras-chave: 0.725
-• Tempo de resposta médio: 13.03s
+• Tempo de resposta médio: 16.07s
 
 🏷️ ANÁLISE POR CATEGORIA:
-• NEGATIVE (1 perguntas):
-  - Precisão: 1.000
-  - Recall: 1.000
-  - F1-Score: 1.000
-  - Tempo médio: 9.20s
-• SPECIFIC (3 perguntas):
-  - Precisão: 1.000
-  - Recall: 1.000
-  - F1-Score: 1.000
-  - Tempo médio: 12.65s
 • VISUAL (1 perguntas):
   - Precisão: 1.000
   - Recall: 1.000
   - F1-Score: 1.000
-  - Tempo médio: 12.92s
+  - Tempo médio: 16.65s
+• SPECIFIC (3 perguntas):
+  - Precisão: 1.000
+  - Recall: 1.000
+  - F1-Score: 1.000
+  - Tempo médio: 13.51s
+• NEGATIVE (1 perguntas):
+  - Precisão: 1.000
+  - Recall: 1.000
+  - F1-Score: 1.000
+  - Tempo médio: 8.05s
 
 📋 RESULTADOS DETALHADOS:
 • tech_001: Quais são os três subgrafos hierárquicos na arquitetura do Zep?

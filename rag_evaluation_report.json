@@ -11,29 +11,29 @@
     "average_f1_score": 0.9,
     "average_page_accuracy": 0.9,
     "average_keyword_coverage": 0.725,
-    "average_response_time": 13.03070330619812
+    "average_response_time": 16.065149593353272
   },
   "category_breakdown": {
-    "negative": {
+    "visual": {
       "count": 1,
       "avg_precision": 1.0,
       "avg_recall": 1.0,
       "avg_f1": 1.0,
-      "avg_response_time": 9.20413088798523
+      "avg_response_time": 16.647237300872803
     },
     "specific": {
       "count": 3,
       "avg_precision": 1.0,
       "avg_recall": 1.0,
       "avg_f1": 1.0,
-      "avg_response_time": 12.652573903401693
+      "avg_response_time": 13.51462976137797
     },
-    "visual": {
+    "negative": {
       "count": 1,
       "avg_precision": 1.0,
       "avg_recall": 1.0,
       "avg_f1": 1.0,
-      "avg_response_time": 12.924518585205078
+      "avg_response_time": 8.052751302719116
     }
   },
   "detailed_results": [
@@ -46,8 +46,8 @@
       "expected_pages": [
         2
       ],
-      "answer": "Os três subgrafos hierárquicos na arquitetura do Zep são:\n\n1. Subgrafo de Episódio (Episode Subgraph): Contém dados de entrada brutos na forma de mensagens, texto ou JSON. Serve como um armazenamento de dados não-perdido, do qual entidades semânticas e relações são extraídas.\n\n2. Subgrafo de Entidade Semântica (Semantic Entity Subgraph): Constrói-se sobre o subgrafo de episódio. Representa entidades extraídas dos episódios e resolvidas com entidades existentes no grafo.\n\n3. Subgrafo de Comunidade (Community Subgraph): Forma o nível mais alto do grafo de conhecimento do Zep. Representa clusters de entidades fortemente conectadas e contém sumarizações de alto nível desses clusters.\n\nEssas informações vêm do documento '2501', página 2.",
-      "response_time": 13.65647554397583,
+      "answer": "Os três subgrafos hierárquicos na arquitetura do Zep são:\n\n1. Subgrafo de Episódio (Episode Subgraph): Contém dados de entrada brutos na forma de mensagens, texto ou JSON. Serve como um armazenamento de dados não-perdido, do qual entidades semânticas e relações são extraídas.\n\n2. Subgrafo de Entidade Semântica (Semantic Entity Subgraph): Constrói-se sobre o subgrafo de episódio. Representa entidades extraídas dos episódios e resolvidas com entidades existentes no grafo. Representa relações entre entidades extraídas dos episódios.\n\n3. Subgrafo de Comunidade (Community Subgraph): Forma o nível mais alto do grafo de conhecimento do Zep. Representa clusters de entidades fortemente conectadas e contém sumarizações de alto nível desses clusters.\n\nEsta informação vem do documento '2501', página 2.",
+      "response_time": 21.14177966117859,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
@@ -65,13 +65,13 @@
       "expected_pages": [
         3
       ],
-      "answer": "O Graphiti lida com a invalidação de arestas (fatos) no grafo de conhecimento através de um processo que envolve extração temporal e comparação semântica. O sistema extrai informações temporais dos fatos a partir do contexto do episódio, utilizando referências temporais para representar datas e horários de forma precisa. Ele rastreia quatro timestamps: t' created e t' expired, que monitoram quando os fatos são criados ou invalidados, e t valid e t invalid, que acompanham o período durante o qual os fatos eram verdadeiros. Essas informações temporais são armazenadas nas arestas junto com outros dados dos fatos.\n\nQuando novas arestas são introduzidas, elas podem invalidar arestas existentes no banco de dados. O sistema utiliza um LLM para comparar novas arestas com arestas existentes semanticamente relacionadas, a fim de identificar possíveis contradições. Se forem identificadas contradições temporais sobrepostas, as arestas afetadas são invalidadas ao definir seu t invalid para o t valid da aresta que está invalidando. O Graphiti prioriza consistentemente novas informações ao determinar a invalidação de arestas, permitindo a adição dinâmica de dados enquanto mantém tanto os estados atuais das relações quanto registros históricos da evolução dessas relações ao longo do tempo.\n\nEsta resposta vem do documento '2501', página 3.",
-      "response_time": 16.601226806640625,
+      "answer": "A resposta vem do documento '2501', página 3. O Graphiti lida com a invalidação de arestas (fatos) no grafo de conhecimento através de um processo que envolve extração temporal e comparação semântica. O sistema extrai informações temporais dos fatos para representar datas e horários de forma precisa. Ele utiliza um modelo bi-temporal que rastreia quando os fatos são criados ou invalidados e o período durante o qual os fatos são válidos. Quando novas arestas são introduzidas, o sistema usa um LLM para comparar essas novas arestas com as existentes que são semanticamente relacionadas, a fim de identificar contradições potenciais. Se forem encontradas contradições temporais sobrepostas, as arestas afetadas são invalidadas ajustando seu tempo de invalidação para coincidir com o tempo de validação da nova aresta. O Graphiti prioriza consistentemente novas informações ao determinar a invalidação de arestas, permitindo a adição dinâmica de dados enquanto mantém registros históricos da evolução das relações.",
+      "response_time": 20.725046634674072,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
       "page_accuracy": 1.0,
-      "keyword_coverage": 0.6666666666666666,
+      "keyword_coverage": 0.8333333333333334,
       "total_candidates": 5,
       "error": null
     },
@@ -84,8 +84,8 @@
       "expected_pages": [
         5
       ],
-      "answer": "Os três métodos de busca implementados pelo Zep para recuperação de memória são: busca por similaridade semântica usando cosseno (ϕ cos), busca de texto completo Okapi BM25 (ϕ bm25) e busca em largura (ϕ bfs). As duas primeiras funções utilizam a implementação do Lucene no Neo4j.\n\nEssa informação vem do documento '2501', página 4.",
-      "response_time": 13.574779987335205,
+      "answer": "Os três métodos de busca implementados pelo Zep para recuperação de memória são: busca de similaridade semântica por cosseno (ϕ cos), busca de texto completo Okapi BM25 (ϕ bm25) e busca em largura (ϕ bfs). Esta informação vem do documento '2501', página 4.",
+      "response_time": 14.622941017150879,
       "precision": 0.0,
       "recall": 0.0,
       "f1_score": 0.0,
@@ -103,13 +103,13 @@
       "expected_pages": [
         1
       ],
-      "answer": "A principal limitação dos frameworks RAG que o Zep visa resolver é a restrição à recuperação de documentos estáticos. Aplicações empresariais exigem a integração dinâmica de conhecimento a partir de diversas fontes, incluindo conversas em andamento e dados de negócios. O Zep aborda essa limitação através de seu componente principal, Graphiti, que é um mecanismo de grafo de conhecimento temporalmente consciente, capaz de sintetizar dinamicamente dados conversacionais não estruturados e dados de negócios estruturados, mantendo relações históricas.\n\nEsta resposta vem do documento '2501', página 1.",
-      "response_time": 13.18637990951538,
+      "answer": "A principal limitação dos frameworks RAG que o Zep visa resolver é a restrição a uma recuperação de documentos estática. Aplicações empresariais exigem a integração dinâmica de conhecimento a partir de fontes diversas, incluindo conversas em andamento e dados de negócios. O Zep aborda essa limitação fundamental através de seu componente central, Graphiti, que é um mecanismo de grafo de conhecimento temporalmente consciente. Este mecanismo sintetiza dinamicamente dados conversacionais não estruturados e dados de negócios estruturados, mantendo as relações históricas.\n\nEssa resposta vem do documento '2501', página 1.",
+      "response_time": 19.6956467628479,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
       "page_accuracy": 1.0,
-      "keyword_coverage": 0.8333333333333334,
+      "keyword_coverage": 0.6666666666666666,
       "total_candidates": 5,
       "error": null
     },
@@ -122,8 +122,8 @@
       "expected_pages": [
         2
       ],
-      "answer": "A estrutura de memória do Zep se assemelha aos modelos psicológicos da memória humana ao utilizar um armazenamento duplo de dados episódicos brutos e informações de entidades semânticas derivadas. Esses modelos psicológicos distinguem entre memória episódica, que representa eventos distintos, e memória semântica, que captura associações entre conceitos e seus significados. Essa abordagem permite que agentes LLM usando Zep desenvolvam estruturas de memória mais sofisticadas e nuançadas, alinhando-se melhor com nossa compreensão dos sistemas de memória humana. A implementação de subgrafos episódicos e semânticos distintos no Zep reflete abordagens semelhantes em modelos psicológicos.\n\nEsta resposta vem do documento '2501', página 2.",
-      "response_time": 13.201799631118774,
+      "answer": "A estrutura de memória do Zep se assemelha aos modelos psicológicos da memória humana ao utilizar um armazenamento duplo de dados episódicos brutos e informações de entidades semânticas derivadas. Isso reflete a distinção entre memória episódica, que representa eventos distintos, e memória semântica, que captura associações entre conceitos e seus significados. Essa abordagem permite que agentes LLM usando Zep desenvolvam estruturas de memória mais sofisticadas e nuançadas, alinhando-se melhor com nossa compreensão dos sistemas de memória humana. A implementação de subgrafos episódicos e semânticos distintos no Zep é inspirada em abordagens semelhantes, como no AriGraph. Esta resposta vem do documento '2501', página 2.",
+      "response_time": 19.222203969955444,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
@@ -142,7 +142,7 @@
         6
       ],
       "answer": "A pontuação de acurácia do Zep com o modelo gpt-4-turbo na avaliação Deep Memory Retrieval (DMR) foi de 94.8%. Esta informação vem do documento '2501', página 6.",
-      "response_time": 12.406131029129028,
+      "response_time": 11.674238681793213,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
@@ -161,7 +161,7 @@
         7
       ],
       "answer": "Na Tabela 2 do documento '2501', página 7, a redução de latência do Zep em comparação com o baseline 'Full-context' usando o modelo gpt-4o foi de 28.9 segundos para 2.58 segundos. Isso representa uma redução significativa na latência.",
-      "response_time": 11.08823823928833,
+      "response_time": 11.104170799255371,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
@@ -179,8 +179,8 @@
       "expected_pages": [
         4
       ],
-      "answer": "O algoritmo de detecção de comunidade que o Zep utiliza é o de propagação de rótulos. A escolha por esse algoritmo foi influenciada pela sua extensão dinâmica simples, que permite ao sistema manter representações precisas das comunidades por períodos mais longos à medida que novos dados entram no grafo, adiando a necessidade de atualizações completas das comunidades. Essa estratégia de atualização dinâmica oferece um método prático que reduz significativamente a latência e os custos de inferência de LLM. A informação vem do documento '2501', página 4.",
-      "response_time": 14.46335244178772,
+      "answer": "O algoritmo de detecção de comunidade que o Zep utiliza é o algoritmo de propagação de rótulos. A escolha por esse algoritmo foi influenciada pela sua extensão dinâmica direta, que permite ao sistema manter representações precisas das comunidades por períodos mais longos à medida que novos dados entram no grafo, adiando a necessidade de atualizações completas das comunidades. Essa abordagem dinâmica permite uma extensão eficiente das comunidades à medida que os dados fluem para o sistema, embora as comunidades resultantes acabem divergindo gradualmente daquelas que seriam geradas por uma execução completa de propagação de rótulos. Portanto, atualizações periódicas das comunidades ainda são necessárias. Essa informação vem do documento '2501', página 4.",
+      "response_time": 17.765479803085327,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
@@ -198,8 +198,8 @@
       "expected_pages": [
         7
       ],
-      "answer": "A Tabela 3 do documento '2501', página 7, detalha a análise dos resultados do LongMemEval por tipo de pergunta. Ela compara o desempenho dos modelos gpt-4o-mini e gpt-4o em um contexto completo versus o uso do sistema Zep. Os tipos de perguntas incluem single-session-preference, single-session-assistant, temporal-reasoning, multi-session, knowledge-update e single-session-user. A tabela mostra as porcentagens de acerto para cada tipo de pergunta nos dois contextos e a diferença percentual (Delta) entre eles. Os resultados indicam que o Zep melhora o desempenho em várias categorias, especialmente em tipos de perguntas complexas e nuançadas, com melhorias mais pronunciadas quando usado com modelos mais capazes.",
-      "response_time": 12.924518585205078,
+      "answer": "A Tabela 3 do documento '2501', página 7, detalha a análise dos resultados do LongMemEval por tipo de pergunta, comparando o desempenho dos modelos gpt-4o-mini e gpt-4o em um contexto completo e com o sistema Zep. Os tipos de perguntas incluem single-session-preference, single-session-assistant, temporal-reasoning, multi-session, knowledge-update e single-session-user. A tabela mostra as porcentagens de acerto para cada tipo de pergunta nos dois contextos e a diferença percentual (Delta) entre eles. Os resultados indicam que o Zep melhora o desempenho em várias categorias, especialmente em tipos de perguntas complexas e nuançadas, com melhorias mais pronunciadas quando emparelhado com modelos mais capazes.",
+      "response_time": 16.647237300872803,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
@@ -214,7 +214,7 @@
       "selected_pages": [],
       "expected_pages": [],
       "answer": "Nenhuma informação relevante encontrada (confirmado pela verificação de relevância).",
-      "response_time": 9.20413088798523,
+      "response_time": 8.052751302719116,
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
@@ -224,5 +224,5 @@
       "error": null
     }
   ],
-  "evaluation_timestamp": "2025-06-13T01:41:06.868599"
+  "evaluation_timestamp": "2025-06-13T15:48:38.046705"
 }

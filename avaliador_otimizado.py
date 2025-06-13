@@ -1,4 +1,4 @@
-# avaliador.py
+# avaliador_otimizado.py
 
 import os
 import json
@@ -12,12 +12,12 @@ import statistics
 
 from tqdm import tqdm
 
-# Importa a classe RAG real do seu arquivo 'buscador.py'.
+# Importa a classe RAG otimizada do seu arquivo 'buscador_otimizado.py'.
 try:
-    from buscador import MultimodalRagSearcher
+    from buscador_otimizado import OptimizedMultimodalRagSearcher
 except ImportError:
-    print("ERRO: O arquivo 'buscador.py' com a classe 'MultimodalRagSearcher' não foi encontrado.")
-    print("Por favor, certifique-se de que todos os arquivos (avaliador e buscador) estão na mesma pasta.")
+    print("ERRO: O arquivo 'buscador_otimizado.py' com a classe 'OptimizedMultimodalRagSearcher' não foi encontrado.")
+    print("Por favor, certifique-se de que todos os arquivos (avaliador_otimizado e buscador_otimizado) estão na mesma pasta.")
     exit()
 
 
@@ -53,17 +53,22 @@ class EvaluationResult:
     page_accuracy: float
     keyword_coverage: float
     total_candidates: int
+    phase1_candidates: int  # Novos campos para o pipeline otimizado
+    phase2_selected: int
+    justification: str
+    model_used: str
+    optimization_method: str
     error: Optional[str] = None
 
-class RAGEvaluator:
-    """Avaliador completo do sistema RAG"""
+class OptimizedRAGEvaluator:
+    """Avaliador completo do sistema RAG otimizado"""
     
-    def __init__(self, rag_searcher: MultimodalRagSearcher):
+    def __init__(self, rag_searcher: OptimizedMultimodalRagSearcher):
         """
         Inicializa o avaliador
         
         Args:
-            rag_searcher: Instância do MultimodalRagSearcher real.
+            rag_searcher: Instância do OptimizedMultimodalRagSearcher.
         """
         self.rag_searcher = rag_searcher
         self.results: List[EvaluationResult] = []
@@ -134,7 +139,7 @@ class RAGEvaluator:
                 category="specific",
                 difficulty="hard"
             ),
-             TestQuestion(
+            TestQuestion(
                 id="specific_003",
                 question="Qual algoritmo de detecção de comunidade o Zep utiliza e por quê?",
                 expected_pages=[4],
@@ -161,6 +166,24 @@ class RAGEvaluator:
                 expected_keywords=[],
                 category="negative",
                 difficulty="easy"
+            ),
+            
+            # Perguntas adicionais para testar o sistema otimizado
+            TestQuestion(
+                id="optimization_001",
+                question="Como o Zep mantém a coerência temporal nos grafos de conhecimento dinâmicos?",
+                expected_pages=[3, 4],
+                expected_keywords=["coerência temporal", "bi-temporal", "invalidação", "dinâmico", "grafo"],
+                category="optimization",
+                difficulty="hard"
+            ),
+            TestQuestion(
+                id="optimization_002",
+                question="Quais são as vantagens do uso de embeddings multimodais no Zep comparado a embeddings apenas textuais?",
+                expected_pages=[2, 5],
+                expected_keywords=["multimodal", "embeddings", "vantagens", "textual", "visual"],
+                category="optimization",
+                difficulty="medium"
             ),
         ]
     
@@ -204,24 +227,31 @@ class RAGEvaluator:
         return precision, recall, f1_score, page_accuracy, keyword_coverage
     
     def evaluate_single_question(self, test_q: TestQuestion) -> EvaluationResult:
-        """Avalia uma única pergunta."""
+        """Avalia uma única pergunta usando o sistema otimizado."""
         start_time = time.time()
         
         try:
             result = self.rag_searcher.search_and_answer(test_q.question)
             response_time = time.time() - start_time
 
-            # --- TRECHO ALTERADO ---
             # Trata o caso específico onde a verificação de relevância corretamente não encontra uma resposta.
             # Isso é considerado um SUCESSO para perguntas negativas, não um erro.
             relevance_error = "A informação solicitada não foi encontrada de forma explícita no documento."
             if "error" in result and result["error"] == relevance_error:
                 # Transforma o "erro de relevância" em um resultado bem-sucedido com zero páginas.
                 logger.info(f"Pergunta '{test_q.id}' corretamente identificada como sem resposta pela verificação de relevância.")
+                
+                # Extrair informações do pipeline mesmo com erro de relevância
+                pipeline_info = result.get("pipeline_info", {})
+                all_candidates = result.get("all_candidates", [])
+                
                 result = {
                     "answer": "Nenhuma informação relevante encontrada (confirmado pela verificação de relevância).",
                     "selected_pages_details": [],
-                    "total_candidates": result.get("total_candidates", 0),
+                    "total_candidates": len(all_candidates),
+                    "justification": "Verificação de relevância rejeitou os candidatos",
+                    "pipeline_info": pipeline_info,
+                    "all_candidates": all_candidates
                 }
             # Trata todos os outros erros como falhas.
             elif "error" in result:
@@ -231,6 +261,8 @@ class RAGEvaluator:
                     answer="", response_time=response_time,
                     precision=0.0, recall=0.0, f1_score=0.0, page_accuracy=0.0,
                     keyword_coverage=0.0, total_candidates=0,
+                    phase1_candidates=0, phase2_selected=0,
+                    justification="", model_used="", optimization_method="",
                     error=result["error"]
                 )
             
@@ -240,13 +272,21 @@ class RAGEvaluator:
                 selected_pages, test_q.expected_pages, result["answer"], test_q.expected_keywords
             )
             
+            # Extrair informações específicas do pipeline otimizado
+            pipeline_info = result.get("pipeline_info", {})
+            
             return EvaluationResult(
                 question_id=test_q.id, question=test_q.question,
                 selected_pages=selected_pages, expected_pages=test_q.expected_pages,
                 answer=result["answer"], response_time=response_time,
                 precision=precision, recall=recall, f1_score=f1_score,
                 page_accuracy=page_accuracy, keyword_coverage=keyword_coverage,
-                total_candidates=result.get("total_candidates", 0)
+                total_candidates=result.get("total_candidates", 0),
+                phase1_candidates=pipeline_info.get("phase1_candidates", 0),
+                phase2_selected=pipeline_info.get("phase2_selected", 0),
+                justification=result.get("justification", ""),
+                model_used=pipeline_info.get("model_used", ""),
+                optimization_method=pipeline_info.get("optimization", ""),
             )
             
         except Exception as e:
@@ -257,21 +297,25 @@ class RAGEvaluator:
                 selected_pages=[], expected_pages=test_q.expected_pages,
                 answer="", response_time=response_time,
                 precision=0.0, recall=0.0, f1_score=0.0, page_accuracy=0.0,
-                keyword_coverage=0.0, total_candidates=0, error=str(e)
+                keyword_coverage=0.0, total_candidates=0,
+                phase1_candidates=0, phase2_selected=0,
+                justification="", model_used="", optimization_method="",
+                error=str(e)
             )
     
     def run_evaluation(self, test_questions: Optional[List[TestQuestion]] = None) -> Dict[str, Any]:
-        """Executa avaliação completa."""
+        """Executa avaliação completa do sistema otimizado."""
         if test_questions is None:
             test_questions = self.create_test_dataset()
         
-        logger.info(f"Iniciando avaliação com {len(test_questions)} perguntas")
+        logger.info(f"Iniciando avaliação do sistema otimizado com {len(test_questions)} perguntas")
         
         self.results = [self.evaluate_single_question(test_q) for test_q in tqdm(test_questions, desc="Avaliando perguntas")]
         
         for result in self.results:
-             logger.info(f"Q_ID:{result.question_id}: P={result.precision:.2f}, R={result.recall:.2f}, "
-                        f"F1={result.f1_score:.2f}, T={result.response_time:.2f}s")
+            logger.info(f"Q_ID:{result.question_id}: P={result.precision:.2f}, R={result.recall:.2f}, "
+                       f"F1={result.f1_score:.2f}, T={result.response_time:.2f}s, "
+                       f"Pipeline:{result.phase1_candidates}→{result.phase2_selected}")
 
         successful_results = [r for r in self.results if r.error is None]
         
@@ -287,6 +331,14 @@ class RAGEvaluator:
             "average_page_accuracy": statistics.mean([r.page_accuracy for r in successful_results]),
             "average_keyword_coverage": statistics.mean([r.keyword_coverage for r in successful_results]),
             "average_response_time": statistics.mean([r.response_time for r in successful_results]),
+            # Métricas específicas do pipeline otimizado
+            "average_phase1_candidates": statistics.mean([r.phase1_candidates for r in successful_results]),
+            "average_phase2_selected": statistics.mean([r.phase2_selected for r in successful_results]),
+            "average_reduction_ratio": statistics.mean([
+                (r.phase1_candidates - r.phase2_selected) / r.phase1_candidates 
+                if r.phase1_candidates > 0 else 0 
+                for r in successful_results
+            ]),
         }
         
         # Agrega métricas por categoria
@@ -301,7 +353,27 @@ class RAGEvaluator:
                     "avg_recall": statistics.mean([r.recall for r in cat_results]),
                     "avg_f1": statistics.mean([r.f1_score for r in cat_results]),
                     "avg_response_time": statistics.mean([r.response_time for r in cat_results]),
+                    "avg_phase1_candidates": statistics.mean([r.phase1_candidates for r in cat_results]),
+                    "avg_phase2_selected": statistics.mean([r.phase2_selected for r in cat_results]),
                 }
+
+        # Análise específica do pipeline otimizado
+        pipeline_analysis = {
+            "total_phase1_retrievals": sum([r.phase1_candidates for r in successful_results]),
+            "total_phase2_selections": sum([r.phase2_selected for r in successful_results]),
+            "models_used": list(set([r.model_used for r in successful_results if r.model_used])),
+            "optimization_methods": list(set([r.optimization_method for r in successful_results if r.optimization_method])),
+            "phase1_efficiency": {
+                "max_candidates": max([r.phase1_candidates for r in successful_results]) if successful_results else 0,
+                "min_candidates": min([r.phase1_candidates for r in successful_results]) if successful_results else 0,
+                "std_candidates": statistics.stdev([r.phase1_candidates for r in successful_results]) if len(successful_results) > 1 else 0,
+            },
+            "phase2_efficiency": {
+                "max_selected": max([r.phase2_selected for r in successful_results]) if successful_results else 0,
+                "min_selected": min([r.phase2_selected for r in successful_results]) if successful_results else 0,
+                "std_selected": statistics.stdev([r.phase2_selected for r in successful_results]) if len(successful_results) > 1 else 0,
+            }
+        }
 
         report = {
             "evaluation_summary": {
@@ -309,28 +381,33 @@ class RAGEvaluator:
                 "successful_evaluations": len(successful_results),
                 "failed_evaluations": len(self.results) - len(successful_results),
                 "success_rate": len(successful_results) / len(test_questions) if test_questions else 0,
+                "system_type": "OptimizedMultimodalRagSearcher",
+                "optimization_approach": "Two-Phase Retrieval",
             },
             "overall_metrics": overall_metrics,
             "category_breakdown": category_stats,
+            "pipeline_analysis": pipeline_analysis,
             "detailed_results": [asdict(r) for r in self.results],
             "evaluation_timestamp": datetime.now().isoformat(),
         }
         
         return report
     
-    def save_report(self, report: Dict[str, Any], output_path: str = "rag_evaluation_report.json"):
+    def save_report(self, report: Dict[str, Any], output_path: str = "rag_optimized_evaluation_report.json"):
         """Salva relatório em arquivo JSON."""
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
         logger.info(f"Relatório JSON salvo em: {output_path}")
     
     def create_detailed_report(self, report: Dict[str, Any]) -> str:
-        """Cria relatório detalhado em texto."""
-        lines = ["=" * 80, "RELATÓRIO DE AVALIAÇÃO DO SISTEMA RAG MULTIMODAL", "=" * 80, ""]
+        """Cria relatório detalhado em texto para o sistema otimizado."""
+        lines = ["=" * 80, "RELATÓRIO DE AVALIAÇÃO DO SISTEMA RAG OTIMIZADO (Two-Phase Retrieval)", "=" * 80, ""]
         
         summary = report["evaluation_summary"]
         lines.extend([
             "📊 RESUMO GERAL:",
+            f"• Sistema: {summary['system_type']}",
+            f"• Abordagem: {summary['optimization_approach']}",
             f"• Total de perguntas: {summary['total_questions']}",
             f"• Avaliações bem-sucedidas: {summary['successful_evaluations']}",
             f"• Avaliações com falha: {summary['failed_evaluations']}",
@@ -348,6 +425,25 @@ class RAGEvaluator:
             f"• Tempo de resposta médio: {metrics['average_response_time']:.2f}s", ""
         ])
         
+        # Métricas específicas do pipeline otimizado
+        lines.extend([
+            "🔄 ANÁLISE DO PIPELINE OTIMIZADO:",
+            f"• Candidatos Fase 1 (média): {metrics['average_phase1_candidates']:.1f}",
+            f"• Selecionados Fase 2 (média): {metrics['average_phase2_selected']:.1f}",
+            f"• Taxa de redução média: {metrics['average_reduction_ratio']:.2%}", ""
+        ])
+        
+        pipeline = report["pipeline_analysis"]
+        lines.extend([
+            "⚙️ EFICIÊNCIA DO PIPELINE:",
+            f"• Total de recuperações Fase 1: {pipeline['total_phase1_retrievals']}",
+            f"• Total de seleções Fase 2: {pipeline['total_phase2_selections']}",
+            f"• Modelos utilizados: {', '.join(pipeline['models_used'])}",
+            f"• Métodos de otimização: {', '.join(pipeline['optimization_methods'])}",
+            f"• Variação Fase 1: {pipeline['phase1_efficiency']['min_candidates']}-{pipeline['phase1_efficiency']['max_candidates']} (std: {pipeline['phase1_efficiency']['std_candidates']:.1f})",
+            f"• Variação Fase 2: {pipeline['phase2_efficiency']['min_selected']}-{pipeline['phase2_efficiency']['max_selected']} (std: {pipeline['phase2_efficiency']['std_selected']:.1f})", ""
+        ])
+        
         lines.append("🏷️ ANÁLISE POR CATEGORIA:")
         for cat, stats in report["category_breakdown"].items():
             lines.extend([
@@ -355,7 +451,8 @@ class RAGEvaluator:
                 f"  - Precisão: {stats['avg_precision']:.3f}",
                 f"  - Recall: {stats['avg_recall']:.3f}",
                 f"  - F1-Score: {stats['avg_f1']:.3f}",
-                f"  - Tempo médio: {stats['avg_response_time']:.2f}s"
+                f"  - Tempo médio: {stats['avg_response_time']:.2f}s",
+                f"  - Pipeline: {stats['avg_phase1_candidates']:.1f} → {stats['avg_phase2_selected']:.1f}"
             ])
         lines.append("")
         
@@ -367,30 +464,34 @@ class RAGEvaluator:
             else:
                 lines.append(f"  ✅ Páginas: {result['selected_pages']} (Esperado: {result['expected_pages']})")
                 lines.append(f"     P={result['precision']:.2f}, R={result['recall']:.2f}, F1={result['f1_score']:.2f}")
+                lines.append(f"     Pipeline: {result['phase1_candidates']} → {result['phase2_selected']} páginas")
+                lines.append(f"     Modelo: {result['model_used']}, Tempo: {result['response_time']:.2f}s")
+                if result['justification']:
+                    lines.append(f"     Justificativa: {result['justification'][:100]}...")
         lines.append("")
         
         return "\n".join(lines)
 
 def main():
     """Função principal para execução standalone."""
-    print("🚀 AVALIADOR DE SISTEMA RAG MULTIMODAL 🚀")
-    print("=" * 60)
+    print("🚀 AVALIADOR DE SISTEMA RAG OTIMIZADO (Two-Phase Retrieval) 🚀")
+    print("=" * 70)
     
     try:
-        print("🔧 Inicializando o sistema RAG real...")
-        rag_searcher = MultimodalRagSearcher()
-        print("✅ Sistema RAG inicializado com sucesso!")
+        print("🔧 Inicializando o sistema RAG otimizado...")
+        rag_searcher = OptimizedMultimodalRagSearcher()
+        print("✅ Sistema RAG otimizado inicializado com sucesso!")
         
-        evaluator = RAGEvaluator(rag_searcher=rag_searcher)
+        evaluator = OptimizedRAGEvaluator(rag_searcher=rag_searcher)
         
-        print("\n🔍 Executando avaliação completa...")
+        print("\n🔍 Executando avaliação completa do sistema otimizado...")
         report = evaluator.run_evaluation()
         
         # Salva e imprime relatórios
         evaluator.save_report(report)
         
         detailed_report = evaluator.create_detailed_report(report)
-        report_path = "rag_evaluation_detailed.txt"
+        report_path = "rag_optimized_evaluation_detailed.txt"
         with open(report_path, 'w', encoding='utf-8') as f:
             f.write(detailed_report)
         logger.info(f"Relatório detalhado salvo em: {report_path}")
@@ -398,14 +499,14 @@ def main():
         
         print("\n" + detailed_report)
         print("\n✅ Avaliação concluída! Arquivos salvos:")
-        print("• rag_evaluation_report.json")
-        print("• rag_evaluation_detailed.txt")
+        print("• rag_optimized_evaluation_report.json")
+        print("• rag_optimized_evaluation_detailed.txt")
         
     except Exception as e:
         print(f"\n❌ Erro fatal durante a execução do avaliador: {e}")
         logger.critical("Erro fatal no main do avaliador", exc_info=True)
         print("\nVerifique se:")
-        print("1. O arquivo 'buscador.py' está na mesma pasta.")
+        print("1. O arquivo 'buscador_otimizado.py' está na mesma pasta.")
         print("2. O arquivo '.env' com as chaves de API está configurado corretamente.")
         print("3. O sistema RAG foi indexado (rode o 'indexador.py' primeiro).")
         print("4. Todas as dependências (`requirements.txt`) estão instaladas.")
