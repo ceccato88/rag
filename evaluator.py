@@ -1,4 +1,4 @@
-# avaliador.py
+# evaluator.py
 
 import os
 import json
@@ -15,9 +15,9 @@ from tqdm import tqdm
 
 # Importa a classe RAG de produção
 try:
-    from buscador_conversacional_producao import ProductionConversationalRAG as MultimodalRagSearcher
+    from search import ProductionConversationalRAG as MultimodalRagSearcher
 except ImportError:
-    print("ERRO: O arquivo 'buscador_conversacional_producao.py' não foi encontrado.")
+    print("ERRO: O arquivo 'search.py' não foi encontrado.")
     print("Por favor, certifique-se de que todos os arquivos estão na mesma pasta.")
     exit()
 

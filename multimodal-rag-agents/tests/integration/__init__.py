@@ -1,0 +1,1 @@
+"""Integration tests for multimodal RAG agents system."""

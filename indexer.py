@@ -1,4 +1,4 @@
-# indexador.py
+# indexer.py
 
 import os, re, logging, asyncio
 from io import BytesIO
@@ -54,18 +54,30 @@ def text_token_estimate(text: str, config: Config) -> int:
 def fits_limits(txt: str, img: Image.Image, config: Config) -> bool:
     return (text_token_estimate(txt, config) + pixel_token_count(img, config)) <= config.MAX_TOKENS_PER_INPUT
 
-def download_pdf(url: str, config: Config) -> Optional[pymupdf.Document]:
+def download_pdf(url_or_path: str, config: Config) -> Optional[pymupdf.Document]:
     try:
-        # Verifica se é um arquivo local
-        if os.path.exists(url):
-            logger.info("Abrindo PDF local: %s", url)
-            doc = pymupdf.open(url)
+        # Detecta se é arquivo local ou URL
+        is_url = url_or_path.startswith(('http://', 'https://'))
+        is_local_path = not is_url and (
+            os.path.exists(url_or_path) or 
+            url_or_path.startswith(('./', '../', '/')) or
+            os.path.sep in url_or_path
+        )
+        
+        if is_local_path:
+            # Arquivo local
+            if not os.path.exists(url_or_path):
+                raise FileNotFoundError(f"Arquivo não encontrado: {url_or_path}")
+            
+            logger.info("Abrindo PDF local: %s", url_or_path)
+            doc = pymupdf.open(url_or_path)
             logger.info("PDF carregado (%d páginas)", doc.page_count)
             return doc
-        else:
+            
+        elif is_url:
             # Download da URL
-            logger.info("Baixando PDF (streaming)…")
-            with requests.get(url, stream=True, timeout=config.DOWNLOAD_TIMEOUT) as r:
+            logger.info("Baixando PDF da URL: %s", url_or_path)
+            with requests.get(url_or_path, stream=True, timeout=config.DOWNLOAD_TIMEOUT) as r:
                 r.raise_for_status()
                 buf = BytesIO()
                 for chunk in r.iter_content(config.DOWNLOAD_CHUNK_SIZE):
@@ -74,6 +86,17 @@ def download_pdf(url: str, config: Config) -> Optional[pymupdf.Document]:
             doc = pymupdf.open(stream=buf, filetype="pdf")
             logger.info("PDF baixado (%d páginas)", doc.page_count)
             return doc
+            
+        else:
+            # Tentativa de interpretar como arquivo local primeiro, depois como URL
+            if os.path.exists(url_or_path):
+                logger.info("Abrindo PDF local: %s", url_or_path)
+                doc = pymupdf.open(url_or_path)
+                logger.info("PDF carregado (%d páginas)", doc.page_count)
+                return doc
+            else:
+                raise ValueError(f"Caminho inválido: '{url_or_path}'. Use um caminho local válido ou URL completa (http/https)")
+                
     except Exception as e:
         logger.error("Falha ao processar PDF: %s", e)
         return None
@@ -199,7 +222,7 @@ async def main() -> None:
     if not pdf: 
         logger.error("Não foi possível carregar o PDF")
         return
-    Path(config.IMAGE_DIR).mkdir(exist_ok=True)
+    os.makedirs(config.IMAGE_DIR, exist_ok=True)
 
     docs = [c for i in tqdm(range(pdf.page_count), desc="Páginas")
             if (c := extract_page_content(pdf, i, src, config.IMAGE_DIR, config))]
