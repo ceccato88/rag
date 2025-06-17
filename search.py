@@ -997,7 +997,9 @@ def main() -> None:
         print("  • Fallbacks robustos")
         print("=" * 70)
 
-        print(rag.ask("Olá!"))
+        # CORREÇÃO APLICADA AQUI:
+        # A chamada automática foi removida e substituída por uma saudação estática.
+        print("🤖 Assistente: Olá! Sou seu assistente de documentos. Faça sua pergunta ou digite /help para ver os comandos.")
         print()
 
         while True:
