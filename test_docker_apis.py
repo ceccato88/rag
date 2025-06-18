@@ -156,9 +156,9 @@ class DockerAPITester:
         
         # Teste 2: Endpoint específico por API
         if "simple" in context.lower() or "8000" in base_url:
-            # API Simple - endpoint /search
+            # API Simple - endpoint /search com pergunta sobre Zep
             search_data = {
-                "query": "Como configurar Docker?",
+                "query": "O que é Zep e como funciona como camada de memória para agentes?",
                 "max_results": 3
             }
             result = self.test_api_endpoint(base_url, "/search", search_data)
@@ -166,7 +166,7 @@ class DockerAPITester:
                 print(f"    ✅ Search endpoint OK ({result['response_time']:.2f}s)")
                 # Verificar estrutura da resposta
                 if "results" in result["data"]:
-                    print(f"      📊 Retornou {len(result['data']['results'])} resultados")
+                    print(f"      📊 Retornou {len(result['data']['results'])} resultados sobre Zep")
                 else:
                     print(f"      ⚠️ Resposta inesperada: {result['data']}")
             else:
@@ -174,9 +174,9 @@ class DockerAPITester:
                 all_success = False
         
         elif "multiagent" in context.lower() or "8001" in base_url:
-            # API MultiAgent - endpoint /research
+            # API MultiAgent - endpoint /research com pergunta sobre Zep
             research_data = {
-                "query": "Explique arquitetura de microserviços",
+                "query": "Como implementar memória persistente para agentes usando Zep? Quais são os benefícios?",
                 "research_depth": "standard",
                 "enable_specialist": True
             }
@@ -185,20 +185,20 @@ class DockerAPITester:
                 print(f"    ✅ Research endpoint OK ({result['response_time']:.2f}s)")
                 # Verificar estrutura da resposta
                 if "summary" in result["data"] or "research_result" in result["data"]:
-                    print(f"      📊 Pesquisa multiagente executada com sucesso")
+                    print(f"      📊 Pesquisa multiagente sobre Zep executada com sucesso")
                 else:
                     print(f"      ⚠️ Resposta inesperada: {result['data']}")
             else:
                 print(f"    ❌ Research endpoint falhou: {result.get('error', result.get('status_code'))}")
                 all_success = False
             
-            # Teste adicional: analyze-complexity
+            # Teste adicional: analyze-complexity sobre Zep
             complexity_data = {
-                "query": "Como implementar cache distribuído?"
+                "query": "Analise a complexidade de integrar Zep Memory com diferentes tipos de agentes"
             }
             result = self.test_api_endpoint(base_url, "/analyze-complexity", complexity_data)
             if result["success"]:
-                print(f"    ✅ Complexity analysis OK ({result['response_time']:.2f}s)")
+                print(f"    ✅ Complexity analysis sobre Zep OK ({result['response_time']:.2f}s)")
             else:
                 print(f"    ❌ Complexity analysis falhou: {result.get('error', result.get('status_code'))}")
         
@@ -258,8 +258,8 @@ class DockerAPITester:
     def test_api_integration(self) -> bool:
         """Testa integração entre as duas APIs"""
         try:
-            # Comparar respostas da mesma query em ambas APIs
-            query = "Explique arquitetura de microserviços"
+            # Comparar respostas da mesma query sobre Zep em ambas APIs
+            query = "Quais são as principais funcionalidades do Zep Memory para agentes AI?"
             
             # Simple API usa /search
             simple_result = self.test_api_endpoint(
