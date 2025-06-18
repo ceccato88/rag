@@ -19,18 +19,10 @@ from astrapy import DataAPIClient
 from utils.metrics import ProcessingMetrics, measure_time
 from utils.validation import validate_embedding
 from utils.cache import SimpleCache
+from config import SystemConfig
 
-# Importa utils
-from utils.metrics import ProcessingMetrics, measure_time
-from utils.validation import validate_embedding
-
-# Configurações do sistema
-LLM_MODEL = "gpt-4o" 
-MAX_CANDIDATES = 5
-MAX_TOKENS_RERANK = 512
-MAX_TOKENS_ANSWER = 2048
-MAX_TOKENS_QUERY_TRANSFORM = 150  # Reduzido para eficiência
-COLLECTION_NAME = "pdf_documents"
+# Configuração centralizada
+system_config = SystemConfig()
 
 # Configuração de logging específica para o buscador
 def setup_rag_logging():
@@ -284,9 +276,9 @@ MENSAGEM: {message}
 RESPONDA APENAS COM A PERGUNTA TRANSFORMADA:"""
 
             response = self.openai_client.chat.completions.create(
-                model=LLM_MODEL,
+                model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=MAX_TOKENS_QUERY_TRANSFORM,
+                max_tokens=system_config.rag.max_tokens_query_transform,
                 temperature=0.0
             )
             
@@ -386,8 +378,14 @@ class ProductionConversationalRAG:
         self.metrics = ProcessingMetrics()
         
         # Inicializa cache para embeddings e respostas
-        self.embedding_cache = SimpleCache(max_size=500, default_ttl=3600)  # 1 hora
-        self.response_cache = SimpleCache(max_size=100, default_ttl=1800)   # 30 min
+        self.embedding_cache = SimpleCache(
+            max_size=system_config.rag.embedding_cache_size, 
+            default_ttl=system_config.rag.embedding_cache_ttl
+        )
+        self.response_cache = SimpleCache(
+            max_size=system_config.rag.response_cache_size, 
+            default_ttl=system_config.rag.response_cache_ttl
+        )
 
         # Validação de ambiente
         required_vars = [
@@ -423,11 +421,11 @@ class ProductionConversationalRAG:
                 os.environ["ASTRA_DB_API_ENDPOINT"], 
                 token=os.environ["ASTRA_DB_APPLICATION_TOKEN"]
             )
-            self.collection = database.get_collection(COLLECTION_NAME)
+            self.collection = database.get_collection(system_config.rag.collection_name)
             
             # Teste de conectividade
             list(self.collection.find({}, limit=1))
-            logger.info(f"Conectado ao Astra DB - Collection '{COLLECTION_NAME}' acessível")
+            logger.info(f"Conectado ao Astra DB - Collection '{system_config.rag.collection_name}' acessível")
                 
         except Exception as e:
             logger.error(f"Falha ao conectar Astra DB: {e}")
@@ -556,8 +554,11 @@ class ProductionConversationalRAG:
             logger.error(f"Erro codificando {image_path}: {e}")
             return None
 
-    def search_candidates(self, query_embedding: List[float], limit: int = MAX_CANDIDATES) -> List[dict]:
+    def search_candidates(self, query_embedding: List[float], limit: int = None) -> List[dict]:
         """Busca candidatos no Astra DB"""
+        if limit is None:
+            limit = system_config.rag.max_candidates
+            
         try:
             logger.debug(f"[SEARCH] Buscando similaridade no Astra DB com limite de {limit}...")
             
@@ -611,7 +612,7 @@ class ProductionConversationalRAG:
             )
 
             response = self.openai_client.chat.completions.create(
-                model=LLM_MODEL,
+                model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=5,
                 temperature=0.0
@@ -670,9 +671,9 @@ class ProductionConversationalRAG:
                                 "image_url": {"url": f"data:image/png;base64,{b64}"}})
 
             response = self.openai_client.chat.completions.create(
-                model=LLM_MODEL,
+                model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": content}],
-                max_tokens=MAX_TOKENS_RERANK,
+                max_tokens=system_config.rag.max_tokens_rerank,
                 temperature=0.0
             )
             
@@ -750,9 +751,9 @@ class ProductionConversationalRAG:
                                         "image_url": {"url": f"data:image/png;base64,{b64}"}})
 
             response = self.openai_client.chat.completions.create(
-                model=LLM_MODEL,
+                model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": content}],
-                max_tokens=MAX_TOKENS_ANSWER,
+                max_tokens=system_config.rag.max_tokens_answer,
                 temperature=0.2
             )
             
@@ -940,7 +941,7 @@ DOCUMENTOS:"""
                     })
             
             response = self.openai_client.chat.completions.create(
-                model=LLM_MODEL,
+                model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": content}],
                 response_format={"type": "json_object"},
                 temperature=0.1

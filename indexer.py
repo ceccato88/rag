@@ -15,6 +15,7 @@ from dotenv import load_dotenv
 from utils.validation import validate_document, validate_embedding
 from utils.resource_manager import ResourceManager
 from utils.metrics import ProcessingMetrics, measure_time
+from config import SystemConfig
 
 import requests, voyageai, pymupdf, pymupdf4llm
 from PIL import Image
@@ -24,29 +25,8 @@ from astrapy.constants import VectorMetric
 from astrapy.info import CollectionDefinition, CollectionVectorOptions
 from astrapy.collection import Collection
 
-@dataclass
-class Config:
-    PDF_URL: str = "https://arxiv.org/pdf/2501.13956"
-    IMAGE_DIR: str = "pdf_images"
-    VOYAGE_EMBEDDING_DIM: int = 1024
-    MAX_TOKENS_PER_INPUT: int = 32_000
-    TOKENS_PER_PIXEL: float = 1 / 560
-    TOKEN_CHARS_RATIO: int = 4  # caracteres por token estimado
-    CONCURRENCY: int = 5
-    ERROR_ON_LIMIT: bool = True
-    BATCH_SIZE: int = 100
-    COLLECTION_NAME: str = "pdf_documents"
-    DOWNLOAD_TIMEOUT: int = 30
-    DOWNLOAD_CHUNK_SIZE: int = 8192
-    PIXMAP_SCALE: int = 2
-    MAX_RETRIES: int = 3
-    RETRY_DELAY: float = 1.0  # segundos
-    CLEANUP_MAX_AGE: int = 24  # horas
-
-def get_config():
-    """Cria configuração com valores do ambiente"""
-    pdf_url = os.getenv("PDF_URL", "https://arxiv.org/pdf/2501.13956")
-    return Config(PDF_URL=pdf_url)
+# Configuração centralizada
+system_config = SystemConfig()
 
 logging.basicConfig(level=logging.INFO,
                     format="%(asctime)s - %(levelname)s - %(message)s")
@@ -57,18 +37,18 @@ def create_doc_source_name(url: str) -> str:
     fn = url.split("/")[-1]
     return re.sub(r"[^a-zA-Z0-9_.-]", "_", os.path.splitext(fn)[0])
 
-def pixel_token_count(img: Image.Image, config: Config) -> int:
-    return int((img.width * img.height) * config.TOKENS_PER_PIXEL)
+def pixel_token_count(img: Image.Image) -> int:
+    return int((img.width * img.height) * system_config.processing.tokens_per_pixel)
 
-def text_token_estimate(text: str, config: Config) -> int:
-    return max(1, len(text) // config.TOKEN_CHARS_RATIO)
+def text_token_estimate(text: str) -> int:
+    return max(1, len(text) // system_config.processing.token_chars_ratio)
 
-def fits_limits(txt: str, img: Image.Image, config: Config) -> bool:
-    return (text_token_estimate(txt, config) + pixel_token_count(img, config)) <= config.MAX_TOKENS_PER_INPUT
+def fits_limits(txt: str, img: Image.Image) -> bool:
+    return (text_token_estimate(txt) + pixel_token_count(img)) <= system_config.rag.max_tokens_per_input
 
-def download_pdf_with_retry(url_or_path: str, config: Config) -> Optional[pymupdf.Document]:
+def download_pdf_with_retry(url_or_path: str) -> Optional[pymupdf.Document]:
     """Baixa ou abre um PDF com retry em caso de falha."""
-    for attempt in range(config.MAX_RETRIES):
+    for attempt in range(system_config.processing.max_retries):
         try:
             # Detecta se é arquivo local ou URL
             is_url = url_or_path.startswith(('http://', 'https://'))

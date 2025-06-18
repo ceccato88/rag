@@ -431,10 +431,10 @@ def main():
         print(f"\n❌ Erro fatal durante a execução do avaliador: {e}")
         logger.critical("Erro fatal no main do avaliador", exc_info=True)
         print("\nVerifique se:")
-        print("1. O arquivo 'buscador.py' está na mesma pasta.")
+        print("1. O arquivo 'search.py' está na mesma pasta.")
         print("2. O arquivo '.env' com as chaves de API está configurado corretamente.")
-        print("3. O sistema RAG foi indexado (rode o 'indexador.py' primeiro).")
-        print("4. Todas as dependências (`requirements.txt`) estão instaladas.")
+        print("3. O sistema RAG foi indexado (rode o 'indexer.py' primeiro).")
+        print("4. Todas as dependências estão instaladas.")
 
 if __name__ == "__main__":
     main()

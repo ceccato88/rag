@@ -20,7 +20,7 @@ if env_file:
     load_dotenv(env_file)
     print(f"✅ Configurações carregadas de: {env_file}")
 
-from researcher.agents.openai_lead import OpenAILeadResearcher, OpenAILeadConfig
+from researcher.agents.openai_lead_researcher import OpenAILeadResearcher, OpenAILeadConfig
 from researcher.agents.base import AgentContext
 
 
@@ -129,18 +129,19 @@ async def teste_busca_direta():
     try:
         # Testar se consegue importar e usar o search.py diretamente
         sys.path.append('/workspaces/rag')
-        from search import SimpleRAG
+        from search import ProductionConversationalRAG
         
         print("📋 Testando conexão com banco de dados...")
-        rag = SimpleRAG()
+        rag = ProductionConversationalRAG()
         
         # Fazer busca direta
-        resultado = rag.search("Zep memory layer")
+        resultado = rag.search_and_answer("Zep memory layer")
+        resultado_str = resultado.get('answer', str(resultado))
         
         print("✅ Busca executada com sucesso!")
         print(f"📄 Resultado (preview):")
-        print(resultado[:500])
-        if len(resultado) > 500:
+        print(resultado_str[:500])
+        if len(resultado_str) > 500:
             print("...")
         
         return True

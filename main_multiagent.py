@@ -21,7 +21,7 @@ if env_file:
     load_dotenv(env_file)
     print(f"✅ Configurações carregadas de: {env_file}")
 
-from researcher.agents.openai_lead import OpenAILeadResearcher, OpenAILeadConfig
+from researcher.agents.openai_lead_researcher import OpenAILeadResearcher, OpenAILeadConfig
 from researcher.agents.base import AgentContext
 
 
