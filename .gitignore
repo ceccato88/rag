@@ -1,10 +1,46 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.egg-info/
+dist/
+build/
+
+# Environment
 .env
+.env.local
+.env.production
+
+# Logs
+*.log
+logs/
 production_users.json*
 production_users/
-*.log
+
+# Temporary files
 pdf_images/
+temp/
+tmp/
+
+# Test coverage
+htmlcov/
+.coverage
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Evaluation reports (regenerated)
+evaluation_reports/
+
+# Cache files
+.cache/

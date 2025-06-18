@@ -264,7 +264,7 @@ Erro: Documento inválido - campos obrigatórios faltando
 
 ## 👥 Equipe
 
-- **Desenvolvimento**: GitHub Copilot Assistant
+- **Desenvolvimento**: Ivan Luis Ceccato
 - **Última atualização**: 18 de Junho de 2025
 - **Status**: Produção - Sistema 100% Funcional
 
