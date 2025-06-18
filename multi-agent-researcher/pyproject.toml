@@ -1,0 +1,22 @@
+[project]
+name = "researcher"
+version = "0.1.0" 
+description = "Subsistema multi-agente integrado ao RAG principal"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    # Dependências específicas do subsistema multi-agente
+    # (dependências comuns já estão no requirements.txt principal)
+    "instructor>=1.0.0",        # Específico para structured outputs
+    "sqlalchemy>=2.0.0",        # Database para memória persistente
+    "aiosqlite>=0.19.0",        # SQLite async para testes
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
