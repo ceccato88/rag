@@ -22,13 +22,29 @@ class RetrieverConfig:
         astra_endpoint: Optional[str] = None,
         astra_token: Optional[str] = None,
         collection_name: str = "pdf_documents",
-        max_candidates: int = 20
+        max_candidates: int = 20,
+        embedding_model: str = "voyage-multimodal-3"
     ):
         self.voyage_api_key = voyage_api_key or os.getenv("VOYAGE_API_KEY")
         self.astra_endpoint = astra_endpoint or os.getenv("ASTRA_DB_API_ENDPOINT")
         self.astra_token = astra_token or os.getenv("ASTRA_DB_APPLICATION_TOKEN")
-        self.collection_name = collection_name
-        self.max_candidates = max_candidates
+        self.collection_name = collection_name or os.getenv("COLLECTION_NAME", "pdf_documents")
+        self.max_candidates = int(os.getenv("MAX_CANDIDATES", str(max_candidates)))
+        self.embedding_model = os.getenv("EMBEDDING_MODEL", embedding_model)
+    
+    @classmethod
+    def from_env(cls, config_manager=None):
+        """Create config from environment variables."""
+        if config_manager:
+            return cls(
+                voyage_api_key=config_manager.get("VOYAGE_API_KEY"),
+                astra_endpoint=config_manager.get("ASTRA_DB_API_ENDPOINT"),
+                astra_token=config_manager.get("ASTRA_DB_APPLICATION_TOKEN"),
+                collection_name=config_manager.get("COLLECTION_NAME", "pdf_documents"),
+                max_candidates=int(config_manager.get("MAX_CANDIDATES", "20")),
+                embedding_model=config_manager.get("EMBEDDING_MODEL", "voyage-multimodal-3")
+            )
+        return cls()
 
 
 class MultimodalRetrieverAgent(Agent[List[DocumentCandidate]]):

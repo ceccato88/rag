@@ -99,8 +99,10 @@ class EnvConfig:
                             value = value[1:-1]
                         
                         self.env_vars[key] = value
-                        # Also set in os.environ for compatibility
-                        os.environ[key] = value
+                        # Only set in os.environ if not already present (preserve priority)
+                        # Skip setting empty keys in os.environ as it's invalid
+                        if key and key not in os.environ:
+                            os.environ[key] = value
                     else:
                         logger.warning(f"Invalid line {line_num} in {env_file}: {line}")
             
@@ -217,15 +219,34 @@ COLLECTION_NAME=pdf_documents
 # Image directory for PDF processing (default: pdf_images)
 IMAGE_DIR=pdf_images
 
-# OpenAI model to use (default: gpt-4o)
+# -----------------------------------------------------------------------------
+# MODEL CONFIGURATION
+# -----------------------------------------------------------------------------
+# Main LLM model for Lead RAG Agent (default: gpt-4o)
 LLM_MODEL=gpt-4o
 
+# Model for reranking documents (default: gpt-4o)
+RERANKER_MODEL=gpt-4o
+
+# Model for context analysis (default: gpt-4o)
+CONTEXT_ANALYZER_MODEL=gpt-4o
+
+# Model for answer generation (default: gpt-4o)
+ANSWER_GENERATOR_MODEL=gpt-4o
+
+# Voyage AI embedding model (default: voyage-multimodal-3)
+EMBEDDING_MODEL=voyage-multimodal-3
+
+# -----------------------------------------------------------------------------
+# RETRIEVAL AND PROCESSING CONFIGURATION
+# -----------------------------------------------------------------------------
 # Maximum candidates for retrieval (default: 5)
 MAX_CANDIDATES=5
 
 # Processing timeouts and limits
 MAX_TOKENS_ANSWER=2048
 MAX_TOKENS_RERANK=512
+MAX_TOKENS_CONTEXT_ANALYSIS=1024
 CONCURRENCY=5
 BATCH_SIZE=100
 """

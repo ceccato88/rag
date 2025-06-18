@@ -24,6 +24,20 @@ class LeadRAGConfig(BaseModel):
     context_window_limit: int = 128000
     subagent_timeout: float = 300.0
     min_confidence_threshold: float = 0.7
+    
+    @classmethod
+    def from_env(cls, config_manager=None):
+        """Create config from environment variables."""
+        import os
+        if config_manager:
+            return cls(
+                openai_api_key=config_manager.get("OPENAI_API_KEY"),
+                model=config_manager.get("LLM_MODEL", "gpt-4o")
+            )
+        return cls(
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            model=os.getenv("LLM_MODEL", "gpt-4o")
+        )
 
 
 class LeadRAGAgent(Agent[RAGResult]):

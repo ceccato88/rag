@@ -31,6 +31,22 @@ class RerankerConfig(BaseModel):
     max_tokens: int = 2048
     max_documents_to_analyze: int = 15
     target_selection_count: int = 5
+    
+    @classmethod
+    def from_env(cls, config_manager=None):
+        """Create config from environment variables."""
+        import os
+        if config_manager:
+            return cls(
+                openai_api_key=config_manager.get("OPENAI_API_KEY"),
+                model=config_manager.get("RERANKER_MODEL", "gpt-4o"),
+                max_tokens=int(config_manager.get("MAX_TOKENS_RERANK", "2048"))
+            )
+        return cls(
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            model=os.getenv("RERANKER_MODEL", "gpt-4o"),
+            max_tokens=int(os.getenv("MAX_TOKENS_RERANK", "2048"))
+        )
 
 
 class MultimodalRerankerAgent(Agent[RankedDocuments]):

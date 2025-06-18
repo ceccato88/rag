@@ -194,40 +194,31 @@ def sample_document_candidates():
     
     return [
         DocumentCandidate(
-            document_id="multimodal_rag_001",
-            content="Multimodal RAG systems integrate text and visual processing capabilities to provide comprehensive retrieval and generation. The architecture typically includes separate encoders for different modalities.",
-            metadata={
-                "source": "multimodal_ai.pdf",
-                "page": 3,
-                "section": "RAG Architecture",
-                "content_type": "technical"
-            },
+            doc_id="multimodal_rag_001",
+            file_path="/path/to/multimodal_ai.pdf",
+            page_num=3,
+            doc_source="multimodal_ai.pdf",
+            markdown_text="Multimodal RAG systems integrate text and visual processing capabilities to provide comprehensive retrieval and generation. The architecture typically includes separate encoders for different modalities.",
             similarity_score=0.92,
-            content_type="text_with_diagrams"
+            visual_content_type="text_with_diagrams"
         ),
         DocumentCandidate(
-            document_id="rag_components_002",
-            content="The key components of a RAG system include the retrieval mechanism, the knowledge base, and the generation model. Each component plays a crucial role in the overall system performance.",
-            metadata={
-                "source": "rag_fundamentals.pdf",
-                "page": 7,
-                "section": "System Components",
-                "content_type": "foundational"
-            },
+            doc_id="rag_components_002",
+            file_path="/path/to/rag_fundamentals.pdf",
+            page_num=7,
+            doc_source="rag_fundamentals.pdf",
+            markdown_text="The key components of a RAG system include the retrieval mechanism, the knowledge base, and the generation model. Each component plays a crucial role in the overall system performance.",
             similarity_score=0.87,
-            content_type="text"
+            visual_content_type=None
         ),
         DocumentCandidate(
-            document_id="visual_processing_003",
-            content="Visual processing in RAG systems requires specialized encoders that can handle images, diagrams, and charts. Integration with text processing creates powerful multimodal capabilities.",
-            metadata={
-                "source": "visual_ai_processing.pdf",
-                "page": 15,
-                "section": "Multimodal Integration",
-                "content_type": "advanced"
-            },
+            doc_id="visual_processing_003",
+            file_path="/path/to/visual_ai_processing.pdf",
+            page_num=15,
+            doc_source="visual_ai_processing.pdf",
+            markdown_text="Visual processing in RAG systems requires specialized encoders that can handle images, diagrams, and charts. Integration with text processing creates powerful multimodal capabilities.",
             similarity_score=0.84,
-            content_type="text_with_images"
+            visual_content_type="text_with_images"
         )
     ]
 
@@ -235,7 +226,7 @@ def sample_document_candidates():
 @pytest.fixture
 def sample_structured_answer():
     """Sample structured answer for testing."""
-    from rag_agents.models.rag_models import StructuredAnswer, SourceReference
+    from rag_agents.models.rag_models import StructuredAnswer, SourceCitation
     
     return StructuredAnswer(
         main_response="""A multimodal RAG system consists of several key components working together:
@@ -248,19 +239,17 @@ def sample_structured_answer():
 
 These components work together to enable comprehensive understanding and generation capabilities that go beyond traditional text-only RAG systems.""",
         sources_used=[
-            SourceReference(
+            SourceCitation(
                 document="multimodal_ai.pdf",
                 page_number=3,
-                section="RAG Architecture", 
                 content_type="text_with_diagrams",
-                relevance_score=0.92
+                excerpt="The architecture typically includes separate encoders for different modalities."
             ),
-            SourceReference(
+            SourceCitation(
                 document="rag_fundamentals.pdf",
                 page_number=7,
-                section="System Components",
                 content_type="text",
-                relevance_score=0.87
+                excerpt="The key components include the retrieval mechanism, knowledge base, and generation model."
             )
         ],
         multimodal_confidence=0.89,

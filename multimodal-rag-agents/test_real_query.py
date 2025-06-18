@@ -22,6 +22,9 @@ def setup_environment():
     print(f"✅ Environment loaded from: {config.env_file_used or 'system environment'}")
     return True
 
+import pytest
+
+@pytest.mark.asyncio
 async def test_real_query():
     """Test the system with a real query."""
     print("🧪 Testing Multimodal RAG with Real Query")

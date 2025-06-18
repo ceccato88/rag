@@ -32,6 +32,22 @@ class AnswerGeneratorConfig(BaseModel):
     temperature: float = 0.2
     include_citations: bool = True
     format_markdown: bool = False
+    
+    @classmethod
+    def from_env(cls, config_manager=None):
+        """Create config from environment variables."""
+        import os
+        if config_manager:
+            return cls(
+                openai_api_key=config_manager.get("OPENAI_API_KEY"),
+                model=config_manager.get("ANSWER_GENERATOR_MODEL", "gpt-4o"),
+                max_tokens=int(config_manager.get("MAX_TOKENS_ANSWER", "3000"))
+            )
+        return cls(
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            model=os.getenv("ANSWER_GENERATOR_MODEL", "gpt-4o"),
+            max_tokens=int(os.getenv("MAX_TOKENS_ANSWER", "3000"))
+        )
 
 
 class MultimodalAnswerAgent(Agent[StructuredAnswer]):

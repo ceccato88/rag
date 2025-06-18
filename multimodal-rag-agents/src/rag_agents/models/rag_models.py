@@ -8,8 +8,8 @@ from datetime import datetime
 class SearchStrategy(BaseModel):
     """Strategy for searching documents."""
     primary_queries: List[str] = Field(description="Main search queries to execute")
-    fallback_queries: List[str] = Field(description="Backup queries if primary fails")
-    content_filters: List[str] = Field(description="Content type filters (e.g., 'tables', 'diagrams')")
+    fallback_queries: List[str] = Field(default_factory=list, description="Backup queries if primary fails")
+    content_filters: List[str] = Field(default_factory=list, description="Content type filters (e.g., 'tables', 'diagrams')")
     max_candidates: int = Field(default=10, description="Maximum documents to retrieve")
     focus_type: Literal["textual", "visual", "balanced"] = Field(default="balanced")
     

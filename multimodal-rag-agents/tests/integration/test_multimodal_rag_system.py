@@ -16,7 +16,7 @@ from rag_agents.agents.context_analyzer import ContextAnalyzerAgent, ContextAnal
 from rag_agents.agents.answer_generator import MultimodalAnswerAgent, AnswerGeneratorConfig
 from rag_agents.agents.base import AgentContext, AgentState
 from rag_agents.models.rag_models import (
-    RAGResult, DocumentCandidate, RankedDocuments, 
+    RAGResult, DocumentCandidate, RankedDocuments, RankingAnalysis,
     ContextAnalysis, StructuredAnswer
 )
 
@@ -42,8 +42,8 @@ class TestMultimodalRAGSystem:
             'retriever': RetrieverConfig(
                 max_candidates=5,
                 voyage_api_key=mock_environment["VOYAGE_API_KEY"],
-                astra_db_endpoint=mock_environment["ASTRA_DB_API_ENDPOINT"],
-                astra_db_token=mock_environment["ASTRA_DB_APPLICATION_TOKEN"]
+                astra_endpoint=mock_environment["ASTRA_DB_API_ENDPOINT"],
+                astra_token=mock_environment["ASTRA_DB_APPLICATION_TOKEN"]
             ),
             'reranker': RerankerConfig(
                 openai_api_key=mock_environment["OPENAI_API_KEY"]
@@ -142,7 +142,7 @@ class TestMultimodalRAGSystem:
         # Lead agent decomposition
         from rag_agents.models.rag_models import RAGDecomposition, SearchStrategy, RankingCriterion
         mock_decomposition = RAGDecomposition(
-            query_type="technical_architecture",
+            query_type="analytical",
             key_aspects=["memory_store", "vector_store", "api_layer", "component_integration"],
             search_strategies=[
                 SearchStrategy(
@@ -170,7 +170,7 @@ class TestMultimodalRAGSystem:
                 )
             ],
             visual_requirements=["architecture_diagrams", "component_flows", "system_overview"],
-            response_format="detailed_technical_explanation"
+            response_format="detailed"
         )
         
         mock_lead_client = Mock()
@@ -181,30 +181,41 @@ class TestMultimodalRAGSystem:
         mock_rerank_response = RankedDocuments(
             documents=[
                 DocumentCandidate(
-                    document_id="zep_arch_001",
-                    content=mock_documents[0]["content"],
-                    metadata=mock_documents[0]["metadata"],
+                    doc_id="zep_arch_001",
+                    file_path=mock_documents[0]["metadata"]["source"],
+                    page_num=mock_documents[0]["metadata"]["page"],
+                    doc_source=mock_documents[0]["metadata"]["source"],
+                    markdown_text=mock_documents[0]["content"],
                     similarity_score=0.92,
-                    content_type="text_with_diagrams"
+                    visual_content_type="diagram"
                 ),
                 DocumentCandidate(
-                    document_id="zep_arch_003",
-                    content=mock_documents[2]["content"],
-                    metadata=mock_documents[2]["metadata"],
+                    doc_id="zep_arch_003",
+                    file_path=mock_documents[2]["metadata"]["source"],
+                    page_num=mock_documents[2]["metadata"]["page"],
+                    doc_source=mock_documents[2]["metadata"]["source"],
+                    markdown_text=mock_documents[2]["content"],
                     similarity_score=0.85,
-                    content_type="text_with_diagrams"
+                    visual_content_type="diagram"
                 ),
                 DocumentCandidate(
-                    document_id="zep_arch_002",
-                    content=mock_documents[1]["content"],
-                    metadata=mock_documents[1]["metadata"],
+                    doc_id="zep_arch_002",
+                    file_path=mock_documents[1]["metadata"]["source"],
+                    page_num=mock_documents[1]["metadata"]["page"],
+                    doc_source=mock_documents[1]["metadata"]["source"],
+                    markdown_text=mock_documents[1]["content"],
                     similarity_score=0.88,
-                    content_type="text"
+                    visual_content_type=None
                 )
             ],
-            ranking_explanation="Documents reranked by technical depth and visual content. Prioritized documents with architectural diagrams and comprehensive component explanations.",
-            diversity_score=0.78,
-            total_candidates_considered=3
+            ranking_analysis=RankingAnalysis(
+                document_scores={"zep_arch_001": 0.92, "zep_arch_003": 0.85, "zep_arch_002": 0.88},
+                ranking_rationale="Documents reranked by technical depth and visual content. Prioritized documents with architectural diagrams and comprehensive component explanations.",
+                selected_documents=["zep_arch_001", "zep_arch_003", "zep_arch_002"],
+                diversity_score=0.78
+            ),
+            total_candidates_processed=3,
+            selection_strategy_used="technical_relevance_with_visual_priority"
         )
         
         mock_rerank_client = Mock()
@@ -216,9 +227,9 @@ class TestMultimodalRAGSystem:
             completeness_score=0.85,
             confidence_level="high",
             information_gaps=["performance_metrics", "scalability_details"],
-            context_conflicts=[],
+            conflicting_sources=[],
             visual_coverage=0.67,
-            recommended_action="proceed_with_answer"
+            recommended_action="proceed"
         )
         
         mock_context_client = Mock()
@@ -226,7 +237,7 @@ class TestMultimodalRAGSystem:
         mock_context_client.chat.completions.create = AsyncMock(return_value=mock_context_analysis)
         
         # Answer generator response
-        from rag_agents.models.rag_models import SourceReference
+        from rag_agents.models.rag_models import SourceCitation
         mock_structured_answer = StructuredAnswer(
             main_response="""The Zep architecture consists of three main components that work together to provide comprehensive memory capabilities for AI assistants:
 
@@ -238,21 +249,21 @@ class TestMultimodalRAGSystem:
 
 These components integrate seamlessly - the Memory Store captures and organizes conversations, the Vector Store enables semantic search across this data, and the API Layer provides access to these capabilities. The architecture supports multiple embedding models and provides fast similarity search for real-time context retrieval.""",
             sources_used=[
-                SourceReference(
+                SourceCitation(
                     document="zep_architecture.pdf",
                     page_number=1,
                     section="Architecture Overview",
                     content_type="text_with_diagrams",
                     relevance_score=0.92
                 ),
-                SourceReference(
+                SourceCitation(
                     document="zep_vector_guide.pdf",
                     page_number=8,
                     section="Vector Store Implementation",
                     content_type="text_with_diagrams", 
                     relevance_score=0.85
                 ),
-                SourceReference(
+                SourceCitation(
                     document="zep_technical.pdf",
                     page_number=15,
                     section="Memory Store Details",
@@ -261,7 +272,7 @@ These components integrate seamlessly - the Memory Store captures and organizes 
                 )
             ],
             multimodal_confidence=0.87,
-            evidence_strength="strong",
+            evidence_strength="high",
             visual_elements_used=["architecture_diagram", "component_flow_chart"],
             limitations=["Missing recent performance benchmarks", "Limited scalability implementation details"],
             follow_up_suggestions=[
@@ -315,19 +326,19 @@ These components integrate seamlessly - the Memory Store captures and organizes 
         rag_result = result.output
         
         # Verify query decomposition
-        assert rag_result.query_decomposition.query_type == "technical_architecture"
+        assert rag_result.query_decomposition.query_type == "analytical"
         assert "memory_store" in rag_result.query_decomposition.key_aspects
         assert len(rag_result.query_decomposition.search_strategies) == 1
         
         # Verify document retrieval and ranking
         assert len(rag_result.ranked_documents.documents) == 3
-        assert rag_result.ranked_documents.documents[0].document_id == "zep_arch_001"
-        assert rag_result.ranked_documents.diversity_score == 0.78
+        assert rag_result.ranked_documents.documents[0].doc_id == "zep_arch_001"
+        assert rag_result.ranked_documents.ranking_analysis.diversity_score == 0.78
         
         # Verify context analysis
         assert rag_result.context_analysis.completeness_score == 0.85
         assert rag_result.context_analysis.confidence_level == "high"
-        assert rag_result.context_analysis.recommended_action == "proceed_with_answer"
+        assert rag_result.context_analysis.recommended_action == "proceed"
         
         # Verify answer generation
         assert "Memory Store" in rag_result.answer.main_response
@@ -335,7 +346,7 @@ These components integrate seamlessly - the Memory Store captures and organizes 
         assert "API Layer" in rag_result.answer.main_response
         assert len(rag_result.answer.sources_used) == 3
         assert rag_result.answer.multimodal_confidence == 0.87
-        assert rag_result.answer.evidence_strength == "strong"
+        assert rag_result.answer.evidence_strength == "high"
         
         # Verify processing metadata
         assert len(rag_result.processing_steps) >= 4  # At least 4 agent steps
@@ -409,12 +420,12 @@ These components integrate seamlessly - the Memory Store captures and organizes 
             from rag_agents.models.rag_models import RAGDecomposition, SearchStrategy
             
             mock_decomposition = RAGDecomposition(
-                query_type="test",
+                query_type="factual",
                 key_aspects=["test"],
                 search_strategies=[SearchStrategy(primary_queries=["test"])],
                 ranking_criteria=[],
                 visual_requirements=[],
-                response_format="test"
+                response_format="detailed"
             )
             
             mock_client = Mock()
@@ -502,12 +513,12 @@ These components integrate seamlessly - the Memory Store captures and organizes 
             from rag_agents.models.rag_models import RAGDecomposition, SearchStrategy
             
             mock_decomposition = RAGDecomposition(
-                query_type="test",
+                query_type="factual",
                 key_aspects=["test"],
                 search_strategies=[SearchStrategy(primary_queries=["test"])],
                 ranking_criteria=[],
                 visual_requirements=[],
-                response_format="test"
+                response_format="detailed"
             )
             
             mock_client = Mock()
@@ -565,12 +576,12 @@ These components integrate seamlessly - the Memory Store captures and organizes 
             from rag_agents.models.rag_models import RAGDecomposition, SearchStrategy
             
             mock_decomposition = RAGDecomposition(
-                query_type="test",
+                query_type="factual",
                 key_aspects=["test"],
                 search_strategies=[SearchStrategy(primary_queries=["test"])],
                 ranking_criteria=[],
                 visual_requirements=[],
-                response_format="test"
+                response_format="detailed"
             )
             
             mock_client = Mock()

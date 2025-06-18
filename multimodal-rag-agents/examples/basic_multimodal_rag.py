@@ -32,12 +32,12 @@ async def main():
     print(f"✅ Environment loaded from: {config.env_file_used or 'system environment'}")
     
     try:
-        # Initialize agent configurations
-        retriever_config = RetrieverConfig()
-        reranker_config = RerankerConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
-        analyzer_config = ContextAnalyzerConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
-        generator_config = AnswerGeneratorConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
-        lead_config = LeadRAGConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        # Initialize agent configurations from environment
+        retriever_config = RetrieverConfig.from_env(config)
+        reranker_config = RerankerConfig.from_env(config)
+        analyzer_config = ContextAnalyzerConfig.from_env(config)
+        generator_config = AnswerGeneratorConfig.from_env(config)
+        lead_config = LeadRAGConfig.from_env(config)
         
         # Initialize agents
         print("🔧 Initializing agents...")

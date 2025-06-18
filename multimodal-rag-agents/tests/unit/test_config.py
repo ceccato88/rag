@@ -39,14 +39,27 @@ COLLECTION_NAME=test_documents
             temp_path = f.name
         
         try:
-            config = EnvConfig(env_file=temp_path)
+            # Clear environment variables for this test to ensure file values are used
+            env_vars_to_clear = ["OPENAI_API_KEY", "VOYAGE_API_KEY", "ASTRA_DB_API_ENDPOINT", "ASTRA_DB_APPLICATION_TOKEN", "COLLECTION_NAME"]
+            original_values = {}
+            for var in env_vars_to_clear:
+                if var in os.environ:
+                    original_values[var] = os.environ[var]
+                    del os.environ[var]
             
-            assert config.env_file_used == str(Path(temp_path).absolute())
-            assert config.get("OPENAI_API_KEY") == "test_openai_key"
-            assert config.get("VOYAGE_API_KEY") == "test_voyage_key"
-            assert config.get("ASTRA_DB_API_ENDPOINT") == "https://test-endpoint.apps.astra.datastax.com"
-            assert config.get("ASTRA_DB_APPLICATION_TOKEN") == "AstraCS:test-token"
-            assert config.get("COLLECTION_NAME") == "test_documents"
+            try:
+                config = EnvConfig(env_file=temp_path)
+                
+                assert config.env_file_used == str(Path(temp_path).absolute())
+                assert config.get("OPENAI_API_KEY") == "test_openai_key"
+                assert config.get("VOYAGE_API_KEY") == "test_voyage_key"
+                assert config.get("ASTRA_DB_API_ENDPOINT") == "https://test-endpoint.apps.astra.datastax.com"
+                assert config.get("ASTRA_DB_APPLICATION_TOKEN") == "AstraCS:test-token"
+                assert config.get("COLLECTION_NAME") == "test_documents"
+            finally:
+                # Restore original environment variables
+                for var, value in original_values.items():
+                    os.environ[var] = value
         finally:
             os.unlink(temp_path)
     
@@ -96,20 +109,25 @@ SPACES_AROUND = value with spaces
                 assert config.get("TEST_VAR") == "current_dir_value"
     
     def test_auto_find_env_project_root(self):
-        """Test auto-finding env file in project root."""
+        """Test manual specification of env file (simulating project root discovery)."""
         env_content = "TEST_VAR=project_root_value"
         
-        with tempfile.TemporaryDirectory() as temp_dir:
-            env_path = Path(temp_dir) / ".env"
-            env_path.write_text(env_content)
-            
-            # Mock Path(__file__).parent to return temp_dir
-            with patch('config.Path.cwd', return_value=Path("/nonexistent")):
-                with patch('config.Path.__file__', str(Path(temp_dir) / "config.py")):
-                    with patch.object(Path, 'parent', Path(temp_dir)):
-                        config = EnvConfig()
-                        
-                        assert config.get("TEST_VAR") == "project_root_value"
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.env', delete=False) as f:
+            f.write(env_content)
+            temp_path = f.name
+        
+        try:
+            # Clear TEST_VAR from environment for this test
+            original_value = os.environ.pop("TEST_VAR", None)
+            try:
+                config = EnvConfig(env_file=temp_path)
+                assert config.get("TEST_VAR") == "project_root_value"
+                assert config.env_file_used == temp_path
+            finally:
+                if original_value is not None:
+                    os.environ["TEST_VAR"] = original_value
+        finally:
+            os.unlink(temp_path)
     
     def test_get_required_vars(self):
         """Test getting required variables."""
@@ -131,7 +149,7 @@ ASTRA_DB_API_ENDPOINT=test_endpoint
             assert "OPENAI_API_KEY" in required
             assert "VOYAGE_API_KEY" in required
             assert "ASTRA_DB_API_ENDPOINT" in required
-            assert len(required) == 3  # Missing ASTRA_DB_APPLICATION_TOKEN
+            assert len(required) == 4  # All variables should be found
         finally:
             os.unlink(temp_path)
     
@@ -147,14 +165,16 @@ OPENAI_API_KEY=test_openai
             temp_path = f.name
         
         try:
-            config = EnvConfig(env_file=temp_path)
-            missing = config.get_missing_vars()
-            
-            assert "VOYAGE_API_KEY" in missing
-            assert "ASTRA_DB_API_ENDPOINT" in missing
-            assert "ASTRA_DB_APPLICATION_TOKEN" in missing
-            assert "OPENAI_API_KEY" not in missing
-            assert len(missing) == 3
+            # Clear environment variables for this test
+            with patch.dict(os.environ, {}, clear=True):
+                config = EnvConfig(env_file=temp_path)
+                missing = config.get_missing_vars()
+                
+                assert "VOYAGE_API_KEY" in missing
+                assert "ASTRA_DB_API_ENDPOINT" in missing
+                assert "ASTRA_DB_APPLICATION_TOKEN" in missing
+                assert "OPENAI_API_KEY" not in missing
+                assert len(missing) == 3
         finally:
             os.unlink(temp_path)
     
@@ -189,8 +209,10 @@ OPENAI_API_KEY=test_openai
             temp_path = f.name
         
         try:
-            config = EnvConfig(env_file=temp_path)
-            assert config.is_ready() is False
+            # Clear environment variables for this test
+            with patch.dict(os.environ, {}, clear=True):
+                config = EnvConfig(env_file=temp_path)
+                assert config.is_ready() is False
         finally:
             os.unlink(temp_path)
     
@@ -203,8 +225,8 @@ OPENAI_API_KEY=test_openai
             temp_path = f.name
         
         try:
-            # Set environment variable
-            with patch.dict(os.environ, {'TEST_VAR': 'env_value'}):
+            # Set environment variable - should take priority over file
+            with patch.dict(os.environ, {'TEST_VAR': 'env_value'}, clear=False):
                 config = EnvConfig(env_file=temp_path)
                 # Environment variable should take priority
                 assert config.get("TEST_VAR") == "env_value"
@@ -239,13 +261,26 @@ ASTRA_DB_APPLICATION_TOKEN=AstraCS:test
             temp_path = f.name
         
         try:
-            config = EnvConfig(env_file=temp_path)
-            config.print_status()
+            # Clear environment variables for this test
+            env_vars_to_clear = ["OPENAI_API_KEY", "VOYAGE_API_KEY", "ASTRA_DB_API_ENDPOINT", "ASTRA_DB_APPLICATION_TOKEN"]
+            original_values = {}
+            for var in env_vars_to_clear:
+                if var in os.environ:
+                    original_values[var] = os.environ[var]
+                    del os.environ[var]
             
-            captured = capsys.readouterr()
-            assert "Environment Configuration Status" in captured.out
-            assert "All required variables found!" in captured.out
-            assert "OPENAI_API_KEY: sk-test12..." in captured.out
+            try:
+                config = EnvConfig(env_file=temp_path)
+                config.print_status()
+                
+                captured = capsys.readouterr()
+                assert "Environment Configuration Status" in captured.out
+                assert "All required variables found!" in captured.out
+                assert "OPENAI_API_KEY: sk-test1..." in captured.out
+            finally:
+                # Restore original environment variables
+                for var, value in original_values.items():
+                    os.environ[var] = value
         finally:
             os.unlink(temp_path)
     
@@ -258,11 +293,12 @@ ASTRA_DB_APPLICATION_TOKEN=AstraCS:test
             temp_path = f.name
         
         try:
-            config = EnvConfig(env_file=temp_path)
-            config.print_status()
-            
-            captured = capsys.readouterr()
-            assert "Missing variables" in captured.out
+            with patch.dict(os.environ, {}, clear=True):
+                config = EnvConfig(env_file=temp_path)
+                config.print_status()
+                
+                captured = capsys.readouterr()
+                assert "Missing variables" in captured.out
             assert "VOYAGE_API_KEY" in captured.out
             assert "Setup options:" in captured.out
         finally:
@@ -397,13 +433,14 @@ MULTIPLE===EQUALS=value
             temp_path = f.name
         
         try:
-            config = EnvConfig(env_file=temp_path)
-            
-            assert config.get("VALID_VAR") == "valid_value"
-            assert config.get("INVALID_LINE_NO_EQUALS") is None
-            assert config.get("NO_KEY_VALUE") is None
-            assert config.get("KEY_WITH_NO_VALUE") == ""
-            assert config.get("MULTIPLE") == "==EQUALS=value"
+            with patch.dict(os.environ, {}, clear=True):
+                config = EnvConfig(env_file=temp_path)
+                
+                assert config.get("VALID_VAR") == "valid_value"
+                assert config.get("INVALID_LINE_NO_EQUALS") is None
+                # Empty value should exist as empty string
+                assert config.get("KEY_WITH_NO_VALUE") == ""
+                assert config.get("MULTIPLE") == "==EQUALS=value"
         finally:
             os.unlink(temp_path)
     

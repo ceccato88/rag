@@ -44,19 +44,21 @@ async def run_simple_demo():
         # Test agent initialization
         print("\n🔧 Initializing agents...")
         
-        retriever_config = RetrieverConfig()
+        config = get_config()
+        
+        retriever_config = RetrieverConfig.from_env(config)
         print("✅ Retriever config created")
         
-        reranker_config = RerankerConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        reranker_config = RerankerConfig.from_env(config)
         print("✅ Reranker config created")
         
-        analyzer_config = ContextAnalyzerConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        analyzer_config = ContextAnalyzerConfig.from_env(config)
         print("✅ Analyzer config created")
         
-        generator_config = AnswerGeneratorConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        generator_config = AnswerGeneratorConfig.from_env(config)
         print("✅ Generator config created")
         
-        lead_config = LeadRAGConfig(openai_api_key=os.getenv("OPENAI_API_KEY"))
+        lead_config = LeadRAGConfig.from_env(config)
         print("✅ Lead config created")
         
         # Try to initialize retriever (this will test Astra DB connection)

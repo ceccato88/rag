@@ -31,6 +31,22 @@ class ContextAnalyzerConfig(BaseModel):
     max_tokens: int = 1024
     completeness_threshold: float = 0.7
     confidence_threshold: float = 0.6
+    
+    @classmethod
+    def from_env(cls, config_manager=None):
+        """Create config from environment variables."""
+        import os
+        if config_manager:
+            return cls(
+                openai_api_key=config_manager.get("OPENAI_API_KEY"),
+                model=config_manager.get("CONTEXT_ANALYZER_MODEL", "gpt-4o"),
+                max_tokens=int(config_manager.get("MAX_TOKENS_CONTEXT_ANALYSIS", "1024"))
+            )
+        return cls(
+            openai_api_key=os.getenv("OPENAI_API_KEY"),
+            model=os.getenv("CONTEXT_ANALYZER_MODEL", "gpt-4o"),
+            max_tokens=int(os.getenv("MAX_TOKENS_CONTEXT_ANALYSIS", "1024"))
+        )
 
 
 class ContextAnalyzerAgent(Agent[ContextAnalysis]):

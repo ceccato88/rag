@@ -46,10 +46,16 @@ VOYAGE_API_KEY=sua-chave-voyage-aqui
 ASTRA_DB_API_ENDPOINT=https://seu-id-database-regiao.apps.astra.datastax.com
 ASTRA_DB_APPLICATION_TOKEN=AstraCS:seu-token-aqui
 
+# Configuração de Modelos
+LLM_MODEL=gpt-4o                     # Modelo principal para Lead RAG Agent
+RERANKER_MODEL=gpt-4o                # Modelo para re-ranking de documentos
+CONTEXT_ANALYZER_MODEL=gpt-4o        # Modelo para análise de contexto
+ANSWER_GENERATOR_MODEL=gpt-4o        # Modelo para geração de respostas
+EMBEDDING_MODEL=voyage-multimodal-3  # Modelo para embeddings multimodais
+
 # Configuração Opcional
 COLLECTION_NAME=pdf_documents
 IMAGE_DIR=pdf_images
-LLM_MODEL=gpt-4o
 MAX_CANDIDATES=5
 ```
 
@@ -332,6 +338,43 @@ python config.py
 - **Eficiência de Token**: Saídas estruturadas minimizam uso de tokens
 - **Cache**: Embeddings multimodais são cacheados para consultas repetidas
 - **Processamento em Lote**: Múltiplos documentos processados em paralelo
+
+## Otimização de Custos
+
+O sistema permite configurar diferentes modelos para cada agente, permitindo otimização de custos:
+
+### Configurações Recomendadas:
+
+**🏆 Alta Qualidade (Recomendado)**
+```bash
+LLM_MODEL=gpt-4o
+RERANKER_MODEL=gpt-4o
+CONTEXT_ANALYZER_MODEL=gpt-4o
+ANSWER_GENERATOR_MODEL=gpt-4o
+```
+
+**⚖️ Balanceado (Custo/Qualidade)**
+```bash
+LLM_MODEL=gpt-4o
+RERANKER_MODEL=gpt-4o
+CONTEXT_ANALYZER_MODEL=gpt-4o-mini
+ANSWER_GENERATOR_MODEL=gpt-4o
+```
+
+**💰 Otimizado para Custo**
+```bash
+LLM_MODEL=gpt-4o-mini
+RERANKER_MODEL=gpt-4o
+CONTEXT_ANALYZER_MODEL=gpt-4o-mini
+ANSWER_GENERATOR_MODEL=gpt-4o-mini
+```
+
+### Recomendações por Agente:
+
+- **Lead RAG Agent**: `gpt-4o` ou `gpt-4o-mini` para decomposição de queries
+- **Reranker Agent**: `gpt-4o` obrigatório para análise multimodal de qualidade
+- **Context Analyzer**: `gpt-4o-mini` adequado para análise de qualidade
+- **Answer Generator**: `gpt-4o` recomendado para respostas de alta qualidade
 
 ## Opções de Implantação
 

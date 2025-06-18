@@ -3,7 +3,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, TypeVar, Generic
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 import uuid
 from pydantic import BaseModel, Field
@@ -22,7 +22,7 @@ class ToolCall(BaseModel):
     """Represents a single tool invocation."""
     tool_name: str
     parameters: Dict[str, Any]
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     result: Optional[Any] = None
     error: Optional[str] = None
 
@@ -68,7 +68,7 @@ class Agent(ABC, Generic[T]):
         
     def add_thinking(self, thought: str) -> None:
         """Add a thinking step."""
-        self.thinking.append(f"[{datetime.utcnow().isoformat()}] {thought}")
+        self.thinking.append(f"[{datetime.now(timezone.utc).isoformat()}] {thought}")
         
     def add_tool_call(self, tool_call: ToolCall) -> None:
         """Record a tool call."""
@@ -86,7 +86,7 @@ class Agent(ABC, Generic[T]):
         
     async def run(self, context: AgentContext) -> AgentResult:
         """Run the complete agent lifecycle."""
-        self.start_time = datetime.utcnow()
+        self.start_time = datetime.now(timezone.utc)
         self.state = AgentState.PLANNING
         
         try:
@@ -101,7 +101,7 @@ class Agent(ABC, Generic[T]):
             result = await self.execute(plan)
             
             self.state = AgentState.COMPLETED
-            self.end_time = datetime.utcnow()
+            self.end_time = datetime.now(timezone.utc)
             
             return AgentResult(
                 agent_id=self.agent_id,
@@ -116,7 +116,7 @@ class Agent(ABC, Generic[T]):
             
         except Exception as e:
             self.state = AgentState.FAILED
-            self.end_time = datetime.utcnow()
+            self.end_time = datetime.now(timezone.utc)
             error_msg = f"Agent {self.name} failed: {str(e)}"
             self.add_thinking(error_msg)
             
