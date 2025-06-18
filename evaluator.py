@@ -1,5 +1,3 @@
-# evaluator.py
-
 import os
 import json
 import time
@@ -41,7 +39,7 @@ class TestQuestion:
 
 @dataclass
 class EvaluationResult:
-    """Resultado da avaliação de uma pergunta"""
+    """Estrutura para resultados de avaliação"""
     question_id: str
     question: str
     selected_pages: List[int]

@@ -19,11 +19,11 @@ from rag_agents.models.rag_models import (
 
 class MockSubAgent:
     """Mock sub-agent for testing."""
-    
+
     def __init__(self, name, output_data):
         self.name = name
         self.output_data = output_data
-        
+
     async def run(self, context):
         """Mock run method."""
         from datetime import datetime, timezone
@@ -42,17 +42,17 @@ class MockSubAgent:
 
 class TestLeadRAGConfig:
     """Test LeadRAGConfig model."""
-    
+
     def test_default_config(self):
         """Test default configuration values."""
         config = LeadRAGConfig(openai_api_key="test_key")
-        
+
         assert config.openai_api_key == "test_key"
         assert config.model == "gpt-4o"
         assert config.max_subagents == 4
         assert config.parallel_execution == True
         assert config.subagent_timeout == 300.0
-    
+
     def test_custom_config(self):
         """Test custom configuration values."""
         config = LeadRAGConfig(
@@ -62,7 +62,7 @@ class TestLeadRAGConfig:
             parallel_execution=False,
             subagent_timeout=600.0
         )
-        
+
         assert config.model == "gpt-4-turbo"
         assert config.max_subagents == 8
         assert config.parallel_execution == False
@@ -71,12 +71,12 @@ class TestLeadRAGConfig:
 
 class TestLeadRAGAgent:
     """Test LeadRAGAgent functionality."""
-    
+
     @pytest.fixture
     def config(self):
         """Create test configuration."""
         return LeadRAGConfig(openai_api_key="test_openai_key")
-    
+
     @pytest.fixture
     def mock_context(self):
         """Create test context."""
@@ -85,7 +85,7 @@ class TestLeadRAGAgent:
             objective="Understand Zep system architecture with visual elements",
             constraints=["Focus on technical details", "Include diagrams"]
         )
-    
+
     @pytest.fixture
     def mock_sub_agents(self):
         """Create mock sub-agents."""
@@ -110,7 +110,7 @@ class TestLeadRAGAgent:
                 visual_content_type=None
             )
         ]
-        
+
         # Mock reranker output
         ranking_analysis = RankingAnalysis(
             document_scores={"doc1": 0.9, "doc2": 0.8},
@@ -118,14 +118,14 @@ class TestLeadRAGAgent:
             selected_documents=["doc1", "doc2"],
             diversity_score=0.7
         )
-        
+
         reranker_output = RankedDocuments(
             documents=retriever_output,
             ranking_analysis=ranking_analysis,
             total_candidates_processed=5,
             selection_strategy_used="technical_relevance_with_diversity"
         )
-        
+
         # Mock context analyzer output
         context_output = ContextAnalysis(
             completeness_score=0.8,
@@ -135,7 +135,7 @@ class TestLeadRAGAgent:
             visual_coverage=0.6,
             recommended_action="proceed"
         )
-        
+
         # Mock answer generator output
         answer_output = StructuredAnswer(
             main_response="The Zep architecture consists of three main components: memory layers, vector storage, and API interfaces...",
@@ -146,14 +146,14 @@ class TestLeadRAGAgent:
             follow_up_suggestions=["Check latest performance benchmarks"],
             multimodal_confidence=0.85
         )
-        
+
         return {
             'retriever': MockSubAgent("Retriever", retriever_output),
             'reranker': MockSubAgent("Reranker", reranker_output),
             'context_analyzer': MockSubAgent("ContextAnalyzer", context_output),
             'answer_generator': MockSubAgent("AnswerGenerator", answer_output)
         }
-    
+
     def test_agent_initialization(self, config, mock_sub_agents):
         """Test agent initialization with sub-agents."""
         agent = LeadRAGAgent(
@@ -164,7 +164,7 @@ class TestLeadRAGAgent:
             config=config,
             name="TestLeadRAG"
         )
-        
+
         assert agent.name == "TestLeadRAG"
         assert agent.config == config
         assert agent.retriever == mock_sub_agents['retriever']
@@ -172,7 +172,7 @@ class TestLeadRAGAgent:
         assert agent.context_analyzer == mock_sub_agents['context_analyzer']
         assert agent.answer_generator == mock_sub_agents['answer_generator']
         assert agent.state == AgentState.IDLE
-    
+
     @pytest.mark.asyncio
     @patch('rag_agents.agents.lead_rag.instructor.from_openai')
     async def test_plan_creation(self, mock_instructor, config, mock_sub_agents, mock_context):
@@ -180,7 +180,7 @@ class TestLeadRAGAgent:
         # Mock instructor client
         mock_client = Mock()
         mock_instructor.return_value = mock_client
-        
+
         # Mock decomposition response
         mock_decomposition = RAGDecomposition(
             query_type="analytical",
@@ -203,9 +203,9 @@ class TestLeadRAGAgent:
             visual_requirements=["architecture_diagrams", "flowcharts"],
             response_format="detailed"
         )
-        
+
         mock_client.chat.completions.create = AsyncMock(return_value=mock_decomposition)
-        
+
         agent = LeadRAGAgent(
             retriever_agent=mock_sub_agents['retriever'],
             reranker_agent=mock_sub_agents['reranker'],
@@ -214,15 +214,15 @@ class TestLeadRAGAgent:
             config=config,
             name="TestLeadRAG"
         )
-        
+
         plan = await agent.plan(mock_context)
-        
+
         assert isinstance(plan, RAGDecomposition)
         assert plan.query_type == "analytical"
         assert "components" in plan.key_aspects
         assert len(plan.search_strategies) == 1
         assert "technical" in plan.search_strategies[0].content_filters
-    
+
     @pytest.mark.asyncio
     @patch('rag_agents.agents.lead_rag.time.time')
     @patch('rag_agents.agents.lead_rag.instructor.from_openai')
@@ -230,11 +230,11 @@ class TestLeadRAGAgent:
         """Test successful end-to-end execution."""
         # Mock time.time() to return increasing values
         mock_time.side_effect = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0]  # Start time and various end times
-        
+
         # Mock instructor client
         mock_client = Mock()
         mock_instructor.return_value = mock_client
-        
+
         # Mock decomposition
         mock_decomposition = RAGDecomposition(
             query_type="analytical",
@@ -244,9 +244,9 @@ class TestLeadRAGAgent:
             visual_requirements=[],
             response_format="detailed"
         )
-        
+
         mock_client.chat.completions.create = AsyncMock(return_value=mock_decomposition)
-        
+
         agent = LeadRAGAgent(
             retriever_agent=mock_sub_agents['retriever'],
             reranker_agent=mock_sub_agents['reranker'],
@@ -255,16 +255,16 @@ class TestLeadRAGAgent:
             config=config,
             name="TestLeadRAG"
         )
-        
+
         result = await agent.run(mock_context)
-        
+
         if result.status != AgentState.COMPLETED:
             print(f"Error: {result.error}")
             print(f"Thinking: {result.thinking}")
-        
+
         assert result.status == AgentState.COMPLETED
         assert isinstance(result.output, RAGResult)
-        
+
         rag_result = result.output
         assert isinstance(rag_result.query_decomposition, RAGDecomposition)
         assert isinstance(rag_result.ranked_documents, RankedDocuments)
@@ -273,7 +273,7 @@ class TestLeadRAGAgent:
         assert len(rag_result.processing_steps) >= 4  # At least 4 agents
         assert rag_result.total_tokens_used > 0
         assert rag_result.total_processing_time > 0
-    
+
     @pytest.mark.asyncio
     @patch('rag_agents.agents.lead_rag.instructor.from_openai')
     async def test_retriever_failure(self, mock_instructor, config, mock_sub_agents, mock_context):
@@ -281,7 +281,7 @@ class TestLeadRAGAgent:
         # Mock instructor client
         mock_client = Mock()
         mock_instructor.return_value = mock_client
-        
+
         mock_decomposition = RAGDecomposition(
             query_type="analytical",
             key_aspects=["test"],
@@ -290,13 +290,13 @@ class TestLeadRAGAgent:
             visual_requirements=[],
             response_format="detailed"
         )
-        
+
         mock_client.chat.completions.create = AsyncMock(return_value=mock_decomposition)
-        
+
         # Make retriever fail
         failing_retriever = Mock()
         failing_retriever.run = AsyncMock(side_effect=Exception("Retriever failed"))
-        
+
         agent = LeadRAGAgent(
             retriever_agent=failing_retriever,
             reranker_agent=mock_sub_agents['reranker'],
@@ -305,12 +305,12 @@ class TestLeadRAGAgent:
             config=config,
             name="TestLeadRAG"
         )
-        
+
         result = await agent.run(mock_context)
-        
+
         assert result.status == AgentState.FAILED
         assert "Retriever failed" in result.error
-    
+
     @pytest.mark.asyncio
     @patch('rag_agents.agents.lead_rag.instructor.from_openai')
     async def test_context_analysis_recommends_more_search(self, mock_instructor, config, mock_sub_agents, mock_context):
@@ -318,7 +318,7 @@ class TestLeadRAGAgent:
         # Mock instructor client
         mock_client = Mock()
         mock_instructor.return_value = mock_client
-        
+
         mock_decomposition = RAGDecomposition(
             query_type="analytical",
             key_aspects=["test"],
@@ -327,9 +327,9 @@ class TestLeadRAGAgent:
             visual_requirements=[],
             response_format="detailed"
         )
-        
+
         mock_client.chat.completions.create = AsyncMock(return_value=mock_decomposition)
-        
+
         # Mock context analyzer to recommend more search
         insufficient_context = ContextAnalysis(
             completeness_score=0.3,  # Low score
@@ -339,9 +339,9 @@ class TestLeadRAGAgent:
             visual_coverage=0.1,
             recommended_action="search_more"  # Recommends more search
         )
-        
+
         mock_sub_agents['context_analyzer'].output_data = insufficient_context
-        
+
         agent = LeadRAGAgent(
             retriever_agent=mock_sub_agents['retriever'],
             reranker_agent=mock_sub_agents['reranker'],
@@ -350,15 +350,15 @@ class TestLeadRAGAgent:
             config=config,
             name="TestLeadRAG"
         )
-        
+
         result = await agent.run(mock_context)
-        
+
         # Should still complete but with partial answer
         assert result.status == AgentState.COMPLETED
         rag_result = result.output
         assert rag_result.context_analysis.recommended_action == "search_more"
         assert rag_result.context_analysis.completeness_score == 0.3
-    
+
     @pytest.mark.asyncio
     @patch('rag_agents.agents.lead_rag.instructor.from_openai')
     async def test_no_documents_retrieved(self, mock_instructor, config, mock_sub_agents, mock_context):
@@ -366,7 +366,7 @@ class TestLeadRAGAgent:
         # Mock instructor client
         mock_client = Mock()
         mock_instructor.return_value = mock_client
-        
+
         mock_decomposition = RAGDecomposition(
             query_type="analytical",
             key_aspects=["test"],
@@ -375,12 +375,12 @@ class TestLeadRAGAgent:
             visual_requirements=[],
             response_format="detailed"
         )
-        
+
         mock_client.chat.completions.create = AsyncMock(return_value=mock_decomposition)
-        
+
         # Mock retriever to return no documents
         mock_sub_agents['retriever'].output_data = []
-        
+
         # Mock reranker to return empty ranked documents
         empty_ranking_analysis = RankingAnalysis(
             document_scores={},
@@ -388,7 +388,7 @@ class TestLeadRAGAgent:
             selected_documents=[],
             diversity_score=0.0
         )
-        
+
         empty_ranked = RankedDocuments(
             documents=[],
             ranking_analysis=empty_ranking_analysis,
@@ -396,7 +396,7 @@ class TestLeadRAGAgent:
             selection_strategy_used="no_selection"
         )
         mock_sub_agents['reranker'].output_data = empty_ranked
-        
+
         # Mock context analyzer for empty context
         empty_context = ContextAnalysis(
             completeness_score=0.0,
@@ -407,7 +407,7 @@ class TestLeadRAGAgent:
             recommended_action="partial_answer"
         )
         mock_sub_agents['context_analyzer'].output_data = empty_context
-        
+
         # Mock answer generator for no context
         no_answer = StructuredAnswer(
             main_response="I don't have sufficient information to answer your question comprehensively.",
@@ -419,7 +419,7 @@ class TestLeadRAGAgent:
             multimodal_confidence=0.0
         )
         mock_sub_agents['answer_generator'].output_data = no_answer
-        
+
         agent = LeadRAGAgent(
             retriever_agent=mock_sub_agents['retriever'],
             reranker_agent=mock_sub_agents['reranker'],
@@ -428,20 +428,20 @@ class TestLeadRAGAgent:
             config=config,
             name="TestLeadRAG"
         )
-        
+
         result = await agent.run(mock_context)
-        
+
         assert result.status == AgentState.COMPLETED
         rag_result = result.output
         assert len(rag_result.ranked_documents.documents) == 0
         assert rag_result.context_analysis.completeness_score == 0.0
         assert "don't have sufficient information" in rag_result.answer.main_response
-    
+
     @pytest.mark.asyncio
     async def test_missing_openai_key(self, mock_sub_agents, mock_context):
         """Test behavior with missing OpenAI API key."""
         config = LeadRAGConfig(openai_api_key="")  # Empty key
-        
+
         # Should fail during initialization or first API call
         try:
             agent = LeadRAGAgent(
@@ -452,9 +452,9 @@ class TestLeadRAGAgent:
                 config=config,
                 name="TestLeadRAG"
             )
-            
+
             result = await agent.run(mock_context)
-            
+
             # If it doesn't fail immediately, it should fail during execution
             if result.status == AgentState.COMPLETED:
                 # This is unexpected - no API key should cause failure
@@ -462,11 +462,11 @@ class TestLeadRAGAgent:
             else:
                 assert result.status == AgentState.FAILED
                 assert "api" in result.error.lower() or "key" in result.error.lower()
-                
+
         except Exception as e:
             # API key validation might happen during initialization
             assert "api" in str(e).lower() or "key" in str(e).lower()
-    
+
     @pytest.mark.asyncio
     @patch('rag_agents.agents.lead_rag.instructor.from_openai')
     async def test_token_tracking(self, mock_instructor, config, mock_sub_agents, mock_context):
@@ -474,7 +474,7 @@ class TestLeadRAGAgent:
         # Mock instructor client
         mock_client = Mock()
         mock_instructor.return_value = mock_client
-        
+
         mock_decomposition = RAGDecomposition(
             query_type="analytical",
             key_aspects=["test"],
@@ -483,9 +483,9 @@ class TestLeadRAGAgent:
             visual_requirements=[],
             response_format="detailed"
         )
-        
+
         mock_client.chat.completions.create = AsyncMock(return_value=mock_decomposition)
-        
+
         agent = LeadRAGAgent(
             retriever_agent=mock_sub_agents['retriever'],
             reranker_agent=mock_sub_agents['reranker'],
@@ -494,12 +494,12 @@ class TestLeadRAGAgent:
             config=config,
             name="TestLeadRAG"
         )
-        
+
         result = await agent.run(mock_context)
-        
+
         assert result.status == AgentState.COMPLETED
         assert result.tokens_used > 0
-        
+
         rag_result = result.output
         assert rag_result.total_tokens_used > 0
         # Should include tokens from lead agent + all sub-agents
