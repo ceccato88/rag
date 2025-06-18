@@ -10,9 +10,9 @@ fornecendo valores padrão para quando as variáveis de ambiente não estão def
 # =============================================================================
 
 DEFAULT_MODELS = {
-    'LLM': 'gpt-4o',
+    'LLM': 'gpt-4o-2024-11-20',
     'EMBEDDING': 'voyage-3', 
-    'MULTIAGENT': 'gpt-4o-mini',
+    'MULTIAGENT': 'gpt-4o-mini-2024-07-18',
     'MULTIMODAL': 'voyage-multimodal-3'
 }
 

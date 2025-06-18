@@ -18,9 +18,10 @@ from contextlib import asynccontextmanager
 from enum import Enum
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
@@ -28,7 +29,7 @@ from dotenv import load_dotenv
 sys.path.append('/workspaces/rag/multi-agent-researcher/src')
 
 from config import SystemConfig
-from search import search_documents
+from search import SimpleRAG
 from utils.validation import validate_query
 from utils.metrics import ProcessingMetrics
 
@@ -41,7 +42,7 @@ from researcher.agents.enhanced_rag_subagent import (
     EnhancedRAGSubagentConfig
 )
 from researcher.agents.base import AgentContext, AgentResult, AgentState
-from researcher.memory.memory_manager import InMemoryManager
+# from researcher.memory.memory_manager import InMemoryManager  # Import removido - arquivo não existe
 from researcher.memory.base import ResearchMemory
 
 # Configuração de logging
@@ -53,6 +54,26 @@ logger = logging.getLogger(__name__)
 
 # Configuração centralizada
 system_config = SystemConfig()
+
+# Configuração de segurança
+security = HTTPBearer()
+API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN")
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verifica se o token Bearer é válido"""
+    if not API_BEARER_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Token de API não configurado no servidor"
+        )
+    
+    if credentials.credentials != API_BEARER_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de acesso inválido",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return credentials.credentials
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODELOS DE DADOS
@@ -145,7 +166,7 @@ class MultiAgentAPIState:
         # Sistema multi-agente
         self.lead_researcher: Optional[OpenAILeadResearcher] = None
         self.specialist_selector = SpecialistSelector()
-        self.memory_manager = InMemoryManager()
+        # self.memory_manager = InMemoryManager()  # Comentado - classe não disponível
         self.research_memory: Optional[ResearchMemory] = None
         
         # WebSocket connections para streaming
@@ -242,13 +263,13 @@ async def initialize_multiagent_system():
             raise RuntimeError(f"Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
         
         # Inicializar memória de pesquisa
-        api_state.research_memory = ResearchMemory(api_state.memory_manager)
+        # api_state.research_memory = ResearchMemory(api_state.memory_manager)  # Temporariamente comentado
+        api_state.research_memory = None  # Placeholder até corrigir memory_manager
         
         # Configurar lead researcher
         lead_config = OpenAILeadConfig.from_env()
         api_state.lead_researcher = OpenAILeadResearcher(
-            config=lead_config,
-            memory=api_state.research_memory
+            config=lead_config
         )
         
         logger.info("✅ Sistema multi-agente inicializado")
@@ -338,7 +359,8 @@ async def health_check(state: MultiAgentAPIState = Depends(get_api_state)):
 @app.post("/analyze-complexity", response_model=ComplexityAnalysis)
 async def analyze_query_complexity(
     query_data: Dict[str, str],
-    state: MultiAgentAPIState = Depends(check_api_ready)
+    state: MultiAgentAPIState = Depends(check_api_ready),
+    token: str = Depends(verify_token)
 ):
     """
     Analisa a complexidade de uma consulta e recomenda estratégia de processamento
@@ -373,7 +395,8 @@ async def analyze_query_complexity(
 async def multi_agent_research(
     query_data: MultiAgentQuery,
     background_tasks: BackgroundTasks,
-    state: MultiAgentAPIState = Depends(check_api_ready)
+    state: MultiAgentAPIState = Depends(check_api_ready),
+    token: str = Depends(verify_token)
 ):
     """
     Endpoint principal para pesquisa multi-agente
@@ -442,7 +465,8 @@ async def multi_agent_research(
 @app.get("/research/{job_id}", response_model=JobStatus)
 async def get_job_status(
     job_id: str,
-    state: MultiAgentAPIState = Depends(check_api_ready)
+    state: MultiAgentAPIState = Depends(check_api_ready),
+    token: str = Depends(verify_token)
 ):
     """Consulta status de job assíncrono"""
     
@@ -748,7 +772,7 @@ def extract_sources_from_result(result: AgentResult) -> List[Dict[str, Any]]:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 @app.get("/specialists", response_model=Dict[str, List[str]])
-async def list_available_specialists():
+async def list_available_specialists(token: str = Depends(verify_token)):
     """Lista tipos de especialistas disponíveis"""
     
     return {
@@ -764,7 +788,10 @@ async def list_available_specialists():
     }
 
 @app.get("/jobs", response_model=Dict[str, Any])
-async def list_active_jobs(state: MultiAgentAPIState = Depends(check_api_ready)):
+async def list_active_jobs(
+    state: MultiAgentAPIState = Depends(check_api_ready),
+    token: str = Depends(verify_token)
+):
     """Lista jobs ativos"""
     
     # Limpar jobs antigos

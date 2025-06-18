@@ -126,7 +126,7 @@ curl -X POST "http://localhost:8000/search" \
   ],
   "metadata": {
     "request_id": "req_1705312200_1",
-    "model_used": "gpt-4o"
+    "model_used": "gpt-4o-2024-11-20"
   }
 }
 ```
@@ -238,7 +238,7 @@ curl -X POST "http://localhost:8001/research" \
     "Coletando informações sobre PyTorch..."
   ],
   "metadata": {
-    "model": "gpt-4o-mini",
+    "model": "gpt-4o-mini-2024-07-18",
     "lead_agent": "OpenAILeadResearcher"
   }
 }
@@ -473,10 +473,10 @@ JWT_SECRET=your_jwt_secret
 
 ```bash
 # Modelos específicos por API
-RAG_SIMPLE_LLM_MODEL=gpt-4o
+RAG_SIMPLE_LLM_MODEL=gpt-4o-2024-11-20
 RAG_SIMPLE_EMBEDDING_MODEL=voyage-3
 
-MULTIAGENT_LLM_MODEL=gpt-4o-mini
+MULTIAGENT_LLM_MODEL=gpt-4o-mini-2024-07-18
 MULTIAGENT_EMBEDDING_MODEL=voyage-3
 ```
 

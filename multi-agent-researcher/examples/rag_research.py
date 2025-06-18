@@ -86,9 +86,9 @@ async def rag_research_example():
     ]
     
     for i, test_case in enumerate(test_queries, 1):
-        console.print(f"\\n{Panel(f'🔍 Test {i}: {test_case[\"description\"]}', style='green')}")
+        console.print(f"\n{Panel(f'🔍 Test {i}: {test_case['description']}', style='green')}")
         console.print(f"Query: {test_case['query']}")
-        console.print(f"Objective: {test_case['objective']}\\n")
+        console.print(f"Objective: {test_case['objective']}\n")
         
         # Create context
         context = AgentContext(

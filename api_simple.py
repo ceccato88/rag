@@ -16,15 +16,16 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends
+from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
 # Importações do sistema RAG
 from config import SystemConfig
-from search import search_documents, SearchResult
+from search import SimpleRAG
 from utils.validation import validate_query
 from utils.metrics import ProcessingMetrics
 
@@ -37,6 +38,26 @@ logger = logging.getLogger(__name__)
 
 # Configuração centralizada
 system_config = SystemConfig()
+
+# Configuração de segurança
+security = HTTPBearer()
+API_BEARER_TOKEN = os.getenv("API_BEARER_TOKEN")
+
+def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Verifica se o token Bearer é válido"""
+    if not API_BEARER_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Token de API não configurado no servidor"
+        )
+    
+    if credentials.credentials != API_BEARER_TOKEN:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de acesso inválido",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return credentials.credentials
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # MODELOS DE DADOS
@@ -230,7 +251,8 @@ async def health_check(state: APIState = Depends(get_api_state)):
 async def simple_rag_search(
     query_data: SimpleRAGQuery,
     background_tasks: BackgroundTasks,
-    state: APIState = Depends(check_api_ready)
+    state: APIState = Depends(check_api_ready),
+    token: str = Depends(verify_token)
 ):
     """
     Endpoint principal para consultas RAG simples
@@ -257,17 +279,16 @@ async def simple_rag_search(
         
         # Configurar parâmetros da busca
         max_results = query_data.max_results or system_config.rag.max_candidates
-        similarity_threshold = query_data.similarity_threshold or system_config.rag.similarity_threshold
+        similarity_threshold = query_data.similarity_threshold or system_config.multiagent.similarity_threshold
         
         # Executar busca RAG
-        search_results: List[SearchResult] = await asyncio.to_thread(
-            search_documents,
-            query_data.query,
-            max_results=max_results,
-            similarity_threshold=similarity_threshold
+        rag = SimpleRAG()
+        response = await asyncio.to_thread(
+            rag.search,
+            query_data.query
         )
         
-        if not search_results:
+        if not response:
             logger.warning(f"⚠️ [{request_id}] Nenhum resultado encontrado")
             raise HTTPException(
                 status_code=404,
@@ -275,29 +296,26 @@ async def simple_rag_search(
             )
         
         # Processar resultados
-        response_text = search_results[0].answer if search_results else "Nenhuma resposta gerada."
+        response_text = response
         
-        # Preparar fontes
+        # Preparar fontes (simplificado para o SimpleRAG)
         sources = []
-        for result in search_results:
-            if query_data.include_metadata:
-                sources.append({
-                    "page_num": result.page_num,
-                    "similarity_score": result.similarity_score,
-                    "doc_source": result.doc_source,
-                    "excerpt": result.content[:200] + "..." if len(result.content) > 200 else result.content
-                })
+        if query_data.include_metadata:
+            sources.append({
+                "message": "Resposta gerada pelo sistema RAG",
+                "model": system_config.rag.llm_model
+            })
         
         processing_time = time.time() - start_time
         
-        logger.info(f"✅ [{request_id}] Consulta processada em {processing_time:.2f}s - {len(search_results)} resultados")
+        logger.info(f"✅ [{request_id}] Consulta processada em {processing_time:.2f}s")
         
         # Adicionar tarefa em background para métricas
         background_tasks.add_task(
             record_usage_metrics,
             request_id, 
             query_data.query, 
-            len(search_results), 
+            1, 
             processing_time
         )
         
@@ -305,7 +323,7 @@ async def simple_rag_search(
             success=True,
             query=query_data.query,
             response=response_text,
-            results_count=len(search_results),
+            results_count=1,
             processing_time=processing_time,
             timestamp=datetime.utcnow().isoformat(),
             sources=sources,
@@ -340,7 +358,10 @@ async def simple_rag_search(
 # ═══════════════════════════════════════════════════════════════════════════════
 
 @app.get("/config", response_model=Dict[str, Any])
-async def get_config(state: APIState = Depends(check_api_ready)):
+async def get_config(
+    state: APIState = Depends(check_api_ready),
+    token: str = Depends(verify_token)
+):
     """Retorna configuração atual do sistema (informações não-sensíveis)"""
     
     return {
@@ -352,7 +373,7 @@ async def get_config(state: APIState = Depends(check_api_ready)):
         "limits": {
             "max_candidates": system_config.rag.max_candidates,
             "max_tokens_per_input": system_config.rag.max_tokens_per_input,
-            "similarity_threshold": system_config.rag.similarity_threshold
+            "similarity_threshold": system_config.multiagent.similarity_threshold
         },
         "database": {
             "collection_name": system_config.rag.collection_name,
@@ -365,7 +386,10 @@ async def get_config(state: APIState = Depends(check_api_ready)):
     }
 
 @app.get("/metrics", response_model=Dict[str, Any])
-async def get_metrics(state: APIState = Depends(check_api_ready)):
+async def get_metrics(
+    state: APIState = Depends(check_api_ready),
+    token: str = Depends(verify_token)
+):
     """Retorna métricas de uso da API"""
     
     return {

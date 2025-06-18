@@ -71,57 +71,8 @@ def validate_environment_vars(required_vars: List[str]) -> Dict[str, Any]:
         "total_found": len(required_vars) - len(missing_vars)
     }
 
-def sanitize_filename(filename: str) -> str:
-    """Sanitiza nome de arquivo removendo caracteres problemáticos."""
-    # Remove caracteres especiais e substitui por underscore
-    sanitized = re.sub(r'[<>:"/\\|?*]', '_', filename)
-    
-    # Remove espaços múltiplos e substitui por underscore
-    sanitized = re.sub(r'\s+', '_', sanitized)
-    
-    # Remove underscores múltiplos
-    sanitized = re.sub(r'_+', '_', sanitized)
-    
-    # Remove underscore do início e fim
-    sanitized = sanitized.strip('_')
-    
-    # Remove underscores antes da extensão (ex: "file_.txt" -> "file.txt")
-    sanitized = re.sub(r'_+\.', '.', sanitized)
-    
-    return sanitized
+# Função removida - não utilizada no projeto
+# def sanitize_filename(filename: str) -> str:
 
-def validate_file_path(file_path: str) -> Dict[str, Any]:
-    """
-    Valida se um caminho de arquivo é válido e acessível.
-    
-    Returns:
-        Dict com informações sobre a validação
-    """
-    import os
-    
-    result = {
-        "valid": False,
-        "exists": False,
-        "readable": False,
-        "size": 0,
-        "error": None
-    }
-    
-    try:
-        if not file_path:
-            result["error"] = "Caminho vazio"
-            return result
-        
-        result["exists"] = os.path.exists(file_path)
-        
-        if result["exists"]:
-            result["readable"] = os.access(file_path, os.R_OK)
-            result["size"] = os.path.getsize(file_path)
-            result["valid"] = result["readable"] and result["size"] > 0
-        else:
-            result["error"] = "Arquivo não encontrado"
-            
-    except Exception as e:
-        result["error"] = str(e)
-    
-    return result
+# Função removida - não utilizada no projeto
+# def validate_file_path(file_path: str) -> Dict[str, Any]:

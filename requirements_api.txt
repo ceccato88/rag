@@ -36,7 +36,7 @@ phonenumbers==8.13.25
 # === SEGURANÇA ===
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0
-cryptography==41.0.8
+cryptography>=41.0.0
 
 # === CACHE & STORAGE ===
 redis==5.0.1

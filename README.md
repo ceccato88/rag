@@ -462,8 +462,8 @@ ASTRA_DB_APPLICATION_TOKEN=AstraCS:sua_token_aqui
 # =============================================================================
 
 # Modelos
-RAG_LLM_MODEL=gpt-4o
-MULTIAGENT_MODEL=gpt-4o-mini
+RAG_LLM_MODEL=gpt-4o-2024-11-20
+MULTIAGENT_MODEL=gpt-4o-mini-2024-07-18
 RAG_EMBEDDING_MODEL=voyage-3
 
 # Performance
@@ -687,7 +687,7 @@ print(resultado.content)
 **Para Papers Acadêmicos:**
 ```env
 # .env - Configuração para papers
-RAG_LLM_MODEL=gpt-4o                  # Melhor qualidade
+RAG_LLM_MODEL=gpt-4o-2024-11-20                  # Melhor qualidade
 MAX_CANDIDATES=10                     # Mais candidatos
 MAX_TOKENS_ANSWER=3000               # Respostas mais longas
 SUBAGENT_TIMEOUT=300.0               # Timeout maior
@@ -697,7 +697,7 @@ MAX_SUBAGENTS=4                      # Mais especialização
 **Para Documentação Técnica:**
 ```env
 # .env - Configuração para docs
-RAG_LLM_MODEL=gpt-4o-mini            # Rapidez vs qualidade
+RAG_LLM_MODEL=gpt-4o-mini-2024-07-18            # Rapidez vs qualidade
 MAX_CANDIDATES=5                     # Equilíbrio
 MAX_TOKENS_ANSWER=1500               # Respostas concisas
 PROCESSING_CONCURRENCY=8             # Processamento rápido
@@ -732,7 +732,7 @@ config = SystemConfig()
 # Modificar configurações em runtime
 config.rag.max_candidates = 15
 config.multiagent.max_subagents = 5
-config.rag.llm_model = "gpt-4o"
+config.rag.llm_model = "gpt-4o-2024-11-20"
 
 # Validar configuração
 validation = config.validate_all()
@@ -750,7 +750,7 @@ rag = RAGSearcher(config=config)
 #### High Performance (Velocidade)
 ```env
 # .env - Configuração de alta velocidade
-RAG_LLM_MODEL=gpt-4o-mini
+RAG_LLM_MODEL=gpt-4o-mini-2024-07-18
 MAX_CANDIDATES=3
 MAX_TOKENS_ANSWER=1000
 PROCESSING_CONCURRENCY=15
@@ -762,7 +762,7 @@ PARALLEL_EXECUTION=true
 #### High Quality (Qualidade)
 ```env
 # .env - Configuração de alta qualidade
-RAG_LLM_MODEL=gpt-4o
+RAG_LLM_MODEL=gpt-4o-2024-11-20
 MAX_CANDIDATES=15
 MAX_TOKENS_ANSWER=4000
 MAX_SUBAGENTS=5
@@ -974,7 +974,7 @@ if __name__ == "__main__":
 
 #### Para Velocidade Máxima:
 ```env
-RAG_LLM_MODEL=gpt-4o-mini            # Modelo mais rápido
+RAG_LLM_MODEL=gpt-4o-mini-2024-07-18            # Modelo mais rápido
 MAX_CANDIDATES=3                     # Menos candidatos
 MAX_TOKENS_ANSWER=1000              # Respostas mais curtas
 EMBEDDING_CACHE_SIZE=2000           # Cache maior
@@ -983,7 +983,7 @@ PROCESSING_CONCURRENCY=10           # Alta concorrência
 
 #### Para Qualidade Máxima:
 ```env
-RAG_LLM_MODEL=gpt-4o                # Melhor modelo
+RAG_LLM_MODEL=gpt-4o-2024-11-20                # Melhor modelo
 MAX_CANDIDATES=20                   # Mais candidatos
 MAX_TOKENS_ANSWER=4000             # Respostas completas
 MAX_SUBAGENTS=5                    # Mais especialização

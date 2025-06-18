@@ -171,7 +171,7 @@ RAG Research Subagents: Can search and analyze documents for specific topics
         plan = self.reasoner.create_plan(
             objective=f"Create comprehensive research plan for: {context.query}",
             available_resources=[
-                "OpenAI GPT-4o mini" if self.client else "Heuristic decomposition",
+                f"OpenAI {self.config.model}" if self.client else "Heuristic decomposition",
                 "RAG subagents",
                 "Document search capabilities"
             ]

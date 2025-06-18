@@ -104,7 +104,7 @@ docker-compose up -d
 ### **🧪 Testes e Exemplos**
 - `test_api_config.py` - Validação da configuração
 - `example_api_client.py` - Exemplos de uso das APIs
-- `teste_configuracao_final.py` - Teste do sistema completo
+
 - `DEPENDENCIES.md` - Guia completo das dependências
 
 ---
@@ -182,8 +182,8 @@ print(f"Tempo estimado: {analysis['estimated_time']}s")
 ## ⚙️ CONFIGURAÇÕES IMPORTANTES
 
 ### **📊 Modelos Configurados**
-- **RAG LLM**: `gpt-4o` (respostas principais)
-- **Multi-Agente**: `gpt-4o-mini` (reasoning)
+- **RAG LLM**: `gpt-4o-2024-11-20` (respostas principais)
+- **Multi-Agente**: `gpt-4o-mini-2024-07-18` (reasoning)
 - **Embedding**: `voyage-3` (texto)
 - **Multimodal**: `voyage-multimodal-3` (texto + imagem)
 

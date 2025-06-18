@@ -37,10 +37,10 @@ services:
       context: .
       dockerfile: Dockerfile.api-multiagent
     ports:
-      - "8001:8001"
+      - "8001:8000"
     environment:
       - API_HOST=0.0.0.0
-      - API_PORT=8001
+      - API_PORT=8000
       - API_LOG_LEVEL=info
       - API_WORKERS=1
     env_file:
@@ -50,7 +50,7 @@ services:
       - ./temp:/app/temp
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
