@@ -1,11 +1,20 @@
 # indexer.py
 
-import os, re, logging, asyncio
+import os
+import re
+import time
+import logging
+import asyncio
 from io import BytesIO
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+
+from utils.validation import validate_document, validate_embedding
+from utils.resource_manager import ResourceManager
+from utils.metrics import ProcessingMetrics, measure_time
 
 import requests, voyageai, pymupdf, pymupdf4llm
 from PIL import Image
@@ -30,6 +39,9 @@ class Config:
     DOWNLOAD_TIMEOUT: int = 30
     DOWNLOAD_CHUNK_SIZE: int = 8192
     PIXMAP_SCALE: int = 2
+    MAX_RETRIES: int = 3
+    RETRY_DELAY: float = 1.0  # segundos
+    CLEANUP_MAX_AGE: int = 24  # horas
 
 def get_config():
     """Cria configuração com valores do ambiente"""
@@ -54,52 +66,59 @@ def text_token_estimate(text: str, config: Config) -> int:
 def fits_limits(txt: str, img: Image.Image, config: Config) -> bool:
     return (text_token_estimate(txt, config) + pixel_token_count(img, config)) <= config.MAX_TOKENS_PER_INPUT
 
-def download_pdf(url_or_path: str, config: Config) -> Optional[pymupdf.Document]:
-    try:
-        # Detecta se é arquivo local ou URL
-        is_url = url_or_path.startswith(('http://', 'https://'))
-        is_local_path = not is_url and (
-            os.path.exists(url_or_path) or 
-            url_or_path.startswith(('./', '../', '/')) or
-            os.path.sep in url_or_path
-        )
-        
-        if is_local_path:
-            # Arquivo local
-            if not os.path.exists(url_or_path):
-                raise FileNotFoundError(f"Arquivo não encontrado: {url_or_path}")
+def download_pdf_with_retry(url_or_path: str, config: Config) -> Optional[pymupdf.Document]:
+    """Baixa ou abre um PDF com retry em caso de falha."""
+    for attempt in range(config.MAX_RETRIES):
+        try:
+            # Detecta se é arquivo local ou URL
+            is_url = url_or_path.startswith(('http://', 'https://'))
+            is_local_path = not is_url and (
+                os.path.exists(url_or_path) or 
+                url_or_path.startswith(('./', '../', '/')) or
+                os.path.sep in url_or_path
+            )
             
-            logger.info("Abrindo PDF local: %s", url_or_path)
-            doc = pymupdf.open(url_or_path)
-            logger.info("PDF carregado (%d páginas)", doc.page_count)
-            return doc
-            
-        elif is_url:
-            # Download da URL
-            logger.info("Baixando PDF da URL: %s", url_or_path)
-            with requests.get(url_or_path, stream=True, timeout=config.DOWNLOAD_TIMEOUT) as r:
-                r.raise_for_status()
-                buf = BytesIO()
-                for chunk in r.iter_content(config.DOWNLOAD_CHUNK_SIZE):
-                    buf.write(chunk)
-            buf.seek(0)
-            doc = pymupdf.open(stream=buf, filetype="pdf")
-            logger.info("PDF baixado (%d páginas)", doc.page_count)
-            return doc
-            
-        else:
-            # Tentativa de interpretar como arquivo local primeiro, depois como URL
-            if os.path.exists(url_or_path):
+            if is_local_path:
+                # Arquivo local
+                if not os.path.exists(url_or_path):
+                    raise FileNotFoundError(f"Arquivo não encontrado: {url_or_path}")
+                
                 logger.info("Abrindo PDF local: %s", url_or_path)
                 doc = pymupdf.open(url_or_path)
                 logger.info("PDF carregado (%d páginas)", doc.page_count)
                 return doc
-            else:
-                raise ValueError(f"Caminho inválido: '{url_or_path}'. Use um caminho local válido ou URL completa (http/https)")
                 
-    except Exception as e:
-        logger.error("Falha ao processar PDF: %s", e)
-        return None
+            elif is_url:
+                # Download da URL
+                logger.info("Baixando PDF da URL: %s", url_or_path)
+                with requests.get(url_or_path, stream=True, timeout=config.DOWNLOAD_TIMEOUT) as r:
+                    r.raise_for_status()
+                    buf = BytesIO()
+                    for chunk in r.iter_content(config.DOWNLOAD_CHUNK_SIZE):
+                        buf.write(chunk)
+                buf.seek(0)
+                doc = pymupdf.open(stream=buf, filetype="pdf")
+                logger.info("PDF baixado (%d páginas)", doc.page_count)
+                return doc
+                
+            else:
+                # Tentativa de interpretar como arquivo local primeiro, depois como URL
+                if os.path.exists(url_or_path):
+                    logger.info("Abrindo PDF local: %s", url_or_path)
+                    doc = pymupdf.open(url_or_path)
+                    logger.info("PDF carregado (%d páginas)", doc.page_count)
+                    return doc
+                else:
+                    raise ValueError(f"Caminho inválido: '{url_or_path}'. Use um caminho local válido ou URL completa (http/https)")
+                    
+        except Exception as e:
+            if attempt == config.MAX_RETRIES - 1:
+                logger.error("Falha ao processar PDF após %d tentativas: %s", config.MAX_RETRIES, e)
+                return None
+            
+            delay = config.RETRY_DELAY * (2 ** attempt)  # Backoff exponencial
+            logger.warning(f"Tentativa {attempt + 1} falhou: {e}. Tentando novamente em {delay:.1f}s...")
+            time.sleep(delay)
 
 def extract_page_content(pdf: pymupdf.Document, n: int,
                          src: str, img_dir: str, config: Config) -> Optional[Dict]:
@@ -203,6 +222,7 @@ async def embed_page(sema: asyncio.Semaphore, client: voyageai.AsyncClient,
 # ───── Main ─────
 async def main() -> None:
     load_dotenv()
+    metrics = ProcessingMetrics()
     
     try:
         validate_env_vars()
@@ -212,17 +232,22 @@ async def main() -> None:
 
     # Usa configuração com valores do ambiente
     config = get_config()
+    resource_manager = ResourceManager(config.IMAGE_DIR)
     
-    src = create_doc_source_name(config.PDF_URL)
-    logger.info("Indexando documento: %s", src)
-    logger.info("PDF URL/Path: %s", config.PDF_URL)
+    with measure_time(metrics, "setup"):
+        src = create_doc_source_name(config.PDF_URL)
+        logger.info("Indexando documento: %s", src)
+        logger.info("PDF URL/Path: %s", config.PDF_URL)
+
+        # Limpa arquivos temporários antigos
+        resource_manager.cleanup(max_age_hours=config.CLEANUP_MAX_AGE)
 
     pdf_path = config.PDF_URL  # Store the original PDF path for cleanup
-    pdf = download_pdf(config.PDF_URL, config)
-    if not pdf: 
-        logger.error("Não foi possível carregar o PDF")
-        return
-    os.makedirs(config.IMAGE_DIR, exist_ok=True)
+    with measure_time(metrics, "download"):
+        pdf = download_pdf_with_retry(config.PDF_URL, config)
+        if not pdf: 
+            logger.error("Não foi possível carregar o PDF")
+            return
 
     docs = [c for i in tqdm(range(pdf.page_count), desc="Páginas")
             if (c := extract_page_content(pdf, i, src, config.IMAGE_DIR, config))]
@@ -233,8 +258,9 @@ async def main() -> None:
     sema = asyncio.Semaphore(config.CONCURRENCY)
     async_client = voyageai.AsyncClient()
     try:
-        tasks = [embed_page(sema, async_client, d, config) for d in docs]
-        embedded = [d for d in await asyncio.gather(*tasks) if d]
+        with measure_time(metrics, "embeddings"):
+            tasks = [embed_page(sema, async_client, d, config) for d in docs]
+            embedded = [d for d in await asyncio.gather(*tasks) if d]
     finally:
         # Fecha conexão HTTP do cliente
         if hasattr(async_client, "aclose"):
@@ -243,18 +269,25 @@ async def main() -> None:
     if not embedded:
         logger.error("Nenhum embedding gerado"); return
 
-    # Conectar ao Astra DB
-    collection = connect_to_astra(config)
-    
-    # Remover documentos antigos do mesmo source (só se a collection existir e tiver dados)
-    try:
-        del_result = collection.delete_many({"doc_source": src})
-        if del_result.deleted_count > 0:
-            logger.info("Removidos %d documentos antigos (%s)", del_result.deleted_count, src)
-        else:
-            logger.info("Nenhum documento antigo encontrado para remover (%s)", src)
-    except Exception as e:
-        logger.warning("Aviso ao tentar remover documentos antigos: %s", e)
+    # Validar embeddings
+    invalid_docs = [d for d in embedded if not validate_embedding(d["embedding"], config.VOYAGE_EMBEDDING_DIM)]
+    if invalid_docs:
+        logger.error(f"{len(invalid_docs)} documentos com embeddings inválidos")
+        embedded = [d for d in embedded if validate_embedding(d["embedding"], config.VOYAGE_EMBEDDING_DIM)]
+
+    with measure_time(metrics, "database"):
+        # Conectar ao Astra DB
+        collection = connect_to_astra(config)
+        
+        # Remover documentos antigos do mesmo source
+        try:
+            del_result = collection.delete_many({"doc_source": src})
+            if del_result.deleted_count > 0:
+                logger.info("Removidos %d documentos antigos (%s)", del_result.deleted_count, src)
+            else:
+                logger.info("Nenhum documento antigo encontrado para remover (%s)", src)
+        except Exception as e:
+            logger.warning("Aviso ao tentar remover documentos antigos: %s", e)
 
     # Preparar documentos para inserção
     documents = [
@@ -296,6 +329,10 @@ async def main() -> None:
             for j, doc in enumerate(batch):
                 if insert_document_fallback(doc, batch_idx, j):
                     inserted_count += 1
+
+    # Finaliza métricas e mostra resumo
+    metrics.finish()
+    metrics.log_summary()
 
     logger.info("✅ Indexação finalizada: %d/%d páginas inseridas", inserted_count, pdf.page_count)
     pdf.close()
