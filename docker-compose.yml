@@ -1,0 +1,94 @@
+# Docker Compose para APIs de Produção
+# Sistema RAG Multi-Agente
+
+version: '3.8'
+
+services:
+  # API RAG Simples
+  rag-simple-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api-simple
+    ports:
+      - "8000:8000"
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8000
+      - API_LOG_LEVEL=info
+      - API_WORKERS=1
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./temp:/app/temp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - rag-network
+
+  # API Multi-Agente
+  rag-multiagent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api-multiagent
+    ports:
+      - "8001:8001"
+    environment:
+      - API_HOST=0.0.0.0
+      - API_PORT=8001
+      - API_LOG_LEVEL=info
+      - API_WORKERS=1
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - ./temp:/app/temp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - rag-network
+
+  # Redis para cache (opcional)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+  # Nginx como load balancer (opcional)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - rag-simple-api
+      - rag-multiagent-api
+    restart: unless-stopped
+    networks:
+      - rag-network
+
+volumes:
+  redis_data:
+    driver: local
+
+networks:
+  rag-network:
+    driver: bridge

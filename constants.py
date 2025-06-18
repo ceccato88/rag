@@ -55,7 +55,10 @@ TIMEOUT_CONFIG = {
     'MAX_RETRIES': 3,
     'RETRY_DELAY': 1.0,           # 1 segundo
     'CIRCUIT_BREAKER_THRESHOLD': 5,
-    'CIRCUIT_BREAKER_TIMEOUT': 60 # 1 minuto
+    'CIRCUIT_BREAKER_TIMEOUT': 60, # 1 minuto
+    'EXPONENTIAL_BACKOFF_MAX': 60.0,  # Máximo 60 segundos
+    'LINEAR_BACKOFF_MAX': 30.0,       # Máximo 30 segundos
+    'IMMEDIATE_RETRY_DELAY': 1.0      # 1 segundo
 }
 
 # =============================================================================
@@ -80,7 +83,8 @@ MULTIAGENT_CONFIG = {
     'MAX_SUBAGENTS': 3,
     'PARALLEL_EXECUTION': True,
     'USE_LLM_DECOMPOSITION': True,
-    'CONCURRENCY_LIMIT': 3
+    'CONCURRENCY_LIMIT': 3,
+    'SIMILARITY_THRESHOLD': 0.7  # 70% de similaridade para queries
 }
 
 # =============================================================================

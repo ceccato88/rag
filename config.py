@@ -117,6 +117,10 @@ class MultiAgentConfig:
     retry_delay: float = get_env_float('RETRY_DELAY', TIMEOUT_CONFIG['RETRY_DELAY'])
     circuit_breaker_threshold: int = get_env_int('CIRCUIT_BREAKER_THRESHOLD', TIMEOUT_CONFIG['CIRCUIT_BREAKER_THRESHOLD'])
     circuit_breaker_timeout: int = get_env_int('CIRCUIT_BREAKER_TIMEOUT', TIMEOUT_CONFIG['CIRCUIT_BREAKER_TIMEOUT'])
+    exponential_backoff_max: float = get_env_float('EXPONENTIAL_BACKOFF_MAX', TIMEOUT_CONFIG['EXPONENTIAL_BACKOFF_MAX'])
+    linear_backoff_max: float = get_env_float('LINEAR_BACKOFF_MAX', TIMEOUT_CONFIG['LINEAR_BACKOFF_MAX'])
+    immediate_retry_delay: float = get_env_float('IMMEDIATE_RETRY_DELAY', TIMEOUT_CONFIG['IMMEDIATE_RETRY_DELAY'])
+    similarity_threshold: float = get_env_float('SIMILARITY_THRESHOLD', MULTIAGENT_CONFIG['SIMILARITY_THRESHOLD'])
     
     # APIs
     openai_api_key: Optional[str] = None

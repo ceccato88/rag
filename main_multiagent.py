@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """
-🚀 SISTEMA RAG MULTI-AGENTE - ARQUIVO PRINCIPAL
+🚀 SISTEMA RAG MULTI-AGENTE - INTERFACE LINHA DE COMANDO
 
-Este é o arquivo principal para usar o sistema multi-agente em produção.
+Interface interativa para testar o sistema multi-agente via linha de comando.
+Para APIs de produção, use: api_simple.py ou api_multiagent.py
+
 Execute: python main_multiagent.py
 """
 
@@ -89,6 +91,10 @@ async def modo_interativo():
     
     print("🚀 SISTEMA RAG MULTI-AGENTE - MODO INTERATIVO")
     print("="*60)
+    print("💡 Para APIs de produção, use:")
+    print("   • API RAG Simples: python api_simple.py")
+    print("   • API Multi-Agente: python api_multiagent.py")
+    print()
     print("Digite suas perguntas ou 'sair' para terminar")
     print("Comandos: /help, /stats, /trace, /sair")
     print()
@@ -209,8 +215,11 @@ async def modo_demonstracao():
 async def main():
     """Função principal."""
     
-    print("🚀 SISTEMA RAG MULTI-AGENTE")
+    print("🚀 SISTEMA RAG MULTI-AGENTE - CLI")
     print("="*40)
+    print("💡 NOTA: Para produção, use as APIs:")
+    print("   • python api_simple.py (porta 8000)")
+    print("   • python api_multiagent.py (porta 8001)")
     print()
     print("Escolha o modo de execução:")
     print("1. Modo Interativo")
