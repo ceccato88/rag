@@ -2,7 +2,7 @@
 
 import pytest
 from unittest.mock import Mock, patch
-from utils.validation import validate_document, validate_embedding
+from utils.validation import validate_document, validate_embedding, validate_search_result, validate_query, validate_environment_vars, sanitize_filename, validate_file_path
 
 
 @pytest.mark.unit
@@ -103,8 +103,8 @@ class TestValidateEmbedding:
     def test_embedding_with_non_numeric_values(self):
         """Testa embedding com valores não numéricos."""
         embedding = ['a', 'b', 'c'] + [0.1] * 1021
-        # A função atual não valida tipos dos elementos, apenas tamanho
-        assert validate_embedding(embedding, 1024) is True
+        # A função agora valida tipos dos elementos (melhoria de segurança)
+        assert validate_embedding(embedding, 1024) is False
     
     def test_logging_on_error(self):
         """Testa se o logging é chamado corretamente em caso de erro."""
@@ -115,3 +115,77 @@ class TestValidateEmbedding:
             validate_embedding([1, 2, 3], 1024)
             # Verifica se o erro de dimensão é logado
             assert mock_logger.error.call_count == 2
+
+
+@pytest.mark.unit
+class TestValidateSearchResult:
+    """Testes para a função validate_search_result."""
+    
+    def test_valid_search_result(self):
+        """Testa resultado de busca válido."""
+        result = {
+            'answer': 'Test answer',
+            'candidates': [{'page': 1, 'score': 0.9}],
+            'selected_pages': [1, 2]
+        }
+        assert validate_search_result(result) is True
+    
+    def test_missing_answer(self):
+        """Testa resultado sem answer."""
+        result = {
+            'candidates': [{'page': 1, 'score': 0.9}],
+            'selected_pages': [1, 2]
+        }
+        assert validate_search_result(result) is False
+    
+    def test_empty_result(self):
+        """Testa resultado vazio."""
+        assert validate_search_result({}) is False
+
+
+@pytest.mark.unit
+class TestValidateQuery:
+    """Testes para a função validate_query."""
+    
+    def test_valid_query(self):
+        """Testa query válida."""
+        assert validate_query("What is machine learning?") is True
+    
+    def test_empty_query(self):
+        """Testa query vazia."""
+        assert validate_query("") is False
+        assert validate_query("   ") is False
+    
+    def test_none_query(self):
+        """Testa query None."""
+        assert validate_query(None) is False
+    
+    def test_very_short_query(self):
+        """Testa query muito curta."""
+        assert validate_query("ab") is False
+    
+    def test_minimum_valid_length(self):
+        """Testa comprimento mínimo válido."""
+        assert validate_query("abc") is True
+
+
+@pytest.mark.unit
+class TestSanitizeFilename:
+    """Testes para a função sanitize_filename."""
+    
+    def test_valid_filename(self):
+        """Testa nome de arquivo já válido."""
+        assert sanitize_filename("valid_filename.txt") == "valid_filename.txt"
+    
+    def test_special_characters(self):
+        """Testa remoção de caracteres especiais."""
+        assert sanitize_filename("file<>name.txt") == "file_name.txt"
+    
+    def test_spaces(self):
+        """Testa substituição de espaços."""
+        assert sanitize_filename("file name.txt") == "file_name.txt"
+    
+    def test_complex_filename(self):
+        """Testa nome de arquivo complexo."""
+        result = sanitize_filename('___My <File> "Name" | Test___.txt')
+        assert result == "My_File_Name_Test.txt"

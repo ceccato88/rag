@@ -11,6 +11,10 @@ import statistics
 
 from tqdm import tqdm
 
+# Importa utilitários
+from utils.metrics import ProcessingMetrics, measure_time
+from utils.resource_manager import ResourceManager
+
 # Importa a classe RAG de produção
 try:
     from search import ProductionConversationalRAG as MultimodalRagSearcher
@@ -66,6 +70,12 @@ class RAGEvaluator:
         """
         self.rag_searcher = rag_searcher
         self.results: List[EvaluationResult] = []
+        self.metrics = ProcessingMetrics()
+        
+        # Configurar gerenciador de recursos para relatórios
+        self.resource_manager = ResourceManager("evaluation_reports")
+        
+        logging.info("RAGEvaluator inicializado com métricas e gerenciamento de recursos")
 
     def create_test_dataset(self) -> List[TestQuestion]:
         """
@@ -266,7 +276,8 @@ class RAGEvaluator:
 
         logger.info(f"Iniciando avaliação com {len(test_questions)} perguntas")
 
-        self.results = [self.evaluate_single_question(test_q) for test_q in tqdm(test_questions, desc="Avaliando perguntas")]
+        with measure_time(self.metrics, "evaluation_execution"):
+            self.results = [self.evaluate_single_question(test_q) for test_q in tqdm(test_questions, desc="Avaliando perguntas")]
 
         for result in self.results:
              logger.info(f"Q_ID:{result.question_id}: P={result.precision:.2f}, R={result.recall:.2f}, "
@@ -279,14 +290,15 @@ class RAGEvaluator:
             return {"error": "Nenhuma avaliação bem-sucedida"}
 
         # Agrega métricas gerais
-        overall_metrics = {
-            "average_precision": statistics.mean([r.precision for r in successful_results]),
-            "average_recall": statistics.mean([r.recall for r in successful_results]),
-            "average_f1_score": statistics.mean([r.f1_score for r in successful_results]),
-            "average_page_accuracy": statistics.mean([r.page_accuracy for r in successful_results]),
-            "average_keyword_coverage": statistics.mean([r.keyword_coverage for r in successful_results]),
-            "average_response_time": statistics.mean([r.response_time for r in successful_results]),
-        }
+        with measure_time(self.metrics, "metrics_calculation"):
+            overall_metrics = {
+                "average_precision": statistics.mean([r.precision for r in successful_results]),
+                "average_recall": statistics.mean([r.recall for r in successful_results]),
+                "average_f1_score": statistics.mean([r.f1_score for r in successful_results]),
+                "average_page_accuracy": statistics.mean([r.page_accuracy for r in successful_results]),
+                "average_keyword_coverage": statistics.mean([r.keyword_coverage for r in successful_results]),
+                "average_response_time": statistics.mean([r.response_time for r in successful_results]),
+            }
 
         # Agrega métricas por categoria
         categories = {q.category for q in test_questions}
@@ -319,9 +331,24 @@ class RAGEvaluator:
 
     def save_report(self, report: Dict[str, Any], output_path: str = "rag_evaluation_report.json"):
         """Salva relatório em arquivo JSON."""
-        with open(output_path, 'w', encoding='utf-8') as f:
-            json.dump(report, f, indent=2, ensure_ascii=False)
-        logger.info(f"Relatório JSON salvo em: {output_path}")
+        # Usa o diretório gerenciado para salvar relatórios
+        full_path = os.path.join(self.resource_manager.base_dir, output_path)
+        
+        with measure_time(self.metrics, "report_saving"):
+            with open(full_path, 'w', encoding='utf-8') as f:
+                json.dump(report, f, indent=2, ensure_ascii=False)
+        
+        logger.info(f"Relatório JSON salvo em: {full_path}")
+        
+        # Log das métricas finais
+        self.metrics.finish()
+        self.metrics.log_summary()
+        
+        # Log das métricas do avaliador
+        self.metrics.log_summary()
+        
+        # Limpa relatórios antigos (mais de 7 dias)
+        self.resource_manager.cleanup(max_age_hours=168)  # 7 dias
 
     def create_detailed_report(self, report: Dict[str, Any]) -> str:
         """Cria relatório detalhado em texto."""

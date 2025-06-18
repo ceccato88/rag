@@ -25,6 +25,10 @@ import logging
 from typing import List, Tuple
 from dotenv import load_dotenv
 
+# Importa utilitários
+from utils.resource_manager import ResourceManager, cleanup_temp_files
+from utils.metrics import ProcessingMetrics, measure_time
+
 # Configuração de logging
 logging.basicConfig(
     level=logging.INFO,

@@ -24,6 +24,10 @@ from dotenv import load_dotenv
 from astrapy import DataAPIClient
 from astrapy.exceptions import DataAPIException
 
+# Importa utilitários
+from utils.metrics import ProcessingMetrics, measure_time
+from utils.resource_manager import ResourceManager
+
 # Configuração de logging
 logging.basicConfig(
     level=logging.INFO,

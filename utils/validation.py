@@ -1,6 +1,7 @@
-"""Utilitários de validação para o indexador."""
+"""Utilitários de validação para o sistema RAG."""
 import logging
-from typing import Dict
+import re
+from typing import Dict, List, Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -17,4 +18,110 @@ def validate_embedding(embedding: list, expected_dim: int) -> bool:
     if len(embedding) != expected_dim:
         logger.error(f"Dimensão incorreta: esperado {expected_dim}, recebido {len(embedding)}")
         return False
+    
+    # Valida se todos os valores são numéricos
+    if not all(isinstance(x, (int, float)) for x in embedding):
+        logger.error("Embedding contém valores não numéricos")
+        return False
+        
     return True
+
+def validate_search_result(result: Dict) -> bool:
+    """Valida estrutura de resultado de busca RAG."""
+    required_fields = ['answer', 'candidates', 'selected_pages']
+    return all(field in result for field in required_fields)
+
+def validate_query(query: str) -> bool:
+    """Valida se uma query é válida para busca."""
+    if not query or not isinstance(query, str):
+        return False
+    
+    # Remove espaços em branco
+    query = query.strip()
+    
+    # Verifica se não está vazia após limpeza
+    if len(query) == 0:
+        return False
+    
+    # Verifica tamanho mínimo e máximo
+    if len(query) < 3 or len(query) > 1000:
+        logger.warning(f"Query muito curta/longa: {len(query)} caracteres")
+        return False
+    
+    return True
+
+def validate_environment_vars(required_vars: List[str]) -> Dict[str, Any]:
+    """
+    Valida se variáveis de ambiente obrigatórias estão definidas.
+    
+    Args:
+        required_vars: Lista de nomes de variáveis obrigatórias
+        
+    Returns:
+        Dict com status da validação e variáveis faltando
+    """
+    import os
+    
+    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    
+    return {
+        "valid": len(missing_vars) == 0,
+        "missing_vars": missing_vars,
+        "total_required": len(required_vars),
+        "total_found": len(required_vars) - len(missing_vars)
+    }
+
+def sanitize_filename(filename: str) -> str:
+    """Sanitiza nome de arquivo removendo caracteres problemáticos."""
+    # Remove caracteres especiais e substitui por underscore
+    sanitized = re.sub(r'[<>:"/\\|?*]', '_', filename)
+    
+    # Remove espaços múltiplos e substitui por underscore
+    sanitized = re.sub(r'\s+', '_', sanitized)
+    
+    # Remove underscores múltiplos
+    sanitized = re.sub(r'_+', '_', sanitized)
+    
+    # Remove underscore do início e fim
+    sanitized = sanitized.strip('_')
+    
+    # Remove underscores antes da extensão (ex: "file_.txt" -> "file.txt")
+    sanitized = re.sub(r'_+\.', '.', sanitized)
+    
+    return sanitized
+
+def validate_file_path(file_path: str) -> Dict[str, Any]:
+    """
+    Valida se um caminho de arquivo é válido e acessível.
+    
+    Returns:
+        Dict com informações sobre a validação
+    """
+    import os
+    
+    result = {
+        "valid": False,
+        "exists": False,
+        "readable": False,
+        "size": 0,
+        "error": None
+    }
+    
+    try:
+        if not file_path:
+            result["error"] = "Caminho vazio"
+            return result
+        
+        result["exists"] = os.path.exists(file_path)
+        
+        if result["exists"]:
+            result["readable"] = os.access(file_path, os.R_OK)
+            result["size"] = os.path.getsize(file_path)
+            result["valid"] = result["readable"] and result["size"] > 0
+        else:
+            result["error"] = "Arquivo não encontrado"
+            
+    except Exception as e:
+        result["error"] = str(e)
+    
+    return result

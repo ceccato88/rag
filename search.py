@@ -15,6 +15,15 @@ from openai import OpenAI
 from PIL import Image
 from astrapy import DataAPIClient
 
+# Importa utilitários
+from utils.metrics import ProcessingMetrics, measure_time
+from utils.validation import validate_embedding
+from utils.cache import SimpleCache
+
+# Importa utils
+from utils.metrics import ProcessingMetrics, measure_time
+from utils.validation import validate_embedding
+
 # Configurações do sistema
 LLM_MODEL = "gpt-4o" 
 MAX_CANDIDATES = 5
@@ -373,6 +382,13 @@ class ProductionConversationalRAG:
         """Inicializa com configurações do sistema"""
         load_dotenv()
 
+        # Inicializa sistema de métricas
+        self.metrics = ProcessingMetrics()
+        
+        # Inicializa cache para embeddings e respostas
+        self.embedding_cache = SimpleCache(max_size=500, default_ttl=3600)  # 1 hora
+        self.response_cache = SimpleCache(max_size=100, default_ttl=1800)   # 30 min
+
         # Validação de ambiente
         required_vars = [
             "VOYAGE_API_KEY", "OPENAI_API_KEY",
@@ -419,9 +435,6 @@ class ProductionConversationalRAG:
 
     def ask(self, user_message: str) -> str:
         """Interface conversacional principal otimizada"""
-        import time
-        start_time = time.time()
-        
         logger.info(f"[ASK] === INICIANDO PROCESSAMENTO ===")
         logger.info(f"[ASK] Pergunta do usuário: {user_message}")
         
@@ -430,14 +443,13 @@ class ProductionConversationalRAG:
             self.chat_history.append({"role": "user", "content": user_message})
             logger.debug(f"[ASK] Mensagem adicionada ao histórico. Total: {len(self.chat_history)} mensagens")
             
-            # Transforma em query RAG
+            # Transforma em query RAG com métricas
             logger.info(f"[ASK] 🔄 ETAPA 1: Transformando query com IA...")
-            transform_start = time.time()
             
-            transformed_query = self.query_transformer.transform_query(self.chat_history)
+            with measure_time(self.metrics, "query_transformation"):
+                transformed_query = self.query_transformer.transform_query(self.chat_history)
             
-            transform_time = time.time() - transform_start
-            logger.info(f"[ASK] ✅ Query transformada em {transform_time:.2f}s: '{transformed_query}'")
+            logger.info(f"[ASK] ✅ Query transformada: '{transformed_query}'")
             
             # Verifica se precisa fazer RAG
             needs_rag = self.query_transformer.needs_rag(transformed_query)
@@ -445,7 +457,8 @@ class ProductionConversationalRAG:
             
             if not needs_rag:
                 logger.info(f"[ASK] 💬 Gerando resposta conversacional simples...")
-                response = self._generate_non_rag_response(user_message)
+                with measure_time(self.metrics, "non_rag_response"):
+                    response = self._generate_non_rag_response(user_message)
                 logger.info(f"[ASK] ✅ Resposta simples gerada")
             else:
                 # Limpa a query e faz RAG
@@ -453,15 +466,14 @@ class ProductionConversationalRAG:
                 logger.info(f"[ASK] 🧹 Query limpa: '{clean_query}'")
                 logger.info(f"[ASK] 🔍 ETAPA 3: Iniciando busca RAG...")
                 
-                rag_start = time.time()
-                rag_result = self.search_and_answer(clean_query)
-                rag_time = time.time() - rag_start
+                with measure_time(self.metrics, "rag_search"):
+                    rag_result = self.search_and_answer(clean_query)
                 
                 if "error" in rag_result:
-                    logger.warning(f"[ASK] ❌ RAG retornou erro em {rag_time:.2f}s: {rag_result['error']}")
+                    logger.warning(f"[ASK] ❌ RAG retornou erro: {rag_result['error']}")
                     response = f"Desculpe, não consegui encontrar informações sobre isso. {rag_result['error']}"
                 else:
-                    logger.info(f"[ASK] ✅ RAG completado em {rag_time:.2f}s")
+                    logger.info(f"[ASK] ✅ RAG completado")
                     logger.info(f"[ASK] 📊 Páginas selecionadas: {rag_result.get('selected_pages_count', 0)}")
                     logger.info(f"[ASK] 📚 Fonte: {rag_result.get('selected_pages', 'N/A')}")
                     response = rag_result["answer"]
@@ -476,14 +488,14 @@ class ProductionConversationalRAG:
                 self.chat_history = self.chat_history[-16:]
                 logger.debug(f"[ASK] Histórico limitado: {old_len} -> {len(self.chat_history)} mensagens")
             
-            total_time = time.time() - start_time
-            logger.info(f"[ASK] ✅ === PROCESSAMENTO COMPLETO em {total_time:.2f}s ===")
+            # Log de métricas
+            self.metrics.log_summary()
+            logger.info(f"[ASK] ✅ === PROCESSAMENTO COMPLETO ===")
             
             return response
             
         except Exception as e:
-            error_time = time.time() - start_time
-            logger.error(f"[ASK] ❌ Erro no processamento após {error_time:.2f}s: {e}", exc_info=True)
+            logger.error(f"[ASK] ❌ Erro no processamento: {e}", exc_info=True)
             return "Desculpe, ocorreu um erro interno. Tente novamente."
 
     def _generate_non_rag_response(self, user_message: str) -> str:
@@ -502,13 +514,31 @@ class ProductionConversationalRAG:
     # Métodos de RAG originais (mantidos para compatibilidade)
     def get_query_embedding(self, query: str) -> List[float]:
         """Gera embedding para a consulta"""
+        # Verifica cache primeiro
+        cache_key = self.embedding_cache._create_key(query)
+        cached_embedding = self.embedding_cache.get(cache_key)
+        
+        if cached_embedding is not None:
+            logger.debug(f"Cache hit para embedding da query: {query[:50]}...")
+            return cached_embedding
+        
         try:
             res = self.voyage_client.multimodal_embed(
                 inputs=[[query]],
                 model="voyage-multimodal-3",
                 input_type="query"
             )
-            return res.embeddings[0]
+            embedding = res.embeddings[0]
+            
+            # Valida embedding usando utils
+            if not validate_embedding(embedding, 1024):
+                raise ValueError("Embedding inválido retornado pela API")
+            
+            # Armazena no cache
+            self.embedding_cache.set(cache_key, embedding)
+            logger.debug(f"Embedding cacheado para query: {query[:50]}...")
+                
+            return embedding
         except Exception as e:
             logger.error(f"Erro embedding consulta: {e}")
             raise
@@ -1064,7 +1094,7 @@ def print_production_help():
 • /clear    - Limpa histórico
 • /stats    - Estatísticas do sistema
 • /extract  - Extração de dados
-  Exemplo: /extract {"title": "", "authors": []}
+  Exemplo: /extract {\"title\": \"\", \"authors\": []}
 
 💡 RECURSOS:
 • Cache de transformações (economia de custos)

@@ -307,8 +307,8 @@ class TestEvaluatorIntegration:
             TestQuestion("q2", "Question 2", [2], ["answer"], "cat2", "medium")
         ]
         
-        with patch('time.time', side_effect=[1000.0, 1001.0, 1002.0, 1003.0]):
-            report = evaluator.run_evaluation(test_questions)
+        # Remove o patch do time.time para evitar conflito com métricas
+        report = evaluator.run_evaluation(test_questions)
         
         assert "evaluation_summary" in report
         assert "overall_metrics" in report

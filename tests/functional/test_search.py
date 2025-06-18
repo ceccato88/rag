@@ -109,10 +109,10 @@ class TestSearchFunctionality:
         
         rag = ProductionConversationalRAG()
         
-        # Mock embedding
+        # Mock embedding - usando 1024 dimensões para passar na validação
         mock_voyage_client = Mock()
         mock_embedding_response = Mock()
-        mock_embedding_response.embeddings = [[0.1, 0.2, 0.3]]
+        mock_embedding_response.embeddings = [[0.1] * 1024]  # 1024 dimensões
         mock_voyage_client.multimodal_embed.return_value = mock_embedding_response
         rag.voyage_client = mock_voyage_client
         
@@ -167,14 +167,14 @@ class TestSearchFunctionality:
         # Mock voyage client
         mock_voyage_client = Mock()
         mock_response = Mock()
-        mock_response.embeddings = [[0.1, 0.2, 0.3, 0.4]]
+        mock_response.embeddings = [[0.1] * 1024]  # Embedding de 1024 dimensões
         mock_voyage_client.multimodal_embed.return_value = mock_response
         rag.voyage_client = mock_voyage_client
         
         embedding = rag.get_query_embedding("test query")
         
         assert isinstance(embedding, list)
-        assert len(embedding) == 4
+        assert len(embedding) == 1024
         assert all(isinstance(x, float) for x in embedding)
     
     @patch('search.DataAPIClient')
