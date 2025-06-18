@@ -4,11 +4,18 @@
 
 ### **1️⃣ Instalar**
 ```bash
+# Ativar ambiente virtual primeiro
+source .venv/bin/activate
+
+# Instalar dependências
 python install.py
 ```
 
 ### **2️⃣ Executar**
 ```bash
+# Manter ambiente virtual ativo
+source .venv/bin/activate
+
 # Terminal 1: API RAG Simples
 python api_simple.py
 
@@ -18,6 +25,9 @@ python api_multiagent.py
 
 ### **3️⃣ Testar**
 ```bash
+# Ambiente virtual ativo
+source .venv/bin/activate
+
 python example_api_client.py
 ```
 
@@ -27,6 +37,7 @@ python example_api_client.py
 
 ### **📊 API RAG Simples**
 ```python
+# Ativar ambiente virtual primeiro: source .venv/bin/activate
 import requests
 
 response = requests.post("http://localhost:8000/search", json={
@@ -38,6 +49,7 @@ print(response.json()["response"])
 
 ### **🤖 API Multi-Agente**
 ```python
+# Ambiente virtual deve estar ativo
 import requests
 
 response = requests.post("http://localhost:8001/research", json={
@@ -60,10 +72,13 @@ print(response.json()["final_answer"])
 ## 🚨 Problemas?
 
 ```bash
+# Ativar ambiente virtual
+source .venv/bin/activate
+
 # Testar configuração
 python test_api_config.py
 
-# Ver logs
+# Ver logs (se usando Docker)
 docker-compose logs -f
 ```
 

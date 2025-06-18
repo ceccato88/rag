@@ -20,8 +20,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
 
-from src.researcher.agents.simple_lead import SimpleLeadResearcher, SimpleLeadConfig
-from src.researcher.agents.rag_subagent import RAGResearchSubagent, RAGSubagentConfig
+from src.researcher.agents.basic_lead_researcher import BasicLeadResearcher
+from src.researcher.agents.document_search_agent import RAGResearchSubagent
 from src.researcher.agents.base import AgentContext
 from src.researcher.memory.base import InMemoryStorage, ResearchMemory
 from src.researcher.tools.base import ToolRegistry
