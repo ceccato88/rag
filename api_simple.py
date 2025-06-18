@@ -29,10 +29,21 @@ from search import SimpleRAG
 from utils.validation import validate_query
 from utils.metrics import ProcessingMetrics
 
-# Configuração de logging
+# Import maintenance functions
+sys.path.append(os.path.join(os.path.dirname(__file__), 'maintenance'))
+from delete_collection import delete_documents
+from delete_documents import delete_specific_documents  
+from delete_images import delete_images
+
+# Configuração de logging para produção
+log_level = os.getenv("API_LOG_LEVEL", "info").upper()
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=getattr(logging, log_level),
+    format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("/app/logs/api_simple.log")
+    ] if os.path.exists("/app/logs") else [logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
@@ -187,14 +198,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configurar CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure conforme necessário em produção
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configurar CORS para produção
+if os.getenv("ENABLE_CORS", "false").lower() == "true":
+    cors_origins = os.getenv("CORS_ORIGINS", "").split(",")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DEPENDÊNCIAS
@@ -212,6 +225,87 @@ def check_api_ready(state: APIState = Depends(get_api_state)):
             detail="API ainda não está pronta. Tente novamente em alguns segundos."
         )
     return state
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ENDPOINTS DE MANUTENÇÃO (PROTEGIDOS)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.delete("/maintenance/collection")
+async def delete_collection_endpoint(
+    all_docs: bool = False,
+    doc_prefix: str = None,
+    token: str = Depends(verify_token)
+):
+    """Endpoint para deletar documentos da collection AstraDB"""
+    if not all_docs and not doc_prefix:
+        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
+    
+    try:
+        result = delete_documents(all_docs=all_docs, doc_prefix=doc_prefix)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": result["message"],
+                "deleted": result["deleted"]
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/maintenance/documents")
+async def delete_documents_endpoint(
+    all_docs: bool = False,
+    doc_prefix: str = None,
+    token: str = Depends(verify_token)
+):
+    """Endpoint para deletar documentos específicos do AstraDB"""
+    if not all_docs and not doc_prefix:
+        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
+    
+    try:
+        result = delete_specific_documents(all_docs=all_docs, doc_prefix=doc_prefix)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": result["message"],
+                "deleted": result["deleted"],
+                "documents": result.get("documents", [])
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/maintenance/images")
+async def delete_images_endpoint(
+    all_images: bool = False,
+    doc_prefix: str = None,
+    token: str = Depends(verify_token)
+):
+    """Endpoint para deletar imagens extraídas dos PDFs"""
+    if not all_images and not doc_prefix:
+        raise HTTPException(status_code=400, detail="Especifique 'all_images=true' ou 'doc_prefix'")
+    
+    try:
+        result = delete_images(all_images=all_images, doc_prefix=doc_prefix)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": result["message"],
+                "deleted": result["deleted"],
+                "files": result.get("files", [])
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ENDPOINTS PRINCIPAIS

@@ -1,268 +1,201 @@
-# 🚀 Sistema RAG Multi-Agente Avançado
+# 🤖 Sistema RAG Multi-Agente
 
-Um sistema de **Geração Aumentada por Recuperação (RAG)** com arquitetura multi-agente especializada, reasoning avançado e sistema de memória distribuída.
+Sistema de IA avançado com busca semântica e raciocínio multi-agente para consultas complexas.
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-green.svg)](https://openai.com)
-[![Voyage AI](https://img.shields.io/badge/Voyage-Embeddings-purple.svg)](https://voyageai.com)
-[![Astra DB](https://img.shields.io/badge/DataStax-Astra_DB-orange.svg)](https://astra.datastax.com)
+## 🚀 Início Rápido
 
----
-
-## 🎯 **O que é este Sistema?**
-
-Este é um **sistema RAG multi-agente** que combina:
-
-- **🔍 Busca semântica avançada** com embeddings multimodais
-- **🤖 Arquitetura multi-agente** com especialização por domínio
-- **🧠 Reasoning ReAct** (Reason + Act) para tomada de decisão
-- **💾 Sistema de memória distribuída** com cache hierárquico
-- **📊 Processamento multimodal** (texto + imagem)
-
-### **Por que usar?**
-
-**Problemas do RAG tradicional:**
-- ❌ Respostas genéricas e superficiais
-- ❌ Falta de especialização por domínio
-- ❌ Limitado a texto apenas
-
-**Soluções deste sistema:**
-- ✅ **Agentes especializados** para diferentes análises
-- ✅ **Reasoning avançado** com padrão ReAct
-- ✅ **Processamento multimodal** (texto + imagem)
-- ✅ **Configuração flexível** para diferentes casos de uso
-
----
-
-## ⚡ **Início Rápido**
-
-### **3 Passos Simples:**
-
+### 1. Configurar Variáveis
 ```bash
-# 1. Instalar
-source .venv/bin/activate
-python install.py
-
-# 2. Executar
-python api_simple.py      # Terminal 1 - API RAG Simples (porta 8000)
-python api_multiagent.py  # Terminal 2 - API Multi-Agente (porta 8001)
-
-# 3. Testar
-python example_api_client.py
+# Edite .env com suas chaves reais
+OPENAI_API_KEY=sk-proj-sua-chave-aqui
+VOYAGE_API_KEY=pa-sua-chave-aqui
+ASTRA_DB_API_ENDPOINT=https://sua-db-aqui
+ASTRA_DB_APPLICATION_TOKEN=AstraCS:seu-token-aqui
+API_BEARER_TOKEN=$(openssl rand -hex 32)
 ```
 
-### **URLs Principais:**
-- **API Simples**: http://localhost:8000
-- **Multi-Agente**: http://localhost:8001
-- **Docs Swagger**: /docs em cada API
-- **Dashboard**: http://localhost/ (com Docker)
-
----
-
-## 📚 **Documentação Completa**
-
-### **🚀 Para Começar Rapidamente**
-- **[QUICKSTART.md](QUICKSTART.md)** - 3 passos para usar o sistema
-- **[FAQ.md](FAQ.md)** - Perguntas frequentes e soluções rápidas
-
-### **🎯 Para Gerentes e Leads**
-- **[SETUP_FINAL.md](SETUP_FINAL.md)** - Resumo executivo e status do projeto
-- **[docs/PERFORMANCE.md](docs/PERFORMANCE.md)** - Métricas e benchmarks
-
-### **🔧 Para DevOps e Administradores**
-- **[DEPENDENCIES.md](DEPENDENCIES.md)** - Guia completo de instalação
-- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Resolução de problemas
-
-### **👨‍💻 Para Desenvolvedores**
-- **[ESTRUTURA_FINAL.md](ESTRUTURA_FINAL.md)** - Mapa da organização do código
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Como contribuir com o projeto
-- **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** - Arquitetura técnica detalhada
-
-### **🔌 Para Integradores**
-- **[API_USAGE.md](API_USAGE.md)** - Guia completo das APIs
-- **[docs/EXAMPLES.md](docs/EXAMPLES.md)** - Exemplos práticos de uso
-
-### **📖 Para Estudiosos**
-- **[docs/THEORY.md](docs/THEORY.md)** - Teoria RAG e conceitos multi-agente
-- **[CHANGELOG.md](CHANGELOG.md)** - Histórico de versões e mudanças
-
----
-
-## 🏗️ **Arquitetura Resumida**
-
-### **Componentes Principais:**
-```
-📊 Sistema RAG Core (search.py)
-    ↓
-🤖 Sistema Multi-Agente (multi-agent-researcher/)
-    ↓  
-🚀 APIs de Produção (api_simple.py, api_multiagent.py)
-    ↓
-🐳 Deploy com Docker (docker-compose.yml)
-```
-
-### **Fluxo de Dados:**
-```
-Query → Lead Researcher → Agentes Especializados → RAG Engine → Resposta
-```
-
-**Detalhes completos**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-
----
-
-## 🔧 **Configuração Básica**
-
-### **1. Requisitos:**
-- Python 3.8+
-- Chaves API: OpenAI, Voyage AI, Astra DB
-
-### **2. Instalação Automática:**
+### 2. Iniciar Sistema
 ```bash
-# Ativar ambiente virtual
-source .venv/bin/activate
-
-# Instalar tudo
-python install.py
+./production-start.sh
 ```
 
-### **3. Configuração:**
+### 3. Verificar Segurança
 ```bash
-# Copiar template
-cp .env.example .env
-
-# Editar com suas chaves
-# OPENAI_API_KEY=sk-...
-# VOYAGE_API_KEY=pa-...
-# ASTRA_DB_API_ENDPOINT=https://...
-# ASTRA_DB_APPLICATION_TOKEN=AstraCS:...
+./security-check.sh
 ```
 
-**Guia completo**: [DEPENDENCIES.md](DEPENDENCIES.md)
+## 📊 APIs Disponíveis
 
----
+### API Simples (Porta 8000)
+- **Busca Rápida**: Consultas diretas com RAG otimizado
+- **Performance**: Baixa latência, ideal para buscas simples
+- **Endpoint**: `POST /search`
 
-## 💡 **Casos de Uso**
+### API Multi-Agente (Porta 8001)
+- **Raciocínio Avançado**: Consultas complexas com múltiplos agentes
+- **Especialização**: Agentes especializados por tipo de consulta  
+- **Modos**: Síncrono, assíncrono e streaming
+- **Endpoint**: `POST /research`
 
-### **📊 API RAG Simples** - Consultas diretas
-```python
-import requests
-response = requests.post("http://localhost:8000/search", json={
-    "query": "O que é machine learning?"
-})
-print(response.json()["response"])
+### Indexação de Documentos (Ambas APIs)
+- **Indexação por URL**: Processa PDFs de URLs
+- **Extração Multimodal**: Texto e imagens
+- **Chunking Inteligente**: Divisão otimizada
+- **Endpoint**: `POST /index`
+
+## 🔧 Uso
+
+### Busca Simples
+```bash
+curl -X POST "http://localhost:8000/search" \
+  -H "Authorization: Bearer $API_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "machine learning"}'
 ```
 
-### **🤖 API Multi-Agente** - Análises complexas
-```python
-response = requests.post("http://localhost:8001/research", json={
-    "query": "Compare TensorFlow vs PyTorch para deep learning",
+### Pesquisa Multi-Agente
+```bash
+curl -X POST "http://localhost:8001/research" \
+  -H "Authorization: Bearer $API_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "Explain neural networks in detail",
     "processing_mode": "sync"
-})
-print(response.json()["final_answer"])
+  }'
 ```
 
-**Mais exemplos**: [docs/EXAMPLES.md](docs/EXAMPLES.md)
-
----
-
-## 🚀 **Deploy em Produção**
-
-### **Método 1: Docker (Recomendado)**
+### Indexação de Documento
 ```bash
-docker-compose up -d
+curl -X POST "http://localhost:8000/index" \
+  -H "Authorization: Bearer $API_BEARER_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "url": "https://arxiv.org/pdf/2501.13956",
+    "doc_source": "arxiv_2024_paper"
+  }'
 ```
 
-### **Método 2: Manual**
+## 🏗️ Arquitetura
+
+```
+┌─────────────────┐    ┌─────────────────┐
+│   API Simples   │    │ API Multi-Agent │
+│    (Porta 8000) │    │   (Porta 8001)  │
+└─────────────────┘    └─────────────────┘
+         │                       │
+         └───────────┬───────────┘
+                     │
+            ┌─────────────────┐
+            │   Vector DB     │
+            │   (AstraDB)     │
+            └─────────────────┘
+```
+
+### Componentes Principais
+- **SimpleRAG**: Busca vetorial otimizada
+- **EnhancedRAG**: Sistema multi-agente com especialização
+- **DistributedMemory**: Cache hierárquico com sharding
+- **Specialist Agents**: Agentes especializados por domínio
+
+## 🛠️ Comandos Úteis
+
 ```bash
-python api_simple.py      # Porta 8000
-python api_multiagent.py  # Porta 8001
+# Iniciar sistema
+./production-start.sh
+
+# Ver logs
+docker-compose logs -f
+
+# Parar sistema  
+./production-stop.sh
+
+# Deploy completo
+./deploy.sh
+
+# Verificar segurança
+./security-check.sh
 ```
 
-**Guia completo**: [SETUP_FINAL.md](SETUP_FINAL.md)
+## ⚙️ Configuração Avançada
 
----
-
-## 📊 **Performance**
-
-| Métrica | API Simples | Multi-Agente |
-|---------|-------------|--------------|
-| **Tempo médio** | 5-30s | 30-300s |
-| **Precisão** | >85% | >90% |
-| **Casos de uso** | Consultas diretas | Análises complexas |
-
-**Detalhes**: [docs/PERFORMANCE.md](docs/PERFORMANCE.md)
-
----
-
-## 🛠️ **Desenvolvimento**
-
-### **Estrutura do Projeto:**
-```
-rag/
-├── 📄 config.py              # Configuração centralizada
-├── 📄 search.py              # Sistema RAG principal
-├── 📄 indexer.py             # Processamento de documentos
-├── 🚀 api_simple.py          # API RAG simples
-├── 🚀 api_multiagent.py      # API multi-agente
-├── 📁 multi-agent-researcher/ # Sistema multi-agente
-├── 📁 utils/                 # Utilitários
-└── 📁 docs/                  # Documentação detalhada
+### Performance
+```env
+API_WORKERS=4              # Workers por API
+MAX_SUBAGENTS=5           # Agentes simultâneos
+CONCURRENCY_LIMIT=10      # Limite de concorrência
 ```
 
-**Detalhes**: [ESTRUTURA_FINAL.md](ESTRUTURA_FINAL.md)
+### Cache
+```env
+REDIS_URL=redis://redis:6379
+ENABLE_DISTRIBUTED_CACHE=true
+CACHE_TTL=7200
+```
 
-### **Como Contribuir:**
-1. Fork do repositório
-2. Criar branch para feature
-3. Seguir padrões do [CONTRIBUTING.md](CONTRIBUTING.md)
-4. Submeter Pull Request
+### Segurança
+```env
+ENABLE_CORS=false         # CORS desabilitado
+API_RATE_LIMIT=100        # Requests por minuto
+DEBUG=false               # Debug desabilitado
+```
 
----
+## 🔒 Segurança
 
-## ❓ **Problemas?**
+- **Token Bearer fixo** para autenticação
+- **CORS desabilitado** por padrão
+- **Rate limiting** configurado
+- **Containers não-root**
+- **Resource limits** aplicados
+- **Headers de segurança** no Nginx
 
-### **Diagnóstico Rápido:**
+## 🛠️ Endpoints de Manutenção (Protegidos)
+
+### Limpeza de Dados
 ```bash
-# Verificar configuração
-source .venv/bin/activate
-python diagnostico_simples.py
+# Deletar TODOS os documentos
+curl -X DELETE "http://localhost:8000/maintenance/collection?all_docs=true" \
+  -H "Authorization: Bearer $API_BEARER_TOKEN"
+
+# Deletar documentos por prefixo
+curl -X DELETE "http://localhost:8000/maintenance/documents?doc_prefix=arxiv_2024" \
+  -H "Authorization: Bearer $API_BEARER_TOKEN"
+
+# Deletar TODAS as imagens
+curl -X DELETE "http://localhost:8001/maintenance/images?all_images=true" \
+  -H "Authorization: Bearer $API_BEARER_TOKEN"
 ```
 
-### **Problemas Comuns:**
-- **APIs não respondem**: Verificar se portas 8000/8001 estão livres
-- **Erro de configuração**: Verificar chaves no .env
-- **Timeout**: Ajustar MULTIAGENT_TIMEOUT no .env
+## 📈 Monitoramento
 
-**Guia completo**: [FAQ.md](FAQ.md) | [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- **Health checks**: `/health` em ambas APIs
+- **Métricas**: Prometheus (opcional, perfil `monitoring`)
+- **Logs estruturados**: JSON com rotação automática
+- **Alertas**: Via status codes e logs
+
+## 🔧 Troubleshooting
+
+### APIs não respondem
+```bash
+docker-compose ps
+docker-compose logs api-simple api-multiagent
+```
+
+### Problemas de memória
+```bash
+docker stats
+# Ajustar limits no docker-compose.yml
+```
+
+### Verificar configuração
+```bash
+./security-check.sh
+curl http://localhost:8000/health
+curl http://localhost:8001/health
+```
 
 ---
 
-## 📚 **Recursos Adicionais**
-
-- **Documentação FastAPI**: Acesse `/docs` em qualquer API
-- **Logs do sistema**: Diretório `logs/`
-- **Exemplos avançados**: [docs/EXAMPLES.md](docs/EXAMPLES.md)
-- **Teoria RAG**: [docs/THEORY.md](docs/THEORY.md)
-
----
-
-## 🎯 **Resumo**
-
-Este sistema RAG Multi-Agente oferece uma solução completa para consultas inteligentes, combinando:
-
-✅ **Facilidade de uso** (3 passos para começar)  
-✅ **Flexibilidade** (APIs simples e avançada)  
-✅ **Escalabilidade** (deploy em produção pronto)  
-✅ **Documentação completa** (para todos os perfis)
-
-**🚀 Pronto para produção e desenvolvimento!**
-
----
-
-## 📞 **Suporte**
-
-- **Dúvidas rápidas**: [FAQ.md](FAQ.md)
-- **Problemas técnicos**: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
-- **Contribuições**: [CONTRIBUTING.md](CONTRIBUTING.md)
-
-**Happy Coding!** 🎉
+**URLs**: 
+- API Simples: http://localhost:8000
+- API Multi-Agente: http://localhost:8001  
+- Nginx: http://localhost (produção)

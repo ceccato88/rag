@@ -1,0 +1,47 @@
+# Development files
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+.env.example
+.env.development
+.env.local
+.gitignore
+README.md
+*.md
+docs/
+
+# Test files
+test_*.py
+test_*.sh
+tests/
+*_test.py
+example_*.py
+
+# Development tools
+delete_*.py
+debug_*.py
+.vscode/
+.idea/
+
+# Logs and temp files
+*.log
+logs/
+temp/
+pdf_images/
+.DS_Store
+*.tmp
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# Git
+.git/
+.gitattributes
+
+# Docker files not needed in build
+docker-compose*.yml
+Dockerfile*
+.dockerignore

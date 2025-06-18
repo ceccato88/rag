@@ -42,13 +42,27 @@ from researcher.agents.enhanced_rag_subagent import (
     EnhancedRAGSubagentConfig
 )
 from researcher.agents.base import AgentContext, AgentResult, AgentState
-# from researcher.memory.memory_manager import InMemoryManager  # Import removido - arquivo não existe
-from researcher.memory.base import ResearchMemory
+from researcher.memory.base import InMemoryStorage, ResearchMemory
+from researcher.memory.enhanced_memory import DistributedMemoryStorage
 
-# Configuração de logging
+# Import maintenance functions
+sys.path.append(os.path.join(os.path.dirname(__file__), 'maintenance'))
+from delete_collection import delete_documents
+from delete_documents import delete_specific_documents
+from delete_images import delete_images
+
+# Import indexer functions
+from indexer import PDFIndexer, IndexingResult
+
+# Configuração de logging para produção
+log_level = os.getenv("API_LOG_LEVEL", "info").upper()
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    level=getattr(logging, log_level),
+    format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler("/app/logs/api_multiagent.log")
+    ] if os.path.exists("/app/logs") else [logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
 
@@ -142,6 +156,22 @@ class JobStatus(BaseModel):
     result: Optional[MultiAgentResponse] = None
     error: Optional[str] = None
 
+class IndexRequest(BaseModel):
+    """Requisição para indexação de documento"""
+    url: str = Field(..., description="URL do PDF para indexar")
+    doc_source: Optional[str] = Field(None, description="Nome/identificador do documento")
+
+class IndexResponse(BaseModel):
+    """Resposta da indexação"""
+    success: bool
+    message: str
+    doc_source: str
+    pages_processed: int
+    chunks_created: int
+    images_extracted: int
+    processing_time: float
+    metadata: Dict[str, Any]
+
 class ComplexityAnalysis(BaseModel):
     """Análise de complexidade da consulta"""
     detected_complexity: QueryComplexity
@@ -166,7 +196,7 @@ class MultiAgentAPIState:
         # Sistema multi-agente
         self.lead_researcher: Optional[OpenAILeadResearcher] = None
         self.specialist_selector = SpecialistSelector()
-        # self.memory_manager = InMemoryManager()  # Comentado - classe não disponível
+        self.memory_storage = DistributedMemoryStorage()
         self.research_memory: Optional[ResearchMemory] = None
         
         # WebSocket connections para streaming
@@ -263,8 +293,7 @@ async def initialize_multiagent_system():
             raise RuntimeError(f"Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
         
         # Inicializar memória de pesquisa
-        # api_state.research_memory = ResearchMemory(api_state.memory_manager)  # Temporariamente comentado
-        api_state.research_memory = None  # Placeholder até corrigir memory_manager
+        api_state.research_memory = ResearchMemory(api_state.memory_storage)
         
         # Configurar lead researcher
         lead_config = OpenAILeadConfig.from_env()
@@ -289,14 +318,16 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Configurar CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Configure conforme necessário em produção
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Configurar CORS para produção
+if os.getenv("ENABLE_CORS", "false").lower() == "true":
+    cors_origins = os.getenv("CORS_ORIGINS", "").split(",")
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=cors_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # DEPENDÊNCIAS
@@ -314,6 +345,124 @@ def check_api_ready(state: MultiAgentAPIState = Depends(get_api_state)):
             detail="API ainda não está pronta. Tente novamente em alguns segundos."
         )
     return state
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ENDPOINTS DE MANUTENÇÃO (PROTEGIDOS)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.delete("/maintenance/collection")
+async def delete_collection_endpoint(
+    all_docs: bool = False,
+    doc_prefix: str = None,
+    token: str = Depends(verify_token)
+):
+    """Endpoint para deletar documentos da collection AstraDB"""
+    if not all_docs and not doc_prefix:
+        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
+    
+    try:
+        result = delete_documents(all_docs=all_docs, doc_prefix=doc_prefix)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": result["message"],
+                "deleted": result["deleted"]
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/maintenance/documents")
+async def delete_documents_endpoint(
+    all_docs: bool = False,
+    doc_prefix: str = None,
+    token: str = Depends(verify_token)
+):
+    """Endpoint para deletar documentos específicos do AstraDB"""
+    if not all_docs and not doc_prefix:
+        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
+    
+    try:
+        result = delete_specific_documents(all_docs=all_docs, doc_prefix=doc_prefix)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": result["message"],
+                "deleted": result["deleted"],
+                "documents": result.get("documents", [])
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.delete("/maintenance/images")
+async def delete_images_endpoint(
+    all_images: bool = False,
+    doc_prefix: str = None,
+    token: str = Depends(verify_token)
+):
+    """Endpoint para deletar imagens extraídas dos PDFs"""
+    if not all_images and not doc_prefix:
+        raise HTTPException(status_code=400, detail="Especifique 'all_images=true' ou 'doc_prefix'")
+    
+    try:
+        result = delete_images(all_images=all_images, doc_prefix=doc_prefix)
+        
+        if result["success"]:
+            return {
+                "success": True,
+                "message": result["message"],
+                "deleted": result["deleted"],
+                "files": result.get("files", [])
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result["error"])
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/index")
+async def index_document_endpoint(
+    url: str,
+    doc_source: str = None,
+    background_tasks: BackgroundTasks = None,
+    token: str = Depends(verify_token)
+):
+    """Endpoint para indexar documento por URL"""
+    try:
+        # Inicializar indexer
+        indexer = PDFIndexer()
+        
+        # Usar URL como doc_source se não fornecido
+        if not doc_source:
+            from indexer import create_doc_source_name
+            doc_source = create_doc_source_name(url)
+        
+        # Executar indexação
+        result = await indexer.process_pdf_async(url, doc_source)
+        
+        if result.success:
+            return {
+                "success": True,
+                "message": "Documento indexado com sucesso",
+                "doc_source": doc_source,
+                "pages_processed": result.pages_processed,
+                "chunks_created": result.chunks_created,
+                "images_extracted": result.images_extracted,
+                "processing_time": result.processing_time,
+                "metadata": result.metadata
+            }
+        else:
+            raise HTTPException(status_code=500, detail=result.error)
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ENDPOINTS PRINCIPAIS
