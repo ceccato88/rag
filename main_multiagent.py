@@ -37,18 +37,21 @@ class MultiAgentRAGSystem:
             config=self.config
         )
         
-    async def ask(self, question: str, objective: str = None, constraints: list = None) -> str:
+    async def ask(self, question: str, objective: str = None, constraints: list = None, streaming: bool = True) -> str:
         """
-        Fazer uma pergunta ao sistema multi-agente.
+        Fazer uma pergunta ao sistema multi-agente, mostrando raciocínio em tempo real se streaming=True.
         
         Args:
             question: Pergunta do usuário
             objective: Objetivo da pesquisa (opcional)
             constraints: Restrições da pesquisa (opcional)
+            streaming: Exibir raciocínio em tempo real (padrão: True)
             
         Returns:
             Resposta do sistema
         """
+        from time import sleep
+        import asyncio
         
         # Criar contexto
         context = AgentContext(
@@ -63,9 +66,32 @@ class MultiAgentRAGSystem:
             print(f"⚠️  Restrições: {', '.join(constraints)}")
         print()
         
-        # Executar sistema multi-agente
-        result = await self.agent.run(context)
-        
+        # Executar sistema multi-agente com streaming
+        task = asyncio.create_task(self.agent.run(context))
+        last_len = 0
+        print("🧠 Raciocínio em tempo real:")
+        while not task.done():
+            if hasattr(self.agent, 'reasoner'):
+                trace = self.agent.reasoner.reasoning_history
+                for step in trace[last_len:]:
+                    print(f"  [{step.step_type.upper()}] {step.content}")
+                    if step.observations:
+                        print(f"     💡 {step.observations}")
+                    if step.next_action:
+                        print(f"     ➡️  Próxima ação: {step.next_action}")
+                last_len = len(trace)
+            await asyncio.sleep(0.5)
+        result = await task
+        # Print any final steps
+        if hasattr(self.agent, 'reasoner'):
+            trace = self.agent.reasoner.reasoning_history
+            for step in trace[last_len:]:
+                print(f"  [{step.step_type.upper()}] {step.content}")
+                if step.observations:
+                    print(f"     💡 {step.observations}")
+                if step.next_action:
+                    print(f"     ➡️  Próxima ação: {step.next_action}")
+        print()
         return result.output
     
     def get_reasoning_trace(self) -> list:
