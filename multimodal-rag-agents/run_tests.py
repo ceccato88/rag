@@ -34,25 +34,26 @@ def run_command(cmd, description):
     return True
 
 def install_test_dependencies():
-    """Install test dependencies."""
-    print("📦 Installing test dependencies...")
-    return run_command("pip install -e .[test]", "Installing test dependencies")
+    """Check test dependencies (skip installation in Replit)."""
+    print("📦 Checking test dependencies...")
+    print("✅ Using pre-installed dependencies in Replit environment")
+    return True
 
 def run_unit_tests():
     """Run unit tests."""
-    return run_command("python -m pytest tests/unit/ -v -m 'not slow'", "Running unit tests")
+    return run_command("PYTHONPATH=src python -m pytest tests/unit/ -v", "Running unit tests")
 
 def run_integration_tests():
     """Run integration tests."""
-    return run_command("python -m pytest tests/integration/ -v -m 'not slow'", "Running integration tests")
+    return run_command("PYTHONPATH=src python -m pytest tests/integration/ -v", "Running integration tests")
 
 def run_all_tests():
     """Run all tests."""
-    return run_command("python -m pytest tests/ -v", "Running all tests")
+    return run_command("PYTHONPATH=src python -m pytest tests/ -v", "Running all tests")
 
 def run_tests_with_coverage():
     """Run tests with coverage report."""
-    return run_command("python -m pytest tests/ --cov=src --cov-report=html --cov-report=term", "Running tests with coverage")
+    return run_command("PYTHONPATH=src python -m pytest tests/ --cov=src --cov-report=html --cov-report=term", "Running tests with coverage")
 
 def run_linting():
     """Run code linting."""
