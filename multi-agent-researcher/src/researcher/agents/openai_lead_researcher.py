@@ -3,9 +3,9 @@
 import asyncio
 import uuid
 import sys
+import os
 from typing import Any, Dict, List, Optional
 from datetime import datetime
-import os
 from pathlib import Path
 
 # Adiciona o diretório raiz ao path para importar config
@@ -91,8 +91,8 @@ class OpenAILeadResearcher(Agent[str]):
         self.client = None
         self.reasoner = ReActReasoner(f"OpenAI Lead Researcher ({self.agent_id})")
         
-        # Initialize OpenAI client if available
-        if OPENAI_AVAILABLE and self.config.use_llm_decomposition:
+        # Initialize OpenAI client for both decomposition AND synthesis
+        if OPENAI_AVAILABLE:
             api_key = self.config.api_key
             if api_key:
                 try:
@@ -100,36 +100,29 @@ class OpenAILeadResearcher(Agent[str]):
                     self.client = instructor.from_openai(base_client)
                     self.reasoner.add_reasoning_step(
                         "initialization",
-                        f"✅ OpenAI client initialized with model: {self.config.model}",
-                        f"API key present: {'Yes' if api_key else 'No'}"
+                        f"✅ OpenAI client initialized for decomposition and synthesis",
+                        f"Models: decomposition={self.config.model}, coordinator={os.getenv('COORDINATOR_MODEL', 'gpt-4.1')}"
                     )
                 except Exception as e:
                     self.reasoner.add_reasoning_step(
                         "initialization",
                         f"❌ Failed to initialize OpenAI client: {e}",
-                        "Falling back to heuristic decomposition"
+                        "Will use fallback methods"
                     )
                     self.client = None
             else:
                 self.reasoner.add_reasoning_step(
                     "initialization",
                     "⚠️ No OpenAI API key found",
-                    "Using heuristic decomposition instead"
+                    "Cannot use advanced synthesis"
                 )
                 self.client = None
         else:
-            if not OPENAI_AVAILABLE:
-                self.reasoner.add_reasoning_step(
-                    "initialization",
-                    "⚠️ OpenAI/instructor not available",
-                    "Using heuristic decomposition"
-                )
-            else:
-                self.reasoner.add_reasoning_step(
-                    "initialization",
-                    "ℹ️ LLM decomposition disabled",
-                    "Using heuristic decomposition"
-                )
+            self.reasoner.add_reasoning_step(
+                "initialization",
+                "⚠️ OpenAI/instructor not available",
+                "Cannot use advanced synthesis"
+            )
             self.client = None
 
     async def plan(self, context: AgentContext) -> List[Dict[str, Any]]:
@@ -147,17 +140,27 @@ class OpenAILeadResearcher(Agent[str]):
             f"Available constraints: {len(context.constraints) if context.constraints else 0}"
         ]
         
+        # Enhanced reasoning with critical analysis from the start
         facts.recalled_facts = [
             "RAG systems work best with specific, focused queries",
-            "Multiple perspectives improve research completeness",
-            f"Maximum {self.config.max_subagents} subagents available",
-            "Parallel execution can speed up research" if self.config.parallel_execution else "Sequential execution is more reliable"
+            "Multiple perspectives improve research completeness and reduce bias",
+            f"Maximum {self.config.max_subagents} subagents available for parallel investigation",
+            "Parallel execution can speed up research" if self.config.parallel_execution else "Sequential execution is more reliable",
+            "Focus area specialization improves query precision and result relevance",
+            "Cross-referencing between different focus areas reveals connections and contradictions",
+            "Document-based evidence provides more reliable foundation than web search"
         ]
         
+        # More sophisticated assumptions based on query analysis
+        query_lower = context.query.lower()
         facts.assumptions = [
-            "Query requires multi-faceted investigation",
-            "Document search will be the primary research method",
-            "Different angles will yield complementary results"
+            "Query requires multi-faceted investigation to avoid incomplete analysis",
+            "Document search will be the primary research method for evidence-based findings",
+            "Different focus areas will yield complementary and potentially contradictory results",
+            f"Query complexity level: {'high' if len(context.query.split()) > 10 else 'moderate' if len(context.query.split()) > 5 else 'low'}",
+            f"Technical depth expected: {'high' if any(tech in query_lower for tech in ['implement', 'algorithm', 'architecture']) else 'moderate'}",
+            f"Conceptual clarity needed: {'high' if any(concept in query_lower for concept in ['what is', 'define', 'explain']) else 'moderate'}",
+            "Results will require critical evaluation for consistency and reliability"
         ]
         
         # Planning phase
@@ -177,25 +180,52 @@ RAG Research Subagents: Can search and analyze documents for specific topics
             ]
         )
         
+        # Use LLM decomposition if client available AND enabled
         if self.client and self.config.use_llm_decomposition:
-            return await self._plan_with_llm(context)
+            return await self._plan_with_llm(context, facts, plan)
         else:
-            return await self._plan_heuristic(context)
+            # Use heuristic decomposition (but client will still be available for synthesis)
+            return await self._plan_heuristic(context, facts, plan)
     
-    async def _plan_with_llm(self, context: AgentContext) -> List[Dict[str, Any]]:
+    async def _plan_with_llm(self, context: AgentContext, facts, plan) -> List[Dict[str, Any]]:
         """Plan using OpenAI GPT-4o mini with ReAct reasoning."""
         
         self.reasoner.add_reasoning_step(
             "planning",
-            "Using LLM-based decomposition for query planning",
-            f"Query complexity requires intelligent analysis using {self.config.model}"
+            "Using LLM-based decomposition informed by ReAct reasoning",
+            f"Integrating manual reasoning with {self.config.model} for optimal focus area selection"
         )
 
-        system_prompt = """You are an expert research coordinator. Analyze the given query and decompose it into specific tasks for RAG (document search) subagents.
+        system_prompt = """You are an expert research coordinator. Analyze the given query and decompose it into specific tasks for specialized RAG (document search) subagents.
+
+🎯 AVAILABLE FOCUS AREAS (choose the most relevant for each task):
+
+• **conceptual**: Definitions, concepts, fundamentals, theoretical foundations
+  → Use when: user asks "what is", needs basic understanding, theoretical background
+
+• **technical**: Implementation details, architecture, algorithms, how-to guides
+  → Use when: user wants to implement, needs technical specifics, code examples
+
+• **comparative**: Comparisons, differences, advantages/disadvantages, alternatives
+  → Use when: user asks "vs", "difference", "better than", needs evaluation
+
+• **examples**: Use cases, case studies, practical examples, demonstrations
+  → Use when: user wants concrete examples, real-world applications, proof of concept
+
+• **overview**: General introduction, broad survey, comprehensive summary
+  → Use when: user needs general understanding, broad perspective, getting started
+
+• **applications**: Practical applications, real-world usage, industry implementations
+  → Use when: user wants to know practical uses, business applications, deployment
+
+• **general**: Broad, comprehensive research without specific focus
+  → Use when: query is very general or doesn't fit other categories
+
+STRATEGY: Choose 2-4 complementary focus areas that together provide comprehensive coverage of the query.
 
 Consider:
 1. What are the key aspects that need investigation?
-2. How can this be divided into independent search tasks?
+2. Which focus areas best complement each other for this query?
 3. What search strategies would be most effective?
 4. How many subagents are needed (1-5)?
 
@@ -203,26 +233,40 @@ CRITICAL: You MUST provide a complete response with ALL required fields. The sub
 
 Required JSON structure:
 {
-  "reasoning": "Explanation of your decomposition strategy",
+  "reasoning": "Explanation of your decomposition strategy and why you chose these specific focus areas",
   "complexity": "simple|moderate|complex",
   "number_of_subagents": <number>,
   "subagent_tasks": [
     {
       "query": "specific search query for documents",
       "objective": "what this search should accomplish",
-      "focus": "overview|technical|applications|comparison"
+      "focus": "conceptual|technical|comparative|examples|overview|applications|general"
     }
   ]
 }
 
-IMPORTANT: The number of items in subagent_tasks MUST match number_of_subagents. Create diverse, complementary search tasks."""
+IMPORTANT: The number of items in subagent_tasks MUST match number_of_subagents. Create diverse, complementary search tasks using different focus areas."""
+
+        # Integrate ReAct reasoning with LLM prompt
+        reasoning_context = f"""
+REACT REASONING ANALYSIS:
+Given Facts: {', '.join(facts.given_facts)}
+Recalled Facts: {', '.join(facts.recalled_facts)}
+Assumptions: {', '.join(facts.assumptions)}
+Planned Approach: {plan.objective if plan else 'No specific plan'}
+Available Resources: {', '.join(plan.resources_needed) if plan and plan.resources_needed else 'Standard RAG capabilities'}
+"""
 
         user_prompt = f"""
 Query: {context.query}
 Objective: {context.objective}
 Constraints: {', '.join(context.constraints) if context.constraints else 'None'}
 
-Decompose this into specific research tasks for document search agents. Each task should focus on a different aspect or angle of the query.
+{reasoning_context}
+
+Based on the ReAct reasoning analysis above, decompose this into specific research tasks for document search agents. Each task should focus on a different aspect or angle of the query, taking into account the facts, assumptions, and planned approach identified.
+
+Choose focus areas that complement the reasoning analysis and provide comprehensive coverage.
 
 Return the decomposition in the exact JSON format specified in the system prompt.
 """
@@ -266,15 +310,15 @@ Return the decomposition in the exact JSON format specified in the system prompt
                 f"❌ LLM decomposition failed: {e}",
                 "Falling back to heuristic decomposition"
             )
-            return await self._plan_heuristic(context)
+            return await self._plan_heuristic(context, facts, plan)
     
-    async def _plan_heuristic(self, context: AgentContext) -> List[Dict[str, Any]]:
+    async def _plan_heuristic(self, context: AgentContext, facts, plan) -> List[Dict[str, Any]]:
         """Fallback heuristic-based planning with ReAct reasoning."""
         
         self.reasoner.add_reasoning_step(
             "planning",
-            "Using heuristic decomposition as fallback",
-            "LLM not available or failed, using rule-based approach"
+            "Using heuristic decomposition informed by ReAct reasoning",
+            f"LLM not available, using rule-based approach with {len(facts.given_facts)} facts and {len(facts.assumptions)} assumptions"
         )
         
         # Base task
@@ -479,12 +523,145 @@ Return the decomposition in the exact JSON format specified in the system prompt
         return results
     
     def _synthesize_results(self, tasks: List[Dict[str, Any]], results: List[AgentResult]) -> str:
-        """Synthesize results from multiple RAG subagents."""
+        """Synthesize results from multiple RAG subagents using advanced coordinator model."""
         successful_results = [r for r in results if r.status == AgentState.COMPLETED and r.output]
         
         if not successful_results:
             return "❌ No results obtained from RAG research. Check if documents are indexed."
         
+        # ALWAYS try advanced AI synthesis using coordinator model (gpt-4.1)
+        if self.client and successful_results:
+            try:
+                return self._advanced_ai_synthesis(tasks, successful_results)
+            except Exception as e:
+                self.reasoner.add_reasoning_step(
+                    "synthesis",
+                    f"❌ Advanced AI synthesis failed: {e}",
+                    "Error will be raised - coordinator must use gpt-4.1"
+                )
+                # Re-raise the exception to ensure we don't fallback
+                raise Exception(f"Coordinator synthesis failed: {e}")
+        
+        # Only fallback if no client available (configuration error)
+        if not self.client:
+            self.reasoner.add_reasoning_step(
+                "synthesis",
+                "⚠️ No OpenAI client available for advanced synthesis",
+                "Using basic synthesis as emergency fallback"
+            )
+        
+        return self._basic_synthesis(tasks, results, successful_results)
+    
+    def _advanced_ai_synthesis(self, tasks: List[Dict[str, Any]], successful_results: List[AgentResult]) -> str:
+        """Advanced AI-powered synthesis using coordinator model (gpt-4.1)."""
+        coordinator_model = os.getenv('COORDINATOR_MODEL', 'gpt-4.1')
+        
+        # Prepare subagent findings for analysis
+        findings_summary = []
+        for i, (task, result) in enumerate(zip(tasks, successful_results)):
+            findings_summary.append({
+                "task_focus": task.get('focus', 'general'),
+                "query": task['query'],
+                "findings": result.output[:2000]  # Limit for token management
+            })
+        
+        # Integrate ReAct reasoning trace with synthesis
+        reasoning_trace = self.reasoner.get_reasoning_trace()
+        
+        synthesis_prompt = f"""Como coordenador de pesquisa AI, analise criticamente os resultados dos subagentes e sintetize uma resposta final abrangente e estruturada.
+
+CONTEXTO DO PROCESSO DE REASONING:
+{reasoning_trace}
+
+RESULTADOS DOS SUBAGENTES:
+{chr(10).join([f"### {f['task_focus'].title()}: {f['query']}{chr(10)}{f['findings']}{chr(10)}" for f in findings_summary])}
+
+INSTRUÇÕES PARA SÍNTESE CRÍTICA AVANÇADA:
+1. **Continuidade do Reasoning**: Continue o processo de raciocínio iniciado no planejamento, mantendo consistência lógica
+2. **Análise Cross-Reference**: Identifique conexões, contradições e padrões entre os achados
+3. **Validação Crítica**: Avalie a consistência e confiabilidade das informações baseado no reasoning trace
+4. **Síntese Estruturada**: Organize em seções lógicas que reflitam o desenvolvimento do reasoning
+5. **Insights Originais**: Derive conclusões que não estão explícitas, mas são logicamente consistentes com o reasoning inicial
+6. **Reflexão sobre o Processo**: Avalie se os resultados confirmam ou contradizem as assumptions iniciais
+7. **Gaps e Limitações**: Identifique lacunas baseado no que foi planejado vs. o que foi encontrado
+
+FORMATO DA RESPOSTA:
+- Use markdown estruturado com headers (##, ###)
+- Inclua seções: Resumo Executivo, Achados Principais, Análise Crítica, Validação do Reasoning, Conclusões
+- Cite evidências específicas dos subagentes
+- Referencie o reasoning trace quando relevante
+- Mantenha tom profissional e acadêmico
+
+Produza uma síntese que demonstre continuidade e evolução do reasoning inicial, integrando pensamento crítico avançado."""
+
+        try:
+            self.reasoner.add_reasoning_step(
+                "synthesis",
+                f"🧠 Executing advanced synthesis with {coordinator_model}",
+                f"Processing {len(successful_results)} subagent results"
+            )
+            
+            # Create a separate OpenAI client for synthesis (synchronous)
+            from openai import OpenAI
+            sync_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+            response = sync_client.chat.completions.create(
+                model=coordinator_model,
+                messages=[{"role": "user", "content": synthesis_prompt}],
+                max_tokens=4000,
+                temperature=0.1
+            )
+            
+            synthesized_content = response.choices[0].message.content.strip()
+            
+            # Add metadata header
+            final_report = f"""# 🤖 AI-Coordinated Research Synthesis
+
+**Coordinator Model**: {coordinator_model}
+**Synthesis Method**: Advanced AI Critical Analysis
+**Subagents Processed**: {len(successful_results)}/{len(tasks)}
+**Timestamp**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+
+---
+
+{synthesized_content}
+
+---
+
+## 📊 Research Metadata
+- **Decomposition**: {'LLM-based' if self.client else 'Heuristic'}
+- **Total Tasks**: {len(tasks)}
+- **Success Rate**: {len(successful_results)}/{len(tasks)} ({len(successful_results)/len(tasks)*100:.0f}%)
+- **AI Models**: Subagents ({self.config.model}) + Coordinator ({coordinator_model})
+"""
+            
+            # Final reasoning validation
+            self.reasoner.add_reasoning_step(
+                "synthesis",
+                f"✅ Advanced synthesis completed successfully",
+                f"Generated {len(synthesized_content)} characters of synthesized content"
+            )
+            
+            # Validate reasoning consistency
+            validation = self.reasoner.validate_progress(f"Synthesis for: {tasks[0]['query'] if tasks else 'unknown query'}")
+            
+            self.reasoner.add_reasoning_step(
+                "validation",
+                f"🔍 Final reasoning validation: {'Consistent' if not validation.is_in_loop else 'Potential inconsistencies detected'}",
+                f"Confidence: {validation.confidence_level:.2f}, Progress: {validation.progress_summary}"
+            )
+            
+            return final_report
+            
+        except Exception as e:
+            self.reasoner.add_reasoning_step(
+                "synthesis",
+                f"❌ Advanced synthesis failed: {e}",
+                "Error in coordinator model processing"
+            )
+            raise
+    
+    def _basic_synthesis(self, tasks: List[Dict[str, Any]], results: List[AgentResult], successful_results: List[AgentResult]) -> str:
+        """Basic synthesis fallback method."""
         # Build comprehensive report
         report_lines = [
             "# 🤖 OpenAI-Coordinated RAG Research Report",

@@ -116,51 +116,10 @@ class SearchResultEvaluation(BaseModel):
     )
 
 
-class SubagentReport(BaseModel):
-    """Final report from a subagent."""
-    task_summary: str = Field(
-        description="Summary of the task completed"
-    )
-    findings: List[Dict[str, str]] = Field(
-        description="List of findings with title, content, and source"
-    )
-    key_insights: List[str] = Field(
-        description="Key insights discovered"
-    )
-    sources_used: List[str] = Field(
-        description="List of sources consulted"
-    )
-    confidence_level: Literal["high", "medium", "low"] = Field(
-        description="Confidence in the findings"
-    )
-    limitations: List[str] = Field(
-        description="Any limitations or caveats",
-        default_factory=list
-    )
+# SubagentReport removido - não usado na resposta final
 
 
-class ResearchSynthesis(BaseModel):
-    """Synthesis of all subagent findings."""
-    executive_summary: str = Field(
-        description="High-level summary of research findings"
-    )
-    main_findings: List[str] = Field(
-        description="Main findings organized by importance"
-    )
-    detailed_sections: List[Dict[str, str]] = Field(
-        description="Detailed sections with title and content"
-    )
-    connections_found: List[str] = Field(
-        description="Connections and patterns across subagent findings"
-    )
-    gaps_remaining: List[str] = Field(
-        description="Any remaining information gaps",
-        default_factory=list
-    )
-    recommendations: List[str] = Field(
-        description="Recommendations based on findings",
-        default_factory=list
-    )
+# ResearchSynthesis removido - não usado na resposta final
 
 
 class CitationMapping(BaseModel):

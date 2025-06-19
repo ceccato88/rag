@@ -32,7 +32,8 @@ class AIConfig(BaseSettings):
     
     openai_api_key: str = Field(..., description="Chave da API OpenAI")
     voyage_api_key: str = Field(..., description="Chave da API Voyage")
-    openai_model: str = Field(default="gpt-4.1-mini", description="Modelo OpenAI")
+    openai_model: str = Field(default="gpt-4.1-mini", description="Modelo OpenAI para subagentes")
+    coordinator_model: str = Field(default="gpt-4.1", description="Modelo OpenAI para coordenador")
     embedding_model: str = Field(default="voyage-multimodal-3", description="Modelo de embedding")
     max_tokens: int = Field(default=4000, ge=1, le=100000, description="Máximo de tokens")
     temperature: float = Field(default=0.1, ge=0.0, le=2.0, description="Temperatura do modelo")

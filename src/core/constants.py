@@ -11,6 +11,7 @@ fornecendo valores padrão otimizados para as APIs que usam modelos nativos.
 
 DEFAULT_MODELS = {
     'LLM': 'gpt-4.1-mini',
+    'COORDINATOR': 'gpt-4.1',
     'EMBEDDING': 'voyage-multimodal-3', 
     'MULTIAGENT': 'gpt-4.1-mini',
     'MULTIMODAL': 'voyage-multimodal-3'
@@ -141,10 +142,13 @@ FALLBACK_CONFIG = {
 # =============================================================================
 
 SPECIALIST_TYPES = {
-    'CONCEPT': 'ConceptExtractionSubagent',
+    'CONCEPTUAL': 'ConceptExtractionSubagent',
     'COMPARATIVE': 'ComparativeAnalysisSubagent', 
     'TECHNICAL': 'TechnicalDetailSubagent',
-    'EXAMPLES': 'ExampleFinderSubagent'
+    'EXAMPLES': 'ExampleFinderSubagent',
+    'OVERVIEW': 'OverviewSubagent',
+    'APPLICATIONS': 'ApplicationsSubagent',
+    'GENERAL': 'GeneralResearchSubagent'
 }
 
 # =============================================================================
@@ -152,7 +156,7 @@ SPECIALIST_TYPES = {
 # =============================================================================
 
 SPECIALIST_PATTERNS = {
-    'CONCEPT': [
+    'CONCEPTUAL': [
         'what is', 'define', 'definition', 'concept', 'meaning',
         'o que é', 'definição', 'conceito', 'significado'
     ],
@@ -167,6 +171,18 @@ SPECIALIST_PATTERNS = {
     'EXAMPLES': [
         'example', 'case study', 'use case', 'application',
         'exemplo', 'caso de uso', 'aplicação', 'demonstração'
+    ],
+    'OVERVIEW': [
+        'overview', 'introduction', 'general', 'summary',
+        'visão geral', 'introdução', 'geral', 'resumo'
+    ],
+    'APPLICATIONS': [
+        'practical', 'real-world', 'usage', 'applications',
+        'prático', 'mundo real', 'uso', 'aplicações'
+    ],
+    'GENERAL': [
+        'general', 'broad', 'comprehensive', 'overall',
+        'geral', 'amplo', 'abrangente', 'global'
     ]
 }
 

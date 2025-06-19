@@ -4,6 +4,7 @@ Separa a busca+reranking da geração de resposta, permitindo maior flexibilidad
 """
 
 import sys
+import os
 import time
 from typing import Any, Dict, List, Optional
 from pathlib import Path
@@ -29,13 +30,14 @@ class OptimizedRAGSearchTool(Tool):
     de acordo com sua especialização.
     """
     
-    def __init__(self, collection_name: str = "pdf_documents", top_k: int = 5):
+    def __init__(self, collection_name: str = "pdf_documents", top_k: int = None):
         super().__init__(
             name="optimized_rag_search", 
             description="Search and rerank documents without final answer generation"
         )
         self.collection_name = collection_name
-        self.top_k = top_k
+        # Usar MAX_CANDIDATES do ambiente, com fallback para 5
+        self.top_k = top_k if top_k is not None else int(os.getenv('MAX_CANDIDATES', 5))
         self.rag_system = None
         
     def _initialize_rag(self):
@@ -83,7 +85,7 @@ class OptimizedRAGSearchTool(Tool):
                     "focus_area": {
                         "type": "string",
                         "description": "Area of focus for document selection",
-                        "enum": ["conceptual", "technical", "comparative", "examples", "general"],
+                        "enum": ["conceptual", "technical", "comparative", "examples", "overview", "applications", "general"],
                         "default": "general"
                     }
                 },
@@ -213,6 +215,8 @@ class OptimizedRAGSearchTool(Tool):
             "technical": f"technical implementation architecture {query}",
             "comparative": f"comparison analysis differences {query}",
             "examples": f"examples use cases applications {query}",
+            "overview": f"overview general introduction {query}",
+            "applications": f"practical applications real-world usage {query}",
             "general": query  # Sem modificação
         }
         
@@ -440,6 +444,16 @@ class DocumentProcessor:
             
             if any(pattern in content.lower() for pattern in ["disadvantage", "limitation", "con"]):
                 disadvantages.append(content[:100] + "...")
+        
+        # Buscar comparações visuais
+        visual_comparisons = []
+        for doc in documents:
+            if doc.get("is_multimodal") and doc.get("image_base64"):
+                visual_comparisons.append({
+                    "source": f"Page {doc.get('page_number', 'N/A')}",
+                    "description": "Visual comparison/diagram",
+                    "image_base64": doc.get("image_base64")
+                })
         
         return {
             "comparisons": comparisons,

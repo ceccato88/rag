@@ -40,10 +40,11 @@ def get_env_bool(key: str, default: bool) -> bool:
 @dataclass
 class RAGConfig:
     """Configurações do sistema RAG."""
-    # Modelos (usando nomes padronizados com fallback para compatibilidade)
-    llm_model: str = os.getenv('OPENAI_MODEL', os.getenv('RAG_LLM_MODEL', DEFAULT_MODELS['LLM']))
-    embedding_model: str = os.getenv('EMBEDDING_MODEL', os.getenv('RAG_EMBEDDING_MODEL', DEFAULT_MODELS['EMBEDDING']))
-    multimodal_model: str = os.getenv('EMBEDDING_MODEL', os.getenv('VOYAGE_MULTIMODAL_MODEL', DEFAULT_MODELS['MULTIMODAL']))
+    # Modelos (usando nomes padronizados)
+    llm_model: str = os.getenv('OPENAI_MODEL', DEFAULT_MODELS['LLM'])
+    coordinator_model: str = os.getenv('COORDINATOR_MODEL', DEFAULT_MODELS['COORDINATOR'])
+    embedding_model: str = os.getenv('EMBEDDING_MODEL', DEFAULT_MODELS['EMBEDDING'])
+    multimodal_model: str = os.getenv('EMBEDDING_MODEL', DEFAULT_MODELS['MULTIMODAL'])
     
     # Limites de tokens
     max_candidates: int = get_env_int('MAX_CANDIDATES', TOKEN_LIMITS['MAX_CANDIDATES'])
