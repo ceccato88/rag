@@ -199,7 +199,7 @@ if __name__ == "__main__":
     
     # Executar servidor
     uvicorn.run(
-        "main:app",
+        "api.main:app",  # Caminho correto do módulo
         host=config.server.host,
         port=config.server.port,
         workers=config.server.workers if not config.server.reload else 1,

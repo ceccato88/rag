@@ -28,7 +28,7 @@ from astrapy import DataAPIClient
 from astrapy.collection import Collection
 
 from .config import SystemConfig
-from .constants import NATIVE_MODELS_CONFIG, API_REFACTORED_CONFIG, VALIDATION_CONFIG
+from .constants import NATIVE_MODELS_CONFIG, API_CONFIG, VALIDATION_CONFIG
 from ..utils.validation import validate_document, validate_embedding
 from ..utils.resource_manager import ResourceManager
 from ..utils.metrics import ProcessingMetrics

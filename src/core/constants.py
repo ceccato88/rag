@@ -268,7 +268,7 @@ PRODUCTION_CONFIG = {
 API_CONFIG = {
     # API Única com Rotas Multi-Agente e Simple RAG
     'API_PORT': 8000,
-    'API_WORKERS': 4,
+    'API_WORKERS': 4,  # Usando 4 workers para produção
     'API_TIMEOUT': 300,
     'API_MEMORY_LIMIT': '3GB',
     'API_CPU_LIMIT': '3.0',

@@ -283,7 +283,10 @@ class ErrorHandler:
     
     @staticmethod
     def validate_url(url: str) -> None:
-        """Valida URL de documento"""
+        """Valida URL de documento verificando Content-Type"""
+        import requests
+        from requests.exceptions import RequestException
+        
         if not url or not url.strip():
             raise ValidationError("URL não pode estar vazia", "url", url)
         
@@ -292,8 +295,18 @@ class ErrorHandler:
         if not url.startswith(("http://", "https://")):
             raise ValidationError("URL deve começar com http:// ou https://", "url", url)
         
-        if not url.lower().endswith(".pdf"):
-            raise ValidationError("URL deve apontar para um arquivo PDF", "url", url)
+        # Verificar Content-Type ao invés de apenas extensão
+        try:
+            response = requests.head(url, timeout=10, allow_redirects=True)
+            content_type = response.headers.get('content-type', '').lower()
+            
+            if 'application/pdf' not in content_type and not url.lower().endswith('.pdf'):
+                raise ValidationError("URL deve apontar para um arquivo PDF", "url", url)
+                
+        except RequestException:
+            # Se não conseguir fazer HEAD request, fallback para verificação de extensão
+            if not url.lower().endswith('.pdf'):
+                raise ValidationError("URL deve apontar para um arquivo PDF (não foi possível verificar Content-Type)", "url", url)
     
     @staticmethod
     def validate_token(token: Optional[str]) -> None:

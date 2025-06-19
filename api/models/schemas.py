@@ -111,7 +111,10 @@ class IndexRequest(BaseModel):
     @field_validator('url')
     @classmethod
     def validate_url_format(cls, v):
-        """Valida formato da URL"""
+        """Valida formato da URL e verifica se é um PDF"""
+        import requests
+        from urllib.parse import urlparse
+        
         if not v or not v.strip():
             raise ValueError("URL não pode estar vazia")
         
@@ -120,8 +123,40 @@ class IndexRequest(BaseModel):
         if not v.startswith(("http://", "https://")):
             raise ValueError("URL deve começar com http:// ou https://")
         
-        if not v.lower().endswith(".pdf"):
-            raise ValueError("URL deve apontar para um arquivo PDF")
+        # Verificar se a URL é válida
+        try:
+            parsed = urlparse(v)
+            if not all([parsed.scheme, parsed.netloc]):
+                raise ValueError("URL inválida")
+        except Exception:
+            raise ValueError("Formato de URL inválido")
+        
+        # Se termina com .pdf, aceitar diretamente (validação rápida)
+        if v.lower().endswith(".pdf"):
+            return v
+        
+        # Caso contrário, verificar Content-Type via HEAD request
+        try:
+            response = requests.head(v, timeout=10, allow_redirects=True)
+            content_type = response.headers.get('content-type', '').lower()
+            
+            # Verificar se é PDF pelo Content-Type
+            if 'application/pdf' in content_type:
+                return v
+            
+            # Verificar se é uma URL conhecida que serve PDFs (arXiv, etc.)
+            known_pdf_domains = ['arxiv.org', 'biorxiv.org', 'medrxiv.org']
+            if any(domain in parsed.netloc.lower() for domain in known_pdf_domains):
+                return v
+                
+            raise ValueError("URL não aponta para um arquivo PDF válido")
+            
+        except requests.exceptions.RequestException:
+            # Se não conseguir verificar, aceitar se for de domínios conhecidos
+            known_pdf_domains = ['arxiv.org', 'biorxiv.org', 'medrxiv.org']
+            if any(domain in parsed.netloc.lower() for domain in known_pdf_domains):
+                return v
+            raise ValueError("Não foi possível verificar se a URL aponta para um PDF")
         
         return v
     
