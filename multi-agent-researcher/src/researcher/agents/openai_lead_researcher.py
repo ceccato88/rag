@@ -71,7 +71,7 @@ class QueryDecomposition(BaseModel):
     reasoning: str
     complexity: str  # "simple", "moderate", "complex" 
     number_of_subagents: int
-    subagent_tasks: List[Dict[str, Any]] = []  # Default empty list to prevent validation errors
+    subagent_tasks: List[Dict[str, Any]]  # Required field - LLM must provide tasks
 
 
 class OpenAILeadResearcher(Agent[str]):
@@ -199,21 +199,23 @@ Consider:
 3. What search strategies would be most effective?
 4. How many subagents are needed (1-5)?
 
-IMPORTANT: You must return a JSON response with the following structure:
+CRITICAL: You MUST provide a complete response with ALL required fields. The subagent_tasks list cannot be empty.
+
+Required JSON structure:
 {
   "reasoning": "Explanation of your decomposition strategy",
   "complexity": "simple|moderate|complex",
   "number_of_subagents": <number>,
   "subagent_tasks": [
     {
-      "query": "specific search query",
-      "objective": "what this task should accomplish",
-      "focus": "area of focus"
+      "query": "specific search query for documents",
+      "objective": "what this search should accomplish",
+      "focus": "overview|technical|applications|comparison"
     }
   ]
 }
 
-Focus on creating diverse, complementary tasks that together provide comprehensive coverage of the query."""
+IMPORTANT: The number of items in subagent_tasks MUST match number_of_subagents. Create diverse, complementary search tasks."""
 
         user_prompt = f"""
 Query: {context.query}
@@ -226,12 +228,15 @@ Return the decomposition in the exact JSON format specified in the system prompt
 """
 
         try:
+            print(f"🔧 [DEBUG] Starting LLM decomposition for query: {context.query}")
+            print(f"🔧 [DEBUG] LLM client available: {self.client is not None}")
             self.reasoner.add_reasoning_step(
                 "execution",
                 "Executing LLM-based query decomposition",
                 f"Sending request to {self.config.model}"
             )
             
+            print(f"🔧 [DEBUG] Calling OpenAI with model: {self.config.model}")
             decomposition = await self.client.chat.completions.create(
                 model=self.config.model,
                 max_tokens=self.config.max_tokens,
@@ -241,6 +246,7 @@ Return the decomposition in the exact JSON format specified in the system prompt
                 ],
                 response_model=QueryDecomposition
             )
+            print(f"🔧 [DEBUG] LLM response received: {decomposition}")
             
             self.reasoner.add_reasoning_step(
                 "execution",
@@ -251,6 +257,7 @@ Return the decomposition in the exact JSON format specified in the system prompt
             # Limit subagents to config max
             tasks = decomposition.subagent_tasks[:self.config.max_subagents]
             
+            print(f"🔧 [DEBUG] LLM plan returning {len(tasks)} tasks: {tasks}")
             return tasks
             
         except Exception as e:
@@ -299,10 +306,14 @@ Return the decomposition in the exact JSON format specified in the system prompt
             f"📝 Heuristic decomposition created {len(tasks)} tasks",
             f"Tasks: {[task.get('focus', 'general') for task in tasks]}"
         )
+        print(f"🔧 [DEBUG] Heuristic plan returning {len(tasks)} tasks: {tasks}")
         return tasks
     
     async def execute(self, plan: List[Dict[str, Any]]) -> str:
         """Execute research plan with RAG subagents."""
+        print(f"🔧 [DEBUG] Execute called with plan length: {len(plan)}")
+        print(f"🔧 [DEBUG] Plan contents: {plan}")
+        
         self.reasoner.add_reasoning_step(
             "execution",
             f"🚀 Executing {len(plan)} research tasks",
@@ -331,7 +342,13 @@ Return the decomposition in the exact JSON format specified in the system prompt
             
             # Inject RAG system if available
             if hasattr(self, 'rag_system') and self.rag_system:
+                print(f"🔧 [DEBUG] Lead Researcher injecting RAG into subagent: {type(self.rag_system).__name__}")
                 subagent.rag_tool.set_rag_system(self.rag_system)
+            elif hasattr(self, 'inject_rag_to_subagent'):
+                print(f"🔧 [DEBUG] Using external RAG injection method")
+                self.inject_rag_to_subagent(subagent)
+            else:
+                print(f"🔧 [DEBUG] Lead Researcher has no RAG system to inject. Has rag_system attr: {hasattr(self, 'rag_system')}, Value: {getattr(self, 'rag_system', None)}")
             
             self.subagents.append(subagent)
             
@@ -402,7 +419,13 @@ Return the decomposition in the exact JSON format specified in the system prompt
             
             # Inject RAG system if available
             if hasattr(self, 'rag_system') and self.rag_system:
+                print(f"🔧 [DEBUG] Lead Researcher injecting RAG into subagent: {type(self.rag_system).__name__}")
                 subagent.rag_tool.set_rag_system(self.rag_system)
+            elif hasattr(self, 'inject_rag_to_subagent'):
+                print(f"🔧 [DEBUG] Using external RAG injection method")
+                self.inject_rag_to_subagent(subagent)
+            else:
+                print(f"🔧 [DEBUG] Lead Researcher has no RAG system to inject. Has rag_system attr: {hasattr(self, 'rag_system')}, Value: {getattr(self, 'rag_system', None)}")
             
             self.subagents.append(subagent)
             

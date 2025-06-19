@@ -40,19 +40,27 @@ class OptimizedRAGSearchTool(Tool):
         
     def _initialize_rag(self):
         """Lazy initialization of RAG search system."""
+        print(f"🔧 [DEBUG] Initializing RAG. Current rag_system: {type(self.rag_system).__name__ if self.rag_system else 'None'}")
+        
         if self.rag_system is None:
             try:
                 # Se um sistema RAG foi injetado, usar ele
                 if hasattr(self, 'injected_rag_system') and self.injected_rag_system:
+                    print(f"🔧 [DEBUG] Using injected RAG system: {type(self.injected_rag_system).__name__}")
                     self.rag_system = self.injected_rag_system
                     return
                 
                 # Tentar importar sistema padrão
+                print("🔧 [DEBUG] No injected RAG found, trying to import ProductionConversationalRAG")
                 from src.core.search import ProductionConversationalRAG
                 self.rag_system = ProductionConversationalRAG()
-            except ImportError:
+                print("🔧 [DEBUG] ProductionConversationalRAG imported successfully")
+            except ImportError as e:
                 # Fallback para modo demo se não conseguir importar
+                print(f"🔧 [DEBUG] ImportError: {e}. Falling back to None")
                 self.rag_system = None
+        else:
+            print(f"🔧 [DEBUG] RAG system already initialized: {type(self.rag_system).__name__}")
         
     def get_description(self) -> ToolDescription:
         return ToolDescription(
@@ -165,20 +173,26 @@ class OptimizedRAGSearchTool(Tool):
         if "error" in rag_result:
             raise Exception(rag_result["error"])
         
-        # Extrair documentos estruturados
+        # Extrair documentos multimodais completos
         documents = []
         if "selected_pages_details" in rag_result:
             for i, page_detail in enumerate(rag_result["selected_pages_details"]):
                 document = {
                     "document_id": f"doc_{page_detail.get('page_number', i)}",
                     "page_number": page_detail.get('page_number'),
-                    "content": page_detail.get('content', ''),
+                    "content": page_detail.get('content', ''),  # Markdown completo
+                    "image_base64": page_detail.get('image_base64'),  # Imagem para visão
+                    "file_path": page_detail.get('file_path'),
+                    "similarity_score": page_detail.get('similarity_score', 0.0),
                     "relevance_rank": i + 1,
                     "source": page_detail.get('source', 'unknown'),
+                    "is_multimodal": page_detail.get('is_multimodal', False),
                     "metadata": {
                         "doc_source": page_detail.get('doc_source'),
                         "page_type": "document_page",
-                        "focus_area": focus_area
+                        "focus_area": focus_area,
+                        "has_image": bool(page_detail.get('image_base64')),
+                        "similarity_score": page_detail.get('similarity_score', 0.0)
                     }
                 }
                 documents.append(document)
@@ -206,68 +220,93 @@ class OptimizedRAGSearchTool(Tool):
     
     async def _execute_rag_pipeline_partial(self, query: str, top_k: int) -> Dict[str, Any]:
         """
-        Executa pipeline RAG até o ponto de reranking, sem gerar resposta final.
-        Isso permite que o subagente processe os documentos com sua especialização.
+        Executa pipeline RAG até o ponto de reranking, retornando dados multimodais completos.
+        Os subagentes recebem o conteúdo original do banco vetorial: markdown + imagem base64.
         """
         
         try:
-            # Usar o SimpleRAG diretamente
-            if hasattr(self.rag_system, 'search'):
-                # SimpleRAG: usar método search
+            # Usar ProductionConversationalRAG para acessar dados brutos do banco
+            if hasattr(self.rag_system, 'search_candidates'):
+                print(f"🔧 [DEBUG] Usando search_candidates para dados multimodais completos")
+                
+                # 1. Gerar embedding da query
+                query_embedding = self.rag_system.get_query_embedding(query)
+                print(f"🔧 [DEBUG] Embedding gerado: {len(query_embedding)} dimensões")
+                
+                # 2. Buscar candidatos brutos do Astra DB
+                raw_candidates = self.rag_system.search_candidates(query_embedding, limit=top_k)
+                print(f"🔧 [DEBUG] Candidatos brutos encontrados: {len(raw_candidates)}")
+                
+                if not raw_candidates:
+                    return {
+                        "selected_pages_details": [],
+                        "total_candidates": 0,
+                        "reranking_justification": "Nenhum candidato encontrado no banco vetorial",
+                        "search_successful": False
+                    }
+                
+                # 3. Re-ranking para selecionar os melhores
+                selected_candidates, justification = self.rag_system.rerank_with_gpt(query, raw_candidates)
+                print(f"🔧 [DEBUG] Re-ranking selecionou: {len(selected_candidates)} documentos")
+                
+                # 4. Preparar dados multimodais completos para subagentes
+                multimodal_documents = []
+                for candidate in selected_candidates:
+                    # Carregar imagem em base64
+                    image_base64 = None
+                    if candidate.get("file_path"):
+                        image_base64 = self.rag_system.encode_image_to_base64(candidate["file_path"])
+                    
+                    multimodal_doc = {
+                        "page_number": candidate.get("page_num"),
+                        "content": candidate.get("markdown_text", ""),  # Texto markdown completo
+                        "doc_source": candidate.get("doc_source"),
+                        "file_path": candidate.get("file_path"),
+                        "similarity_score": candidate.get("similarity_score", 0.0),
+                        "image_base64": image_base64,  # Imagem para visão
+                        "source": "astra_db_multimodal",
+                        "is_multimodal": True
+                    }
+                    multimodal_documents.append(multimodal_doc)
+                    print(f"🔧 [DEBUG] Documento multimodal preparado: página {multimodal_doc['page_number']}, imagem: {'Sim' if image_base64 else 'Não'}")
+                
+                return {
+                    "selected_pages_details": multimodal_documents,
+                    "total_candidates": len(raw_candidates),
+                    "reranking_justification": justification,
+                    "search_successful": True
+                }
+            
+            # Fallback para SimpleRAG (sem multimodal)
+            elif hasattr(self.rag_system, 'search'):
+                print(f"🔧 [DEBUG] Fallback: usando SimpleRAG (sem multimodal)")
                 result_text = self.rag_system.search(query)
                 
-                # Como SimpleRAG não retorna metadados estruturados,
-                # vamos criar uma estrutura básica
                 if result_text and "No results" not in result_text:
-                    # Simular documentos baseados no resultado
                     documents = [{
                         "page_number": 1,
-                        "content": result_text[:500],  # Primeiros 500 chars
-                        "doc_source": "search_result",
-                        "source": "SimpleRAG"
+                        "content": result_text,  # Texto completo, não chunk
+                        "doc_source": "simple_rag",
+                        "source": "SimpleRAG",
+                        "is_multimodal": False
                     }]
-                    
-                    if len(result_text) > 500:
-                        documents.append({
-                            "page_number": 2,
-                            "content": result_text[500:1000],
-                            "doc_source": "search_result",
-                            "source": "SimpleRAG"
-                        })
                     
                     return {
                         "selected_pages_details": documents,
-                        "total_candidates": len(documents),
-                        "reranking_justification": "SimpleRAG search result",
+                        "total_candidates": 1,
+                        "reranking_justification": "SimpleRAG search result (sem multimodal)",
                         "search_successful": True
                     }
                 else:
                     return {
                         "selected_pages_details": [],
                         "total_candidates": 0,
-                        "reranking_justification": "No results found",
+                        "reranking_justification": "Nenhum resultado encontrado",
                         "search_successful": False
                     }
             
-            elif hasattr(self.rag_system, 'search_and_answer'):
-                # ProductionConversationalRAG: usar método completo
-                full_result = self.rag_system.search_and_answer(query)
-                
-                if "error" in full_result:
-                    return full_result
-                
-                # Extrair apenas as informações de busca e reranking
-                partial_result = {
-                    "selected_pages_details": full_result.get("selected_pages_details", []),
-                    "total_candidates": full_result.get("total_candidates", 0),
-                    "reranking_justification": full_result.get("reranking_justification", ""),
-                    "search_successful": True
-                }
-                
-                return partial_result
-            
             else:
-                return {"error": "RAG system doesn't have compatible search method"}
+                return {"error": "Sistema RAG não tem método compatível para dados multimodais"}
             
         except Exception as e:
             return {"error": str(e)}
@@ -308,9 +347,11 @@ class OptimizedRAGSearchTool(Tool):
     
     def set_rag_system(self, rag_system):
         """Inject a RAG system into this tool."""
+        print(f"🔧 [DEBUG] Injecting RAG system into tool: {type(rag_system).__name__}")
         self.rag_system = rag_system
         # Also set as injected system for reference
         self.injected_rag_system = rag_system
+        print(f"🔧 [DEBUG] RAG system injection complete. Tool now has: {type(self.rag_system).__name__}")
 
 
 class DocumentProcessor:
@@ -402,37 +443,57 @@ class DocumentProcessor:
         
         return {
             "comparisons": comparisons,
-            "advantages": advantages[:3],  # Máximo 3
-            "disadvantages": disadvantages[:3],  # Máximo 3
-            "document_count": len(documents)
+            "visual_comparisons": visual_comparisons,
+            "advantages": advantages[:3],
+            "disadvantages": disadvantages[:3],
+            "document_count": len(documents),
+            "multimodal_count": sum(1 for doc in documents if doc.get("is_multimodal"))
         }
     
     @staticmethod
     def extract_examples(documents: List[Dict[str, Any]]) -> Dict[str, Any]:
-        """Extrai exemplos e casos de uso dos documentos."""
+        """Extrai exemplos e casos de uso dos documentos multimodais."""
         examples = []
         use_cases = []
+        visual_examples = []
         
         for doc in documents:
             content = doc.get("content", "")
+            page_num = doc.get("page_number", "N/A")
+            has_image = doc.get("is_multimodal", False) and doc.get("image_base64")
             
-            # Buscar padrões de exemplo
-            example_patterns = ["example", "for instance", "such as", "case study"]
+            # Buscar padrões de exemplos no texto
+            example_patterns = ["example", "for instance", "such as", "case study", "demonstration"]
             if any(pattern in content.lower() for pattern in example_patterns):
                 examples.append({
-                    "source": doc.get("document_id"),
-                    "example_text": content[:200] + "..." if len(content) > 200 else content
+                    "source": f"Page {page_num}",
+                    "example_text": content,  # Texto completo do exemplo
+                    "has_visual": has_image,
+                    "similarity_score": doc.get("similarity_score", 0.0)
                 })
             
             # Buscar casos de uso
-            if any(pattern in content.lower() for pattern in ["use case", "application", "scenario"]):
+            usecase_patterns = ["use case", "application", "scenario", "implementation"]
+            if any(pattern in content.lower() for pattern in usecase_patterns):
                 use_cases.append({
-                    "source": doc.get("document_id"),
-                    "use_case": content[:150] + "..." if len(content) > 150 else content
+                    "source": f"Page {page_num}",
+                    "use_case": content[:200] + "..." if len(content) > 200 else content,
+                    "has_visual": has_image
+                })
+            
+            # Identificar exemplos visuais (screenshots, diagramas de exemplo)
+            if has_image and any(keyword in content.lower() for keyword in ["screenshot", "example", "demo"]):
+                visual_examples.append({
+                    "source": f"Page {page_num}",
+                    "type": "visual_example",
+                    "description": f"Visual example/demo on page {page_num}",
+                    "image_base64": doc.get("image_base64")
                 })
         
         return {
             "examples": examples,
-            "use_cases": use_cases,
-            "document_count": len(documents)
+            "use_cases": use_cases[:3],
+            "visual_examples": visual_examples,
+            "document_count": len(documents),
+            "multimodal_count": sum(1 for doc in documents if doc.get("is_multimodal"))
         }

@@ -212,19 +212,32 @@ class APIStateManager:
                 name="API-Lead-Researcher"
             )
             
-            # Injetar o SimpleRAG no Lead Researcher
+            # Injetar o ProductionConversationalRAG (sistema completo) no Lead Researcher para dados multimodais
             if self._simple_rag:
-                self._lead_researcher.rag_system = self._simple_rag
+                # Usar o sistema RAG interno do SimpleRAG que tem capacidades multimodais
+                if hasattr(self._simple_rag, 'rag'):
+                    production_rag = self._simple_rag.rag  # ProductionConversationalRAG
+                    self._lead_researcher.rag_system = production_rag
+                    logger.info("✅ ProductionConversationalRAG (multimodal) injetado no Lead Researcher")
+                else:
+                    # Fallback para SimpleRAG se não tiver acesso ao sistema interno
+                    self._lead_researcher.rag_system = self._simple_rag
+                    logger.warning("⚠️ Usando SimpleRAG (sem multimodal) como fallback")
                 
-                # Também criar um método para injetar RAG nos subagentes
+                # Método para injetar RAG multimodal nos subagentes
                 def inject_rag_to_subagent(subagent):
-                    if hasattr(subagent, 'rag_tool') and hasattr(subagent.rag_tool, 'rag_system'):
-                        subagent.rag_tool.rag_system = self._simple_rag
-                        logger.debug(f"RAG injetado no subagente {subagent.name}")
+                    if hasattr(subagent, 'rag_tool'):
+                        if hasattr(self._simple_rag, 'rag'):
+                            # Injetar sistema completo multimodal
+                            subagent.rag_tool.set_rag_system(self._simple_rag.rag)
+                            logger.debug(f"RAG multimodal injetado no subagente {subagent.name}")
+                        else:
+                            # Fallback
+                            subagent.rag_tool.set_rag_system(self._simple_rag)
+                            logger.debug(f"RAG simples injetado no subagente {subagent.name}")
                 
                 self._lead_researcher.inject_rag_to_subagent = inject_rag_to_subagent
                 
-                logger.info("✅ SimpleRAG injetado no Lead Researcher")
             else:
                 logger.warning("⚠️ SimpleRAG não disponível para injeção no Lead Researcher")
             
@@ -257,7 +270,7 @@ class APIStateManager:
             
             sys.path.append(str(config.paths.workspace_root))
             
-            from search import SimpleRAG
+            from src.core.search import SimpleRAG
             
             self._simple_rag = SimpleRAG()
             self._components_initialized["simple_rag"] = True

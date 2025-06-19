@@ -47,7 +47,7 @@ try:
     original_cwd = os.getcwd()
     os.chdir(workspace_root)
     
-    from indexer import index_pdf_native, create_doc_source_name, IndexingResult
+    from src.core.indexer import index_pdf_native, create_doc_source_name, IndexingResult
     INDEXER_AVAILABLE = True
     logger.info("✅ Indexer refatorado disponível")
     

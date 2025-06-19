@@ -192,12 +192,22 @@ class RAGResearchSubagent(Agent[str]):
                     ""
                 ])
         
-        # Add architecture information
+        # Add visual technical content
+        if processed_info.get('visual_technical'):
+            response_lines.extend(["## 📊 Visual Technical Content"])
+            for visual in processed_info['visual_technical']:
+                response_lines.extend([
+                    f"**{visual['source']}**: {visual['description']}",
+                    ""
+                ])
+        
+        # Add architecture information with visual indicators
         if processed_info['architectures']:
             response_lines.extend(["## 🏗️ Architecture Information"])
             for arch in processed_info['architectures'][:2]:
+                visual_indicator = " 📷" if arch.get('has_visual') else ""
                 response_lines.extend([
-                    f"**Source**: {arch['source']}",
+                    f"**Source**: {arch['source']}{visual_indicator}",
                     arch['architecture_mention'],
                     ""
                 ])
