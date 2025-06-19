@@ -50,20 +50,21 @@ from researcher.memory.base import InMemoryStorage, ResearchMemory
 sys.path.append(os.path.join(os.path.dirname(__file__), 'maintenance'))
 from delete_collection import delete_documents
 
-# Import do indexer (condicional)
+# Import do indexer refatorado
 try:
-    from indexer_simple import process_pdf_from_url, create_doc_source_name
+    from indexer import process_pdf_from_url, create_doc_source_name, index_pdf_native, IndexingResult
     INDEXER_AVAILABLE = True
-except ImportError:
-    try:
-        from indexer import process_pdf_from_url, create_doc_source_name
-        INDEXER_AVAILABLE = True
-    except ImportError:
-        INDEXER_AVAILABLE = False
-        def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
-            return False
-        def create_doc_source_name(url: str) -> str:
-            return url.split("/")[-1]
+    print("✅ Indexer refatorado v2.0.0 carregado")
+except ImportError as e:
+    print(f"⚠️ Indexer não disponível: {e}")
+    INDEXER_AVAILABLE = False
+    # Funções de fallback
+    def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
+        return False
+    def create_doc_source_name(url: str) -> str:
+        return url.split("/")[-1]
+    def index_pdf_native(url: str, doc_source: str = None):
+        return None
 
 # Configuração de logging
 log_level = os.getenv("API_LOG_LEVEL", "info").upper()
@@ -129,10 +130,15 @@ class IndexRequest(BaseModel):
     doc_source: Optional[str] = Field(None, description="Nome/identificador do documento")
 
 class IndexResponse(BaseModel):
-    """Resposta da indexação"""
+    """Resposta da indexação refatorada"""
     success: bool
     message: str
     doc_source: str
+    pages_processed: int = 0
+    chunks_created: int = 0
+    images_extracted: int = 0
+    processing_time: float = 0.0
+    metadata: Dict[str, Any] = {}
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # FACTORY PARA RESPOSTAS
@@ -391,41 +397,47 @@ async def index_document(
     state: APIState = Depends(check_api_ready),
     _: str = Depends(verify_token)
 ):
-    """Indexa documento PDF por URL"""
+    """Indexa documento PDF por URL usando indexer refatorado"""
     if not INDEXER_AVAILABLE:
         raise HTTPException(
             status_code=503,
-            detail="Serviço de indexação não disponível"
+            detail="Serviço de indexação refatorado não disponível"
         )
     
     try:
-        logger.info(f"📄 Indexando documento: {request.url}")
+        logger.info(f"📄 Indexando documento (v2.0.0): {request.url}")
         
         # Criar nome do documento se não fornecido
         doc_source = request.doc_source or create_doc_source_name(request.url)
         
-        # Processar PDF
-        success = process_pdf_from_url(request.url, doc_source)
+        # Usar função nativa que retorna resultado detalhado
+        indexing_result = await asyncio.to_thread(index_pdf_native, request.url, doc_source)
         
-        if success:
+        if indexing_result and indexing_result.success:
             return IndexResponse(
                 success=True,
-                message="Documento indexado com sucesso",
-                doc_source=doc_source
+                message="Documento indexado com sucesso usando indexer refatorado",
+                doc_source=indexing_result.doc_source,
+                pages_processed=indexing_result.pages_processed,
+                chunks_created=indexing_result.chunks_created,
+                images_extracted=indexing_result.images_extracted,
+                processing_time=indexing_result.processing_time,
+                metadata=indexing_result.metadata or {}
             )
         else:
+            error_detail = indexing_result.error if indexing_result else "Erro desconhecido na indexação"
             raise HTTPException(
                 status_code=400,
-                detail="Falha na indexação do documento"
+                detail=f"Falha na indexação: {error_detail}"
             )
             
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ Erro na indexação: {e}")
+        logger.error(f"❌ Erro na indexação refatorada: {e}")
         raise HTTPException(
             status_code=500,
-            detail=f"Erro na indexação: {str(e)}"
+            detail=f"Erro na indexação refatorada: {str(e)}"
         )
 
 @app.delete("/documents/{collection_name}")

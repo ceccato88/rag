@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """
-Indexador simplificado para o sistema RAG Multi-Agente.
-Processa PDFs de URLs, extrai texto e imagens, e indexa no AstraDB.
+Indexador Refatorado v2.0.0 - Sistema RAG Multi-Agente
+
+Indexador simplificado e otimizado que integra com as APIs refatoradas.
+Usa modelos nativos e factory patterns para consistência com o sistema.
 """
 
 import os
@@ -10,9 +12,10 @@ import time
 import logging
 import asyncio
 from io import BytesIO
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Any
 from pathlib import Path
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from datetime import datetime
 from dotenv import load_dotenv
 
 import requests
@@ -25,164 +28,372 @@ from astrapy import DataAPIClient
 from astrapy.collection import Collection
 
 from config import SystemConfig
+from constants import NATIVE_MODELS_CONFIG, API_REFACTORED_CONFIG, VALIDATION_CONFIG
 from utils.validation import validate_document, validate_embedding
 from utils.resource_manager import ResourceManager
-from utils.metrics import ProcessingMetrics, measure_time
+from utils.metrics import ProcessingMetrics
+# from utils.metrics import measure_time  # Temporariamente removido
 
 # Configuração
 load_dotenv()
 system_config = SystemConfig()
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# Setup de logging otimizado
+logging.basicConfig(
+    level=getattr(logging, system_config.production.log_level),
+    format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FUNÇÕES AUXILIARES
+# MODELOS DE DADOS NATIVOS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@dataclass
+class IndexingResult:
+    """Resultado nativo de indexação usando padrões das APIs refatoradas"""
+    success: bool
+    doc_source: str
+    pages_processed: int = 0
+    chunks_created: int = 0
+    images_extracted: int = 0
+    processing_time: float = 0.0
+    error: Optional[str] = None
+    metadata: Dict[str, Any] = None
+    timestamp: str = None
+    
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = datetime.utcnow().isoformat()
+        if self.metadata is None:
+            self.metadata = {}
+
+@dataclass
+class PageContent:
+    """Conteúdo de página usando estrutura nativa"""
+    id: str
+    page_num: int
+    markdown_text: str
+    image_path: str
+    doc_source: str
+    embedding: Optional[List[float]] = None
+    token_count: Optional[int] = None
+    processing_time: Optional[float] = None
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FACTORY PARA RESULTADOS DE INDEXAÇÃO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class IndexingResultFactory:
+    """Factory para criar resultados de indexação consistentes"""
+    
+    @staticmethod
+    def create_success_result(
+        doc_source: str,
+        pages_processed: int,
+        chunks_created: int,
+        processing_time: float,
+        **kwargs
+    ) -> IndexingResult:
+        """Cria resultado de sucesso"""
+        return IndexingResult(
+            success=True,
+            doc_source=doc_source,
+            pages_processed=pages_processed,
+            chunks_created=chunks_created,
+            images_extracted=pages_processed,  # 1 imagem por página
+            processing_time=processing_time,
+            metadata={
+                "indexer_version": "2.0.0",
+                "model_used": system_config.rag.multimodal_model,
+                "embedding_dimension": system_config.rag.voyage_embedding_dim,
+                "native_processing": True,
+                **kwargs
+            }
+        )
+    
+    @staticmethod
+    def create_error_result(
+        doc_source: str,
+        error: str,
+        processing_time: float = 0.0,
+        **kwargs
+    ) -> IndexingResult:
+        """Cria resultado de erro"""
+        return IndexingResult(
+            success=False,
+            doc_source=doc_source,
+            error=error,
+            processing_time=processing_time,
+            metadata={
+                "indexer_version": "2.0.0",
+                "error_occurred": True,
+                **kwargs
+            }
+        )
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# VALIDADOR NATIVO INTEGRADO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class IndexingValidator:
+    """Validador usando configurações nativas do sistema"""
+    
+    @staticmethod
+    def validate_url(url: str) -> bool:
+        """Valida URL ou caminho de arquivo"""
+        if not url or len(url.strip()) < 3:
+            return False
+        
+        # URL HTTP/HTTPS
+        if url.startswith(('http://', 'https://')):
+            return True
+        
+        # Arquivo local
+        if os.path.exists(url) and url.lower().endswith('.pdf'):
+            return True
+        
+        return False
+    
+    @staticmethod
+    def validate_doc_source(doc_source: str) -> bool:
+        """Valida nome do documento"""
+        if not doc_source:
+            return False
+        
+        # Verificar tamanho
+        if len(doc_source) > 100:
+            return False
+        
+        # Verificar caracteres válidos
+        return bool(re.match(r'^[a-zA-Z0-9_.-]+$', doc_source))
+    
+    @staticmethod
+    def validate_environment() -> Tuple[bool, List[str]]:
+        """Valida variáveis de ambiente necessárias"""
+        required_vars = VALIDATION_CONFIG['REQUIRED_ENV_VARS']
+        missing_vars = [var for var in required_vars if not os.getenv(var)]
+        return len(missing_vars) == 0, missing_vars
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# PROCESSADOR NATIVO OTIMIZADO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class NativeIndexingProcessor:
+    """Processador principal usando configurações nativas"""
+    
+    def __init__(self):
+        self.config = system_config
+        self.metrics = ProcessingMetrics()
+        # self.resource_manager = ResourceManager()  # Temporariamente removido
+        
+    def create_doc_source_name(self, url: str) -> str:
+        """Cria nome do documento a partir da URL"""
+        fn = url.split("/")[-1]
+        clean_name = re.sub(r"[^a-zA-Z0-9_.-]", "_", os.path.splitext(fn)[0])
+        
+        # Validar resultado
+        if not IndexingValidator.validate_doc_source(clean_name):
+            # Fallback para timestamp se inválido
+            clean_name = f"doc_{int(time.time())}"
+        
+        return clean_name
+    
+    def calculate_token_count(self, content: PageContent) -> int:
+        """Calcula contagem de tokens usando configurações nativas"""
+        text_tokens = len(content.markdown_text) // self.config.processing.token_chars_ratio
+        
+        # Tokens da imagem (se existir)
+        image_tokens = 0
+        if os.path.exists(content.image_path):
+            try:
+                with Image.open(content.image_path) as img:
+                    image_tokens = int((img.width * img.height) * self.config.processing.tokens_per_pixel)
+            except Exception:
+                image_tokens = 0
+        
+        return max(1, text_tokens + image_tokens)
+    
+    def download_pdf_with_retry(self, url: str) -> Optional[pymupdf.Document]:
+        """Baixa PDF com retry usando configurações nativas"""
+        max_retries = self.config.multiagent.max_retries
+        
+        for attempt in range(max_retries):
+            try:
+                if url.startswith(('http://', 'https://')):
+                    logger.info(f"📥 Baixando PDF: {url}")
+                    
+                    with requests.get(
+                        url, 
+                        stream=True, 
+                        timeout=self.config.processing.download_timeout
+                    ) as r:
+                        r.raise_for_status()
+                        buf = BytesIO()
+                        
+                        for chunk in r.iter_content(self.config.processing.download_chunk_size):
+                            buf.write(chunk)
+                    
+                    buf.seek(0)
+                    doc = pymupdf.open(stream=buf, filetype="pdf")
+                    logger.info(f"✅ PDF baixado ({doc.page_count} páginas)")
+                    return doc
+                else:
+                    # Arquivo local
+                    if os.path.exists(url):
+                        logger.info(f"📂 Abrindo PDF local: {url}")
+                        doc = pymupdf.open(url)
+                        logger.info(f"✅ PDF carregado ({doc.page_count} páginas)")
+                        return doc
+                    else:
+                        raise FileNotFoundError(f"Arquivo não encontrado: {url}")
+                        
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(f"❌ Falha ao baixar PDF após {max_retries} tentativas: {e}")
+                    return None
+                
+                delay = self.config.multiagent.retry_delay * (2 ** attempt)
+                logger.warning(f"⚠️ Tentativa {attempt + 1} falhou: {e}. Retry em {delay:.1f}s...")
+                time.sleep(delay)
+        
+        return None
+    
+    def extract_page_content(self, pdf: pymupdf.Document, page_num: int, doc_source: str) -> Optional[PageContent]:
+        """Extrai conteúdo de uma página usando estrutura nativa"""
+        start_time = time.time()
+        
+        try:
+            page = pdf[page_num]
+            
+            # Extrair markdown
+            md = pymupdf4llm.to_markdown(pdf, pages=[page_num])
+            
+            # Extrair imagem da página
+            img_dir = self.config.processing.image_dir
+            os.makedirs(img_dir, exist_ok=True)
+            
+            pixmap_scale = self.config.processing.pixmap_scale
+            pix = page.get_pixmap(matrix=pymupdf.Matrix(pixmap_scale, pixmap_scale))
+            img_path = os.path.join(img_dir, f"{doc_source}_page_{page_num+1}.png")
+            pix.save(img_path)
+            
+            # Criar objeto nativo
+            content = PageContent(
+                id=f"{doc_source}_{page_num}",
+                page_num=page_num + 1,
+                markdown_text=md,
+                image_path=img_path,
+                doc_source=doc_source,
+                processing_time=time.time() - start_time
+            )
+            
+            # Calcular tokens
+            content.token_count = self.calculate_token_count(content)
+            
+            return content
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao extrair página {page_num + 1}: {e}")
+            return None
+    
+    async def generate_embedding(self, semaphore: asyncio.Semaphore, client: voyageai.AsyncClient, content: PageContent) -> bool:
+        """Gera embedding para conteúdo usando cliente nativo"""
+        async with semaphore:
+            try:
+                # Carregar imagem
+                pil_image = Image.open(content.image_path)
+                
+                # Preparar conteúdo multimodal
+                multimodal_content = [content.markdown_text, pil_image]
+                
+                # Gerar embedding
+                result = await client.multimodal_embed(
+                    inputs=[multimodal_content], 
+                    model=self.config.rag.multimodal_model
+                )
+                
+                if result and result.embeddings:
+                    content.embedding = result.embeddings[0]
+                    
+                    # Validar embedding
+                    if validate_embedding(content.embedding, self.config.rag.voyage_embedding_dim):
+                        return True
+                    else:
+                        logger.warning(f"⚠️ Embedding inválido para {content.id}")
+                        return False
+                else:
+                    logger.warning(f"⚠️ Embedding vazio para {content.id}")
+                    return False
+                    
+            except Exception as e:
+                logger.error(f"❌ Erro ao gerar embedding para {content.id}: {e}")
+                return False
+    
+    def connect_to_astra(self) -> Collection:
+        """Conecta ao AstraDB usando configurações nativas"""
+        try:
+            endpoint = self.config.rag.astra_db_api_endpoint
+            token = self.config.rag.astra_db_application_token
+            
+            if not endpoint or not token:
+                raise RuntimeError("Configurações do AstraDB não encontradas")
+            
+            # Criar cliente
+            client = DataAPIClient()
+            database = client.get_database(endpoint, token=token)
+            
+            logger.info(f"🔌 Conectado ao database: {database.info().name}")
+            
+            # Obter collection
+            collection_name = self.config.rag.collection_name
+            collection = database.get_collection(collection_name)
+            
+            logger.info(f"📚 Usando collection: {collection_name}")
+            return collection
+            
+        except Exception as e:
+            logger.error(f"❌ Erro ao conectar com AstraDB: {e}")
+            raise
+    
+    def prepare_documents_for_insertion(self, contents: List[PageContent]) -> List[Dict[str, Any]]:
+        """Prepara documentos para inserção usando estrutura nativa"""
+        documents = []
+        
+        for content in contents:
+            if content.embedding:
+                doc = {
+                    "_id": content.id,
+                    "page_num": content.page_num,
+                    "file_path": content.image_path,
+                    "doc_source": content.doc_source,
+                    "markdown_text": content.markdown_text,
+                    "$vector": content.embedding,
+                    "token_count": content.token_count,
+                    "processing_time": content.processing_time,
+                    "indexed_at": datetime.utcnow().isoformat(),
+                    "indexer_version": "2.0.0"
+                }
+                documents.append(doc)
+        
+        return documents
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# FUNÇÕES AUXILIARES GLOBAIS
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def create_doc_source_name(url: str) -> str:
-    """Cria nome do documento a partir da URL"""
-    fn = url.split("/")[-1]
-    return re.sub(r"[^a-zA-Z0-9_.-]", "_", os.path.splitext(fn)[0])
-
-def pixel_token_count(img: Image.Image) -> int:
-    """Calcula tokens aproximados de uma imagem"""
-    return int((img.width * img.height) * system_config.processing.tokens_per_pixel)
-
-def text_token_estimate(text: str) -> int:
-    """Estima tokens de um texto"""
-    return max(1, len(text) // system_config.processing.token_chars_ratio)
-
-def download_pdf_with_retry(url: str) -> Optional[pymupdf.Document]:
-    """Baixa PDF com retry em caso de falha"""
-    max_retries = getattr(system_config.processing, 'max_retries', 3)
-    for attempt in range(max_retries):
-        try:
-            if url.startswith(('http://', 'https://')):
-                logger.info(f"Baixando PDF: {url}")
-                download_timeout = getattr(system_config.processing, 'download_timeout', 30)
-                with requests.get(url, stream=True, timeout=download_timeout) as r:
-                    r.raise_for_status()
-                    buf = BytesIO()
-                    download_chunk_size = getattr(system_config.processing, 'download_chunk_size', 8192)
-                    for chunk in r.iter_content(download_chunk_size):
-                        buf.write(chunk)
-                buf.seek(0)
-                doc = pymupdf.open(stream=buf, filetype="pdf")
-                logger.info(f"PDF baixado ({doc.page_count} páginas)")
-                return doc
-            else:
-                # Arquivo local
-                if os.path.exists(url):
-                    logger.info(f"Abrindo PDF local: {url}")
-                    doc = pymupdf.open(url)
-                    logger.info(f"PDF carregado ({doc.page_count} páginas)")
-                    return doc
-                else:
-                    raise FileNotFoundError(f"Arquivo não encontrado: {url}")
-                    
-        except Exception as e:
-            if attempt == max_retries - 1:
-                logger.error(f"Falha ao baixar PDF após {max_retries} tentativas: {e}")
-                return None
-            
-            retry_delay = getattr(system_config.processing, 'retry_delay', 1.0)
-            delay = retry_delay * (2 ** attempt)
-            logger.warning(f"Tentativa {attempt + 1} falhou: {e}. Tentando novamente em {delay:.1f}s...")
-            time.sleep(delay)
-    
-    return None
-
-def extract_page_content(pdf: pymupdf.Document, page_num: int, doc_source: str, img_dir: str) -> Optional[Dict]:
-    """Extrai conteúdo de uma página do PDF"""
-    try:
-        page = pdf[page_num]
-        
-        # Extrair markdown
-        md = pymupdf4llm.to_markdown(pdf, pages=[page_num])
-        
-        # Extrair imagem da página
-        pixmap_scale = getattr(system_config.processing, 'pixmap_scale', 2)
-        pix = page.get_pixmap(matrix=pymupdf.Matrix(pixmap_scale, pixmap_scale))
-        img_path = os.path.join(img_dir, f"{doc_source}_page_{page_num+1}.png")
-        
-        # Criar diretório se não existir
-        os.makedirs(img_dir, exist_ok=True)
-        pix.save(img_path)
-        
-        return {
-            "id": f"{doc_source}_{page_num}",
-            "page_num": page_num + 1,
-            "markdown_text": md,
-            "image_path": img_path,
-            "doc_source": doc_source
-        }
-        
-    except Exception as e:
-        logger.error(f"Erro ao extrair página {page_num + 1}: {e}")
-        return None
-
-async def embed_page(semaphore: asyncio.Semaphore, client: voyageai.AsyncClient, doc: Dict) -> Optional[Dict]:
-    """Gera embedding para uma página"""
-    async with semaphore:
-        try:
-            # Carregar imagem como PIL Image
-            from PIL import Image
-            pil_image = Image.open(doc["image_path"])
-            
-            # Preparar conteúdo multimodal (formato correto para Voyage)
-            content = [doc["markdown_text"], pil_image]
-            
-            # Gerar embedding
-            result = await client.multimodal_embed(
-                inputs=[content], 
-                model=system_config.rag.multimodal_model
-            )
-            
-            if result and result.embeddings:
-                doc["embedding"] = result.embeddings[0]
-                return doc
-            else:
-                logger.warning(f"Embedding vazio para {doc['id']}")
-                return None
-                
-        except Exception as e:
-            logger.error(f"Erro ao gerar embedding para {doc['id']}: {e}")
-            return None
-
-def connect_to_astra() -> Collection:
-    """Conecta ao AstraDB e retorna a collection"""
-    try:
-        endpoint = os.getenv("ASTRA_DB_API_ENDPOINT")
-        token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
-        
-        if not endpoint or not token:
-            raise RuntimeError("Variáveis ASTRA_DB_API_ENDPOINT e ASTRA_DB_APPLICATION_TOKEN devem estar definidas")
-        
-        # Criar cliente e conectar
-        client = DataAPIClient()
-        database = client.get_database(endpoint, token=token)
-        
-        logger.info(f"Conectado ao database: {database.info().name}")
-        
-        # Obter collection
-        collection_name = system_config.rag.collection_name
-        collection = database.get_collection(collection_name)
-        
-        logger.info(f"Usando collection: {collection_name}")
-        return collection
-        
-    except Exception as e:
-        logger.error(f"Erro ao conectar com AstraDB: {e}")
-        raise
+    """Cria nome do documento a partir da URL (função global para compatibilidade)"""
+    processor = NativeIndexingProcessor()
+    return processor.create_doc_source_name(url)
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FUNÇÃO PRINCIPAL DE INDEXAÇÃO
+# FUNÇÃO PRINCIPAL REFATORADA
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
     """
-    Processa PDF de uma URL e indexa no AstraDB.
+    Função principal refatorada para processar PDF usando modelos nativos.
     
     Args:
         url: URL do PDF ou caminho local
@@ -191,52 +402,65 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
     Returns:
         bool: True se sucesso, False se falha
     """
+    processor = NativeIndexingProcessor()
+    start_time = time.time()
+    
     try:
-        # Usar URL como doc_source se não fornecido
-        if not doc_source:
-            doc_source = create_doc_source_name(url)
+        # Validações usando validador nativo
+        if not IndexingValidator.validate_url(url):
+            logger.error(f"❌ URL inválida: {url}")
+            return False
         
-        logger.info(f"🚀 Iniciando indexação: {doc_source}")
+        env_valid, missing_vars = IndexingValidator.validate_environment()
+        if not env_valid:
+            logger.error(f"❌ Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
+            return False
+        
+        # Criar doc_source se não fornecido
+        if not doc_source:
+            doc_source = processor.create_doc_source_name(url)
+        elif not IndexingValidator.validate_doc_source(doc_source):
+            logger.error(f"❌ Nome de documento inválido: {doc_source}")
+            return False
+        
+        logger.info(f"🚀 Iniciando indexação refatorada v2.0.0: {doc_source}")
         logger.info(f"📄 PDF: {url}")
         
         # 1. Baixar/abrir PDF
-        pdf = download_pdf_with_retry(url)
+        pdf = processor.download_pdf_with_retry(url)
         if not pdf:
             logger.error("❌ Não foi possível carregar o PDF")
             return False
         
         # 2. Extrair conteúdo das páginas
-        img_dir = getattr(system_config.processing, 'image_dir', 'pdf_images')
-        os.makedirs(img_dir, exist_ok=True)
-        
         logger.info(f"📊 Extraindo conteúdo de {pdf.page_count} páginas...")
-        docs = []
+        contents = []
         
         for i in tqdm(range(pdf.page_count), desc="Extraindo páginas"):
-            content = extract_page_content(pdf, i, doc_source, img_dir)
+            content = processor.extract_page_content(pdf, i, doc_source)
             if content:
-                docs.append(content)
+                contents.append(content)
         
-        if not docs:
+        if not contents:
             logger.error("❌ Nenhum conteúdo extraído")
             return False
         
-        logger.info(f"✅ Extraídas {len(docs)} páginas")
+        logger.info(f"✅ Extraídas {len(contents)} páginas")
         
-        # 3. Gerar embeddings
+        # 3. Gerar embeddings assíncronos
         logger.info(f"🧠 Gerando embeddings multimodais...")
-        embedded_docs = asyncio.run(_generate_embeddings_async(docs))
+        embedded_contents = asyncio.run(_generate_embeddings_native(processor, contents))
         
-        if not embedded_docs:
+        if not embedded_contents:
             logger.error("❌ Nenhum embedding gerado")
             return False
         
-        logger.info(f"✅ Gerados {len(embedded_docs)} embeddings")
+        logger.info(f"✅ Gerados {len(embedded_contents)} embeddings")
         
         # 4. Conectar ao AstraDB e inserir
-        collection = connect_to_astra()
+        collection = processor.connect_to_astra()
         
-        # Remover documentos antigos do mesmo source
+        # Remover documentos antigos
         try:
             del_result = collection.delete_many({"doc_source": doc_source})
             if del_result.deleted_count > 0:
@@ -244,22 +468,12 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
         except Exception as e:
             logger.warning(f"⚠️ Aviso ao remover documentos antigos: {e}")
         
-        # Preparar documentos para inserção
-        documents = [
-            {
-                "_id": doc["id"],
-                "page_num": doc["page_num"],
-                "file_path": doc["image_path"],
-                "doc_source": doc["doc_source"],
-                "markdown_text": doc["markdown_text"],
-                "$vector": doc["embedding"]
-            } for doc in embedded_docs
-        ]
+        # Preparar e inserir documentos
+        documents = processor.prepare_documents_for_insertion(embedded_contents)
         
-        # Inserir em lotes
         logger.info(f"💾 Inserindo {len(documents)} documentos...")
         inserted_count = 0
-        batch_size = getattr(system_config.processing, 'batch_size', 100)
+        batch_size = processor.config.processing.batch_size
         
         for i in tqdm(range(0, len(documents), batch_size), desc="Inserindo no AstraDB"):
             batch = documents[i:i+batch_size]
@@ -268,7 +482,7 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
                 inserted_count += len(result.inserted_ids)
             except Exception as e:
                 logger.warning(f"⚠️ Erro no lote {i//batch_size + 1}: {e}")
-                # Tentar inserir individualmente
+                # Inserção individual como fallback
                 for doc in batch:
                     try:
                         collection.insert_one(doc)
@@ -276,79 +490,134 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
                     except Exception as individual_error:
                         logger.error(f"❌ Erro ao inserir {doc['_id']}: {individual_error}")
         
-        logger.info(f"✅ Indexação concluída!")
+        processing_time = time.time() - start_time
+        
+        logger.info(f"✅ Indexação refatorada concluída!")
         logger.info(f"📊 Documentos inseridos: {inserted_count}/{len(documents)}")
+        logger.info(f"⏱️ Tempo de processamento: {processing_time:.2f}s")
         logger.info(f"🎯 Doc source: {doc_source}")
         
         return inserted_count > 0
         
     except Exception as e:
-        logger.error(f"❌ Erro na indexação: {e}")
+        logger.error(f"❌ Erro na indexação refatorada: {e}")
         return False
 
-async def _generate_embeddings_async(docs: List[Dict]) -> List[Dict]:
-    """Gera embeddings assíncronos para lista de documentos"""
+async def _generate_embeddings_native(processor: NativeIndexingProcessor, contents: List[PageContent]) -> List[PageContent]:
+    """Gera embeddings usando processador nativo"""
     try:
-        processing_concurrency = getattr(system_config.processing, 'processing_concurrency', 5)
+        processing_concurrency = processor.config.processing.processing_concurrency
         logger.info(f"🔄 Gerando embeddings com {processing_concurrency} workers...")
         
         semaphore = asyncio.Semaphore(processing_concurrency)
         async_client = voyageai.AsyncClient()
         
         try:
-            tasks = [embed_page(semaphore, async_client, doc) for doc in docs]
-            embedded = [doc for doc in await asyncio.gather(*tasks) if doc]
+            tasks = [processor.generate_embedding(semaphore, async_client, content) for content in contents]
+            results = await asyncio.gather(*tasks)
             
-            # Validar embeddings
-            valid_docs = []
-            for doc in embedded:
-                if validate_embedding(doc["embedding"], system_config.rag.voyage_embedding_dim):
-                    valid_docs.append(doc)
-                else:
-                    logger.warning(f"⚠️ Embedding inválido para {doc['id']}")
+            # Filtrar apenas conteúdos com embeddings válidos
+            embedded_contents = [content for content, success in zip(contents, results) if success]
             
-            return valid_docs
+            return embedded_contents
             
         finally:
-            # Fechar conexão do cliente
+            # Fechar conexão
             if hasattr(async_client, "aclose"):
                 await async_client.aclose()
                 
     except Exception as e:
-        logger.error(f"❌ Erro ao gerar embeddings: {e}")
+        logger.error(f"❌ Erro ao gerar embeddings nativos: {e}")
         return []
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FUNÇÃO PRINCIPAL PARA EXECUÇÃO DIRETA
+# FUNÇÃO PRINCIPAL COM RESULTADO NATIVO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def index_pdf_native(url: str, doc_source: str = None) -> IndexingResult:
+    """
+    Função de indexação que retorna resultado nativo para integração com APIs.
+    
+    Args:
+        url: URL do PDF ou caminho local
+        doc_source: Nome/identificador do documento
+    
+    Returns:
+        IndexingResult: Resultado nativo da indexação
+    """
+    start_time = time.time()
+    processor = NativeIndexingProcessor()
+    
+    if not doc_source:
+        doc_source = processor.create_doc_source_name(url)
+    
+    try:
+        success = process_pdf_from_url(url, doc_source)
+        processing_time = time.time() - start_time
+        
+        if success:
+            # Estimar números (seria melhor retornar do processo)
+            return IndexingResultFactory.create_success_result(
+                doc_source=doc_source,
+                pages_processed=0,  # TODO: retornar do processo
+                chunks_created=0,   # TODO: retornar do processo  
+                processing_time=processing_time
+            )
+        else:
+            return IndexingResultFactory.create_error_result(
+                doc_source=doc_source,
+                error="Falha no processamento do PDF",
+                processing_time=processing_time
+            )
+            
+    except Exception as e:
+        processing_time = time.time() - start_time
+        return IndexingResultFactory.create_error_result(
+            doc_source=doc_source,
+            error=str(e),
+            processing_time=processing_time
+        )
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# CLI E EXECUÇÃO DIRETA
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def main():
     """Função principal para execução via linha de comando"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Indexar PDF no sistema RAG")
+    parser = argparse.ArgumentParser(description="Indexador Refatorado v2.0.0 - Sistema RAG Multi-Agente")
     parser.add_argument("url", help="URL ou caminho do PDF")
     parser.add_argument("--doc-source", help="Nome/identificador do documento")
+    parser.add_argument("--native-result", action="store_true", help="Retornar resultado nativo detalhado")
     
     args = parser.parse_args()
     
-    # Validar variáveis de ambiente
-    required_vars = ["VOYAGE_API_KEY", "ASTRA_DB_API_ENDPOINT", "ASTRA_DB_APPLICATION_TOKEN"]
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
-    
-    if missing_vars:
-        logger.error(f"❌ Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
-        return False
-    
-    # Executar indexação
-    success = process_pdf_from_url(args.url, args.doc_source)
-    
-    if success:
-        logger.info("🎉 Indexação realizada com sucesso!")
-        return True
+    if args.native_result:
+        # Usar função que retorna resultado nativo
+        result = index_pdf_native(args.url, args.doc_source)
+        
+        print(f"\n📊 RESULTADO DA INDEXAÇÃO:")
+        print(f"✅ Sucesso: {result.success}")
+        print(f"📄 Doc Source: {result.doc_source}")
+        print(f"📊 Páginas: {result.pages_processed}")
+        print(f"🧩 Chunks: {result.chunks_created}")
+        print(f"⏱️ Tempo: {result.processing_time:.2f}s")
+        
+        if result.error:
+            print(f"❌ Erro: {result.error}")
+        
+        return result.success
     else:
-        logger.error("💥 Falha na indexação!")
-        return False
+        # Usar função tradicional
+        success = process_pdf_from_url(args.url, args.doc_source)
+        
+        if success:
+            logger.info("🎉 Indexação realizada com sucesso!")
+            return True
+        else:
+            logger.error("💥 Falha na indexação!")
+            return False
 
 if __name__ == "__main__":
-    main()
+    exit(0 if main() else 1)
