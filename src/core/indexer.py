@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Indexador - Sistema RAG Multi-Agente
+Indexador Refatorado v2.0.0 - Sistema RAG Multi-Agente
 
-Indexador simplificado e otimizado que integra com as APIs.
+Indexador simplificado e otimizado que integra com as APIs refatoradas.
 Usa modelos nativos e factory patterns para consistência com o sistema.
 """
 
@@ -51,7 +51,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class IndexingResult:
-    """Resultado nativo de indexação usando padrões das APIs"""
+    """Resultado nativo de indexação usando padrões das APIs refatoradas"""
     success: bool
     doc_source: str
     pages_processed: int = 0
@@ -109,7 +109,7 @@ class IndexingResultFactory:
             images_extracted=images_extracted,
             processing_time=processing_time,
             metadata={
-                "indexer_version": "1.0",
+                "indexer_version": "2.0.0",
                 "model_used": system_config.rag.multimodal_model,
                 "embedding_dimension": system_config.rag.voyage_embedding_dim,
                 "native_processing": True,
@@ -131,7 +131,7 @@ class IndexingResultFactory:
             error=error,
             processing_time=processing_time,
             metadata={
-                "indexer_version": "1.0",
+                "indexer_version": "2.0.0",
                 "error_occurred": True,
                 **kwargs
             }
@@ -377,7 +377,7 @@ class NativeIndexingProcessor:
                     "token_count": content.token_count,
                     "processing_time": content.processing_time,
                     "indexed_at": datetime.utcnow().isoformat(),
-                    "indexer_version": "1.0"
+                    "indexer_version": "2.0.0"
                 }
                 documents.append(doc)
         
@@ -398,7 +398,7 @@ def create_doc_source_name(url: str) -> str:
 
 def process_pdf_from_url(url: str, doc_source: str = None) -> Tuple[bool, int, int, int]:
     """
-    Função principal para processar PDF usando modelos nativos.
+    Função principal refatorada para processar PDF usando modelos nativos.
     
     Args:
         url: URL do PDF ou caminho local
@@ -428,7 +428,7 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> Tuple[bool, int, i
             logger.error(f"❌ Nome de documento inválido: {doc_source}")
             return False, 0, 0, 0
         
-        logger.info(f"🚀 Iniciando indexação: {doc_source}")
+        logger.info(f"🚀 Iniciando indexação refatorada v2.0.0: {doc_source}")
         logger.info(f"📄 PDF: {url}")
         
         # 1. Baixar/abrir PDF
@@ -447,8 +447,8 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> Tuple[bool, int, i
             content = processor.extract_page_content(pdf, i, doc_source)
             if content:
                 contents.append(content)
-                # Contar imagens se houver
-                if hasattr(content, 'image_data') and content.image_data:
+                # Contar imagens se houver (verificar se o arquivo de imagem foi criado)
+                if content.image_path and os.path.exists(content.image_path):
                     images_extracted += 1
         
         if not contents:
@@ -502,7 +502,7 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> Tuple[bool, int, i
         
         processing_time = time.time() - start_time
         
-        logger.info(f"✅ Indexação concluída!")
+        logger.info(f"✅ Indexação refatorada concluída!")
         logger.info(f"📊 Documentos inseridos: {inserted_count}/{len(documents)}")
         logger.info(f"⏱️ Tempo de processamento: {processing_time:.2f}s")
         logger.info(f"🎯 Doc source: {doc_source}")
@@ -512,7 +512,7 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> Tuple[bool, int, i
         return success, pages_processed, chunks_created, images_extracted
         
     except Exception as e:
-        logger.error(f"❌ Erro na indexação: {e}")
+        logger.error(f"❌ Erro na indexação refatorada: {e}")
         return False, 0, 0, 0
 
 async def _generate_embeddings_native(processor: NativeIndexingProcessor, contents: List[PageContent]) -> List[PageContent]:
@@ -598,7 +598,7 @@ def main():
     """Função principal para execução via linha de comando"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Indexador - Sistema RAG Multi-Agente")
+    parser = argparse.ArgumentParser(description="Indexador Refatorado v2.0.0 - Sistema RAG Multi-Agente")
     parser.add_argument("url", help="URL ou caminho do PDF")
     parser.add_argument("--doc-source", help="Nome/identificador do documento")
     parser.add_argument("--native-result", action="store_true", help="Retornar resultado nativo detalhado")

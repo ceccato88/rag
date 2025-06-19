@@ -102,7 +102,7 @@ MEMORY_CONFIG = {
 
 SYSTEM_DEFAULTS = {
     'COLLECTION_NAME': 'pdf_documents',
-    'IMAGE_DIR': 'pdf_images',
+    'IMAGE_DIR': 'data/pdf_images',
     'DEFAULT_PDF_URL': 'https://arxiv.org/pdf/2501.13956'
 }
 

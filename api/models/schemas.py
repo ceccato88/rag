@@ -8,7 +8,70 @@ Atualizado para Pydantic V2 com field_validator.
 
 from typing import Dict, List, Any, Optional
 from datetime import datetime
+import re
+import html
 from pydantic import BaseModel, Field, field_validator, ConfigDict
+
+
+def sanitize_and_validate_text(text: str, field_name: str = "text") -> str:
+    """Sanitiza e valida texto contra XSS e outras injeções"""
+    if not text or not text.strip():
+        raise ValueError(f"{field_name} não pode estar vazio")
+    
+    # Primeiro, decodificar entidades HTML para detectar ataques codificados
+    decoded_text = html.unescape(text.strip())
+    
+    # Padrões perigosos mais abrangentes
+    dangerous_patterns = [
+        r'<script[^>]*>.*?</script>',  # Tags script
+        r'javascript:',                # URLs javascript
+        r'data:text/html',            # Data URLs com HTML
+        r'vbscript:',                 # VBScript
+        r'on\w+\s*=',                 # Event handlers (onclick, onload, etc.)
+        r'<iframe[^>]*>',             # iframes
+        r'<object[^>]*>',             # Objects
+        r'<embed[^>]*>',              # Embeds
+        r'<form[^>]*>',               # Forms
+        r'<input[^>]*>',              # Inputs
+        r'expression\s*\(',           # CSS expressions
+        r'@import',                   # CSS imports
+        r'url\s*\(',                  # CSS URLs
+        r'<meta[^>]*>',               # Meta tags
+        r'<link[^>]*>',               # Link tags
+    ]
+    
+    # Verificar padrões perigosos (case insensitive)
+    text_lower = decoded_text.lower()
+    for pattern in dangerous_patterns:
+        if re.search(pattern, text_lower, re.IGNORECASE | re.DOTALL):
+            raise ValueError(f"{field_name} contém conteúdo potencialmente perigoso")
+    
+    # Verificar caracteres suspeitos
+    suspicious_chars = ['<', '>', '{', '}', '$', '`']
+    if any(char in decoded_text for char in suspicious_chars):
+        # Permitir apenas se for texto científico legítimo
+        if not _is_legitimate_scientific_text(decoded_text):
+            raise ValueError(f"{field_name} contém caracteres suspeitos")
+    
+    return text.strip()
+
+
+def _is_legitimate_scientific_text(text: str) -> bool:
+    """Verifica se o texto contém apenas uso legítimo de caracteres especiais"""
+    # Permitir < e > em contextos matemáticos/científicos
+    math_patterns = [
+        r'\d+\s*[<>]\s*\d+',          # Comparações numéricas
+        r'[a-zA-Z]+\s*[<>]\s*[a-zA-Z]+',  # Comparações alfabéticas
+        r'<\s*\d+',                    # Menor que número
+        r'>\s*\d+',                    # Maior que número
+    ]
+    
+    text_without_math = text
+    for pattern in math_patterns:
+        text_without_math = re.sub(pattern, '', text_without_math, flags=re.IGNORECASE)
+    
+    # Se após remover padrões matemáticos ainda há < ou >, é suspeito
+    return '<' not in text_without_math and '>' not in text_without_math
 
 
 class ResearchQuery(BaseModel):
@@ -37,20 +100,21 @@ class ResearchQuery(BaseModel):
     @field_validator('query')
     @classmethod
     def validate_query_content(cls, v):
-        """Valida o conteúdo da query"""
-        if not v or not v.strip():
-            raise ValueError("Query não pode estar vazia")
+        """Valida o conteúdo da query com proteção XSS avançada"""
+        return sanitize_and_validate_text(v, "Query")
+    
+    @field_validator('objective')
+    @classmethod
+    def validate_objective_content(cls, v):
+        """Valida o conteúdo do objetivo com proteção XSS"""
+        if v is None:
+            return v
         
-        # Remover espaços extras
         v = v.strip()
-        
-        # Verificar caracteres perigosos
-        dangerous_chars = ["<script", "</script", "javascript:", "data:", "vbscript:"]
-        v_lower = v.lower()
-        if any(char in v_lower for char in dangerous_chars):
-            raise ValueError("Query contém conteúdo potencialmente perigoso")
-        
-        return v
+        if not v:
+            return None
+            
+        return sanitize_and_validate_text(v, "Objective")
 
 
 class ResearchResponse(BaseModel):
@@ -111,8 +175,10 @@ class IndexRequest(BaseModel):
     @field_validator('url')
     @classmethod
     def validate_url_format(cls, v):
-        """Valida formato da URL e verifica se é um PDF"""
+        """Valida formato da URL e verifica se é um PDF com proteção SSRF"""
         import requests
+        import socket
+        import ipaddress
         from urllib.parse import urlparse
         
         if not v or not v.strip():
@@ -131,13 +197,37 @@ class IndexRequest(BaseModel):
         except Exception:
             raise ValueError("Formato de URL inválido")
         
+        # PROTEÇÃO SSRF: Verificar se o hostname resolve para IP privado
+        try:
+            hostname = parsed.hostname
+            if hostname:
+                # Resolver hostname para IP
+                ip = socket.gethostbyname(hostname)
+                ip_obj = ipaddress.ip_address(ip)
+                
+                # Bloquear IPs privados, localhost e reservados
+                if (ip_obj.is_private or ip_obj.is_loopback or 
+                    ip_obj.is_link_local or ip_obj.is_reserved or
+                    ip_obj.is_multicast):
+                    raise ValueError("Não é permitido acessar endereços IP privados ou localhost")
+        except socket.gaierror:
+            raise ValueError("Não foi possível resolver o hostname")
+        except ValueError as e:
+            if "private" in str(e) or "localhost" in str(e):
+                raise e
+            # Para outros erros de valor, continuar
+        
         # Se termina com .pdf, aceitar diretamente (validação rápida)
         if v.lower().endswith(".pdf"):
             return v
         
-        # Caso contrário, verificar Content-Type via HEAD request
+        # Caso contrário, verificar Content-Type via HEAD request com proteção SSRF
         try:
-            response = requests.head(v, timeout=10, allow_redirects=True)
+            # Configurar sessão com proteções adicionais
+            session = requests.Session()
+            session.max_redirects = 3  # Limitar redirecionamentos
+            
+            response = session.head(v, timeout=10, allow_redirects=True)
             content_type = response.headers.get('content-type', '').lower()
             
             # Verificar se é PDF pelo Content-Type

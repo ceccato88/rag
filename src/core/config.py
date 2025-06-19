@@ -40,10 +40,10 @@ def get_env_bool(key: str, default: bool) -> bool:
 @dataclass
 class RAGConfig:
     """Configurações do sistema RAG."""
-    # Modelos
-    llm_model: str = os.getenv('RAG_LLM_MODEL', DEFAULT_MODELS['LLM'])
-    embedding_model: str = os.getenv('RAG_EMBEDDING_MODEL', DEFAULT_MODELS['EMBEDDING'])
-    multimodal_model: str = os.getenv('VOYAGE_MULTIMODAL_MODEL', DEFAULT_MODELS['MULTIMODAL'])
+    # Modelos (usando nomes padronizados com fallback para compatibilidade)
+    llm_model: str = os.getenv('OPENAI_MODEL', os.getenv('RAG_LLM_MODEL', DEFAULT_MODELS['LLM']))
+    embedding_model: str = os.getenv('EMBEDDING_MODEL', os.getenv('RAG_EMBEDDING_MODEL', DEFAULT_MODELS['EMBEDDING']))
+    multimodal_model: str = os.getenv('EMBEDDING_MODEL', os.getenv('VOYAGE_MULTIMODAL_MODEL', DEFAULT_MODELS['MULTIMODAL']))
     
     # Limites de tokens
     max_candidates: int = get_env_int('MAX_CANDIDATES', TOKEN_LIMITS['MAX_CANDIDATES'])
@@ -193,10 +193,10 @@ class MemoryConfig:
 class ProductionConfig:
     """Configurações específicas para ambiente de produção."""
     
-    # Configurações de desenvolvimento/debug
+    # Configurações de desenvolvimento/debug (usando nomes padronizados)
     debug_mode: bool = get_env_bool('DEBUG_MODE', DEV_CONFIG['DEBUG_MODE'])
     verbose_logging: bool = get_env_bool('VERBOSE_LOGGING', DEV_CONFIG['VERBOSE_LOGGING'])
-    production_mode: bool = get_env_bool('PRODUCTION_MODE', DEV_CONFIG['PRODUCTION_MODE'])
+    production_mode: bool = get_env_bool('PRODUCTION_MODE', True)  # Padrão para True
     enable_performance_metrics: bool = get_env_bool('ENABLE_PERFORMANCE_METRICS', DEV_CONFIG['ENABLE_PERFORMANCE_METRICS'])
     
     # Logging
@@ -206,18 +206,20 @@ class ProductionConfig:
     async_logging: bool = get_env_bool('ASYNC_LOGGING', LOGGING_CONFIG['ASYNC_LOGGING'])
     
     # Segurança e Rate Limiting
-    enable_rate_limiting: bool = get_env_bool('ENABLE_RATE_LIMITING', PRODUCTION_CONFIG['ENABLE_RATE_LIMITING'])
+    enable_rate_limiting: bool = get_env_bool('ENABLE_RATE_LIMITING', True)  # Usar valor padrão
     max_requests_per_minute: int = get_env_int('MAX_REQUESTS_PER_MINUTE', PRODUCTION_CONFIG['MAX_REQUESTS_PER_MINUTE'])
     max_concurrent_requests: int = get_env_int('MAX_CONCURRENT_REQUESTS', PRODUCTION_CONFIG['MAX_CONCURRENT_REQUESTS'])
     
     # Monitoramento
-    monitoring_enabled: bool = get_env_bool('MONITORING_ENABLED', PRODUCTION_CONFIG['MONITORING_ENABLED'])
+    monitoring_enabled: bool = get_env_bool('MONITORING_ENABLED', True)  # Usar valor padrão
     health_check_interval: int = get_env_int('HEALTH_CHECK_INTERVAL', DEV_CONFIG['HEALTH_CHECK_INTERVAL'])
     
-    # Timeouts específicos de produção
-    database_timeout: int = get_env_int('DATABASE_TIMEOUT', PRODUCTION_CONFIG['DATABASE_TIMEOUT'])
-    redis_timeout: int = get_env_int('REDIS_TIMEOUT', PRODUCTION_CONFIG['REDIS_TIMEOUT'])
-    external_api_timeout: int = get_env_int('EXTERNAL_API_TIMEOUT', PRODUCTION_CONFIG['EXTERNAL_API_TIMEOUT'])
+    # Timeouts específicos de produção (usando valores padrão)
+    database_timeout: int = get_env_int('DATABASE_TIMEOUT', 30)
+    redis_timeout: int = get_env_int('REDIS_TIMEOUT', 5)
+    external_api_timeout: int = get_env_int('EXTERNAL_API_TIMEOUT', 10)
+    download_timeout: int = get_env_int('DOWNLOAD_TIMEOUT', 30)
+    cache_ttl: int = get_env_int('CACHE_TTL', 3600)
     
     def validate(self) -> Dict[str, Any]:
         """Valida configurações de produção."""

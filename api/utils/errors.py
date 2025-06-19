@@ -276,15 +276,25 @@ class ErrorHandler:
         if len(query) > 1000:
             raise ValidationError("Consulta não pode exceder 1000 caracteres", "query", query)
         
-        # Verificar caracteres perigosos
-        dangerous_chars = ["<", ">", "&", "\"", "'"]
-        if any(char in query for char in dangerous_chars):
-            raise ValidationError("Consulta contém caracteres não permitidos", "query", query)
+        # Usar validação XSS avançada
+        try:
+            from api.models.schemas import sanitize_and_validate_text
+            sanitize_and_validate_text(query, "Consulta")
+        except ValueError as e:
+            raise ValidationError(str(e), "query", query)
+        except ImportError:
+            # Fallback para validação simples se import falhar
+            dangerous_chars = ["<", ">", "&", "\"", "'"]
+            if any(char in query for char in dangerous_chars):
+                raise ValidationError("Consulta contém caracteres não permitidos", "query", query)
     
     @staticmethod
     def validate_url(url: str) -> None:
-        """Valida URL de documento verificando Content-Type"""
+        """Valida URL de documento verificando Content-Type com proteção SSRF"""
         import requests
+        import socket
+        import ipaddress
+        from urllib.parse import urlparse
         from requests.exceptions import RequestException
         
         if not url or not url.strip():
@@ -295,9 +305,33 @@ class ErrorHandler:
         if not url.startswith(("http://", "https://")):
             raise ValidationError("URL deve começar com http:// ou https://", "url", url)
         
-        # Verificar Content-Type ao invés de apenas extensão
+        # PROTEÇÃO SSRF: Verificar se o hostname resolve para IP privado
         try:
-            response = requests.head(url, timeout=10, allow_redirects=True)
+            parsed = urlparse(url)
+            hostname = parsed.hostname
+            if hostname:
+                # Resolver hostname para IP
+                ip = socket.gethostbyname(hostname)
+                ip_obj = ipaddress.ip_address(ip)
+                
+                # Bloquear IPs privados, localhost e reservados
+                if (ip_obj.is_private or ip_obj.is_loopback or 
+                    ip_obj.is_link_local or ip_obj.is_reserved or
+                    ip_obj.is_multicast):
+                    raise ValidationError("Não é permitido acessar endereços IP privados ou localhost", "url", url)
+        except socket.gaierror:
+            raise ValidationError("Não foi possível resolver o hostname", "url", url)
+        except ValueError as e:
+            if "private" in str(e) or "localhost" in str(e):
+                raise ValidationError(str(e), "url", url)
+        
+        # Verificar Content-Type ao invés de apenas extensão com proteção SSRF
+        try:
+            # Configurar sessão com proteções adicionais
+            session = requests.Session()
+            session.max_redirects = 3  # Limitar redirecionamentos
+            
+            response = session.head(url, timeout=10, allow_redirects=True)
             content_type = response.headers.get('content-type', '').lower()
             
             if 'application/pdf' not in content_type and not url.lower().endswith('.pdf'):

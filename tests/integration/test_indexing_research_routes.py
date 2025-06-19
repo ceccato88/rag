@@ -16,8 +16,8 @@ from fastapi.testclient import TestClient
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 try:
-    from src.apis.v2.main import app
-    from src.apis.v2.core.config import src.core.config as config
+    from api.main import app
+    from api.core.config import config
     
     # Cliente de teste
     client = TestClient(app)

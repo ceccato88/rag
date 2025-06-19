@@ -103,10 +103,20 @@ class ProductionConfig(BaseSettings):
     model_config = SettingsConfigDict(case_sensitive=False)
     
     production_mode: bool = Field(default=True, description="Modo de produção")
+    debug_mode: bool = Field(default=False, description="Modo debug")
+    verbose_logging: bool = Field(default=False, description="Logging verboso")
+    monitoring_enabled: bool = Field(default=True, description="Monitoramento habilitado")
     enable_metrics: bool = Field(default=True, description="Habilitar métricas")
     enable_tracing: bool = Field(default=False, description="Habilitar tracing")
     max_request_size: int = Field(default=16 * 1024 * 1024, description="Tamanho máximo de requisição")
     request_timeout: int = Field(default=300, ge=1, description="Timeout de requisição em segundos")
+    
+    # Timeouts adicionais
+    redis_timeout: int = Field(default=5, ge=1, description="Timeout Redis em segundos")
+    database_timeout: int = Field(default=30, ge=1, description="Timeout banco de dados em segundos")
+    external_api_timeout: int = Field(default=10, ge=1, description="Timeout APIs externas em segundos")
+    download_timeout: int = Field(default=30, ge=1, description="Timeout downloads em segundos")
+    cache_ttl: int = Field(default=3600, ge=1, description="TTL cache em segundos")
 
 
 class PathConfig(BaseSettings):
