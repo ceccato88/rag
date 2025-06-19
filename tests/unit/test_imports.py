@@ -9,15 +9,15 @@ try:
     print("✅ FastAPI importado com sucesso")
     
     print("2. Testando config...")
-    from api.core.config import config
+    from src.apis.v2.core.config import src.core.config as config
     print("✅ Config importado com sucesso")
     
     print("3. Testando schemas...")
-    from api.models.schemas import ResearchQuery, HealthResponse
+    from src.apis.v2.models.schemas import ResearchQuery, HealthResponse
     print("✅ Schemas importados com sucesso")
     
     print("4. Testando main...")
-    from api.main import app
+    from src.apis.v2.main import app
     print("✅ App principal importado com sucesso")
     
     print("✅ Todos os imports funcionaram!")

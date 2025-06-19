@@ -6,7 +6,7 @@ import os
 from typing import Dict, Any, Optional
 from dataclasses import dataclass
 from dotenv import load_dotenv, find_dotenv
-from constants import (
+from .constants import (
     DEFAULT_MODELS, TOKEN_LIMITS, CACHE_CONFIG, TIMEOUT_CONFIG,
     PROCESSING_CONFIG, MULTIAGENT_CONFIG, SYSTEM_DEFAULTS,
     LOGGING_CONFIG, PRODUCTION_CONFIG, DEV_CONFIG, FALLBACK_CONFIG,

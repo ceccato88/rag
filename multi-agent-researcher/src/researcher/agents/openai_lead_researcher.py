@@ -10,7 +10,7 @@ from pathlib import Path
 
 # Adiciona o diretório raiz ao path para importar config
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../.."))
-from config import SystemConfig
+from src.core.config import SystemConfig
 
 # Load environment variables from project root
 from dotenv import load_dotenv, find_dotenv

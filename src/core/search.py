@@ -16,10 +16,10 @@ from PIL import Image
 from astrapy import DataAPIClient
 
 # Importa utilitários
-from utils.metrics import ProcessingMetrics, measure_time
-from utils.validation import validate_embedding
-from utils.cache import SimpleCache
-from config import SystemConfig
+from ..utils.metrics import ProcessingMetrics, measure_time
+from ..utils.validation import validate_embedding
+from ..utils.cache import SimpleCache
+from .config import SystemConfig
 
 # Configuração centralizada
 system_config = SystemConfig()

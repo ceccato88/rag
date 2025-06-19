@@ -48,7 +48,7 @@ class OptimizedRAGSearchTool(Tool):
                     return
                 
                 # Tentar importar sistema padrão
-                from search import ProductionConversationalRAG
+                from src.core.search import ProductionConversationalRAG
                 self.rag_system = ProductionConversationalRAG()
             except ImportError:
                 # Fallback para modo demo se não conseguir importar

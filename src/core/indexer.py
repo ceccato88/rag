@@ -27,11 +27,11 @@ from tqdm import tqdm
 from astrapy import DataAPIClient
 from astrapy.collection import Collection
 
-from config import SystemConfig
-from constants import NATIVE_MODELS_CONFIG, API_REFACTORED_CONFIG, VALIDATION_CONFIG
-from utils.validation import validate_document, validate_embedding
-from utils.resource_manager import ResourceManager
-from utils.metrics import ProcessingMetrics
+from .config import SystemConfig
+from .constants import NATIVE_MODELS_CONFIG, API_REFACTORED_CONFIG, VALIDATION_CONFIG
+from ..utils.validation import validate_document, validate_embedding
+from ..utils.resource_manager import ResourceManager
+from ..utils.metrics import ProcessingMetrics
 # from utils.metrics import measure_time  # Temporariamente removido
 
 # Configuração
@@ -93,15 +93,20 @@ class IndexingResultFactory:
         pages_processed: int,
         chunks_created: int,
         processing_time: float,
+        images_extracted: int = None,
         **kwargs
     ) -> IndexingResult:
         """Cria resultado de sucesso"""
+        # Se não especificado, assumir 1 imagem por página como padrão
+        if images_extracted is None:
+            images_extracted = pages_processed
+            
         return IndexingResult(
             success=True,
             doc_source=doc_source,
             pages_processed=pages_processed,
             chunks_created=chunks_created,
-            images_extracted=pages_processed,  # 1 imagem por página
+            images_extracted=images_extracted,
             processing_time=processing_time,
             metadata={
                 "indexer_version": "2.0.0",
@@ -391,7 +396,7 @@ def create_doc_source_name(url: str) -> str:
 # FUNÇÃO PRINCIPAL REFATORADA
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
+def process_pdf_from_url(url: str, doc_source: str = None) -> Tuple[bool, int, int, int]:
     """
     Função principal refatorada para processar PDF usando modelos nativos.
     
@@ -400,7 +405,7 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
         doc_source: Nome/identificador do documento
     
     Returns:
-        bool: True se sucesso, False se falha
+        Tuple[bool, int, int, int]: (sucesso, páginas_processadas, chunks_criados, imagens_extraídas)
     """
     processor = NativeIndexingProcessor()
     start_time = time.time()
@@ -409,19 +414,19 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
         # Validações usando validador nativo
         if not IndexingValidator.validate_url(url):
             logger.error(f"❌ URL inválida: {url}")
-            return False
+            return False, 0, 0, 0
         
         env_valid, missing_vars = IndexingValidator.validate_environment()
         if not env_valid:
             logger.error(f"❌ Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
-            return False
+            return False, 0, 0, 0
         
         # Criar doc_source se não fornecido
         if not doc_source:
             doc_source = processor.create_doc_source_name(url)
         elif not IndexingValidator.validate_doc_source(doc_source):
             logger.error(f"❌ Nome de documento inválido: {doc_source}")
-            return False
+            return False, 0, 0, 0
         
         logger.info(f"🚀 Iniciando indexação refatorada v2.0.0: {doc_source}")
         logger.info(f"📄 PDF: {url}")
@@ -430,20 +435,25 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
         pdf = processor.download_pdf_with_retry(url)
         if not pdf:
             logger.error("❌ Não foi possível carregar o PDF")
-            return False
+            return False, 0, 0, 0
         
         # 2. Extrair conteúdo das páginas
         logger.info(f"📊 Extraindo conteúdo de {pdf.page_count} páginas...")
         contents = []
+        pages_processed = pdf.page_count
+        images_extracted = 0
         
         for i in tqdm(range(pdf.page_count), desc="Extraindo páginas"):
             content = processor.extract_page_content(pdf, i, doc_source)
             if content:
                 contents.append(content)
+                # Contar imagens se houver
+                if hasattr(content, 'image_data') and content.image_data:
+                    images_extracted += 1
         
         if not contents:
             logger.error("❌ Nenhum conteúdo extraído")
-            return False
+            return False, 0, 0, 0
         
         logger.info(f"✅ Extraídas {len(contents)} páginas")
         
@@ -453,7 +463,7 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
         
         if not embedded_contents:
             logger.error("❌ Nenhum embedding gerado")
-            return False
+            return False, 0, 0, 0
         
         logger.info(f"✅ Gerados {len(embedded_contents)} embeddings")
         
@@ -497,11 +507,13 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
         logger.info(f"⏱️ Tempo de processamento: {processing_time:.2f}s")
         logger.info(f"🎯 Doc source: {doc_source}")
         
-        return inserted_count > 0
+        chunks_created = len(embedded_contents)  # Cada conteúdo embedded é um chunk
+        success = inserted_count > 0
+        return success, pages_processed, chunks_created, images_extracted
         
     except Exception as e:
         logger.error(f"❌ Erro na indexação refatorada: {e}")
-        return False
+        return False, 0, 0, 0
 
 async def _generate_embeddings_native(processor: NativeIndexingProcessor, contents: List[PageContent]) -> List[PageContent]:
     """Gera embeddings usando processador nativo"""
@@ -552,15 +564,15 @@ def index_pdf_native(url: str, doc_source: str = None) -> IndexingResult:
         doc_source = processor.create_doc_source_name(url)
     
     try:
-        success = process_pdf_from_url(url, doc_source)
+        success, pages_processed, chunks_created, images_extracted = process_pdf_from_url(url, doc_source)
         processing_time = time.time() - start_time
         
         if success:
-            # Estimar números (seria melhor retornar do processo)
             return IndexingResultFactory.create_success_result(
                 doc_source=doc_source,
-                pages_processed=0,  # TODO: retornar do processo
-                chunks_created=0,   # TODO: retornar do processo  
+                pages_processed=pages_processed,
+                chunks_created=chunks_created,
+                images_extracted=images_extracted,
                 processing_time=processing_time
             )
         else:

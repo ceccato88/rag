@@ -18,7 +18,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from dotenv import load_dotenv
-from config import SystemConfig
+from src.core.config import SystemConfig
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -39,8 +39,8 @@ def delete_images(all_images: bool = False, doc_prefix: str = None) -> dict:
         # Carregar configuração
         load_dotenv()
         
-        # Diretório de imagens (padrão: pdf_images)
-        images_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pdf_images")
+        # Diretório de imagens (nova estrutura: data/pdf_images)
+        images_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data", "pdf_images")
         
         if not os.path.exists(images_dir):
             return {"success": True, "deleted": 0, "message": "Diretório de imagens não existe"}

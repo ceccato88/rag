@@ -42,19 +42,25 @@ try:
     
     # Adicionar path do workspace
     workspace_root = Path("/workspaces/rag")
-    maintenance_path = workspace_root / "maintenance"
+    maintenance_path = workspace_root / "scripts" / "maintenance"
     if str(maintenance_path) not in sys.path:
         sys.path.append(str(maintenance_path))
     
     from delete_collection import delete_documents
+    from delete_images import delete_images
     DELETE_AVAILABLE = True
-    logger.info("✅ Função de deleção disponível")
+    DELETE_IMAGES_AVAILABLE = True
+    logger.info("✅ Funções de deleção disponíveis")
 except ImportError as e:
     logger.warning(f"⚠️ Função de deleção não disponível: {e}")
     DELETE_AVAILABLE = False
+    DELETE_IMAGES_AVAILABLE = False
     
     def delete_documents(collection_name: str):
         return {"error": "Função de deleção não disponível"}
+    
+    def delete_images(all_images: bool = False, doc_prefix: str = None):
+        return {"error": "Função de deleção de imagens não disponível"}
 
 
 @router.get("/health", response_model=HealthResponse, summary="Health Check Básico")
@@ -119,7 +125,7 @@ async def get_system_stats(
         
         # Verificar indexer
         try:
-            from indexer import index_pdf_native
+            from src.core.indexer import index_pdf_native
             indexer_available = True
         except ImportError:
             indexer_available = False
@@ -195,6 +201,76 @@ async def delete_documents_endpoint(
     except Exception as e:
         logger.error(f"❌ Erro na deleção: {e}")
         raise ProcessingError("deleção", str(e))
+
+
+@router.delete("/images", response_model=DeleteResponse, summary="Deletar Imagens")
+async def delete_images_endpoint(
+    all_images: bool = False,
+    doc_prefix: str = None,
+    state_manager: APIStateManager = Depends(get_authenticated_state)
+):
+    """
+    Deleta imagens extraídas dos PDFs.
+    
+    **Parâmetros:**
+    - **all_images**: Se True, deleta TODAS as imagens (padrão: False)
+    - **doc_prefix**: Se fornecido, deleta apenas imagens que começam com esse prefixo
+    
+    **Processo:**
+    1. Localiza diretório de imagens (`data/pdf_images/`)
+    2. Encontra arquivos correspondentes aos critérios
+    3. Remove arquivos físicos do sistema
+    4. Retorna estatísticas da operação
+    
+    **Retorna:**
+    - Resultado da operação
+    - Número de imagens deletadas
+    - Detalhes da operação
+    
+    **Exemplo de uso:**
+    ```bash
+    # Deletar todas as imagens
+    curl -X DELETE "http://localhost:8000/api/v1/images?all_images=true" \\
+         -H "Authorization: Bearer YOUR_TOKEN"
+    
+    # Deletar imagens de um documento específico
+    curl -X DELETE "http://localhost:8000/api/v1/images?doc_prefix=arxiv_2024" \\
+         -H "Authorization: Bearer YOUR_TOKEN"
+    ```
+    """
+    try:
+        if not DELETE_IMAGES_AVAILABLE:
+            raise ProcessingError("deleção de imagens", "Função de deleção de imagens não disponível")
+        
+        logger.info(f"🖼️ Iniciando deleção de imagens - all: {all_images}, prefix: {doc_prefix}")
+        
+        # Validação básica
+        if not all_images and not doc_prefix:
+            raise ProcessingError("deleção de imagens", "Deve especificar 'all_images=true' ou fornecer 'doc_prefix'")
+        
+        # Executar deleção
+        result = delete_images(all_images=all_images, doc_prefix=doc_prefix)
+        
+        if isinstance(result, dict) and "error" in result:
+            raise ProcessingError("deleção de imagens", result["error"])
+        
+        response = DeleteResponse(
+            success=True,
+            message=f"Imagens deletadas com sucesso",
+            details={
+                "all_images": all_images,
+                "doc_prefix": doc_prefix,
+                "operation_result": result,
+                "timestamp": datetime.utcnow().isoformat()
+            }
+        )
+        
+        logger.info(f"✅ Deleção de imagens concluída: {result.get('deleted', 0)} arquivos")
+        return response
+        
+    except Exception as e:
+        logger.error(f"❌ Erro na deleção de imagens: {e}")
+        raise ProcessingError("deleção de imagens", str(e))
 
 
 @router.get("/version", summary="Versão da API")

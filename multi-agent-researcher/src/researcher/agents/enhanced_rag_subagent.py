@@ -13,7 +13,7 @@ from enum import Enum
 
 # Adiciona o diretório raiz ao path para importar config
 sys.path.append(os.path.join(os.path.dirname(__file__), "../../../.."))
-from config import SystemConfig
+from src.core.config import SystemConfig
 
 from researcher.agents.base import Agent, AgentContext, AgentResult, AgentState
 from researcher.agents.document_search_agent import RAGResearchSubagent, RAGSubagentConfig

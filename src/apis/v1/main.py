@@ -28,12 +28,12 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 # Importações da nova estrutura modular
-from api.core.config import config
-from api.core.state import lifespan_manager
-from api.utils.middleware import setup_middlewares
-from api.utils.errors import ErrorHandler
-from api.routers import research_router, indexing_router, management_router
-from api.dependencies import get_rate_limiter
+from .core.config import config
+from .core.state import lifespan_manager
+from .utils.middleware import setup_middlewares
+from .utils.errors import ErrorHandler
+from .routers import research_router, indexing_router, management_router
+from .dependencies import get_rate_limiter
 
 # Configuração de logging
 logging.basicConfig(
