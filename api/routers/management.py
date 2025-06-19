@@ -284,7 +284,7 @@ async def get_api_version():
     - Componentes disponíveis
     """
     return {
-        "api_version": "2.0.0",
+        "api_version": "1.0",
         "api_name": "Sistema RAG Multi-Agente",
         "build_date": "2025-06-19",
         "python_version": "3.12+",

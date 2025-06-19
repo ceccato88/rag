@@ -49,7 +49,7 @@ try:
     
     from src.core.indexer import index_pdf_native, create_doc_source_name, IndexingResult
     INDEXER_AVAILABLE = True
-    logger.info("✅ Indexer refatorado disponível")
+    logger.info("✅ Indexer disponível")
     
     # Voltar ao diretório original
     os.chdir(original_cwd)
@@ -124,7 +124,7 @@ async def index_document(
         if indexing_result and indexing_result.success:
             response = IndexResponse(
                 success=True,
-                message="Documento indexado com sucesso usando indexer refatorado v2.0.0",
+                message="Documento indexado com sucesso usando indexer",
                 doc_source=indexing_result.doc_source,
                 pages_processed=indexing_result.pages_processed,
                 chunks_created=indexing_result.chunks_created,
@@ -168,7 +168,7 @@ async def indexing_status():
     """
     return {
         "indexer_available": INDEXER_AVAILABLE,
-        "indexer_version": "2.0.0" if INDEXER_AVAILABLE else None,
+        "indexer_version": "1.0" if INDEXER_AVAILABLE else None,
         "capabilities": {
             "pdf_processing": INDEXER_AVAILABLE,
             "image_extraction": INDEXER_AVAILABLE,

@@ -32,8 +32,8 @@ class AIConfig(BaseSettings):
     
     openai_api_key: str = Field(..., description="Chave da API OpenAI")
     voyage_api_key: str = Field(..., description="Chave da API Voyage")
-    openai_model: str = Field(default="gpt-4-turbo-preview", description="Modelo OpenAI")
-    embedding_model: str = Field(default="voyage-large-2", description="Modelo de embedding")
+    openai_model: str = Field(default="gpt-4.1-mini", description="Modelo OpenAI")
+    embedding_model: str = Field(default="voyage-multimodal-3", description="Modelo de embedding")
     max_tokens: int = Field(default=4000, ge=1, le=100000, description="Máximo de tokens")
     temperature: float = Field(default=0.1, ge=0.0, le=2.0, description="Temperatura do modelo")
 
@@ -83,7 +83,7 @@ class ServerConfig(BaseSettings):
     model_config = SettingsConfigDict(case_sensitive=False)
     
     host: str = Field(default="0.0.0.0", alias="api_host", description="Host do servidor")
-    port: int = Field(default=8001, alias="api_port", ge=1, le=65535, description="Porta do servidor")
+    port: int = Field(default=8000, alias="api_port", ge=1, le=65535, description="Porta do servidor")
     workers: int = Field(default=1, alias="api_workers", ge=1, le=10, description="Número de workers")
     reload: bool = Field(default=False, alias="api_reload", description="Habilitar reload automático")
     log_level: str = Field(default="INFO", alias="api_log_level", description="Nível de log")
@@ -102,7 +102,7 @@ class ProductionConfig(BaseSettings):
     """Configurações específicas de produção"""
     model_config = SettingsConfigDict(case_sensitive=False)
     
-    production_mode: bool = Field(default=False, description="Modo de produção")
+    production_mode: bool = Field(default=True, description="Modo de produção")
     enable_metrics: bool = Field(default=True, description="Habilitar métricas")
     enable_tracing: bool = Field(default=False, description="Habilitar tracing")
     max_request_size: int = Field(default=16 * 1024 * 1024, description="Tamanho máximo de requisição")

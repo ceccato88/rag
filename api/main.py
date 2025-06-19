@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🚀 API Principal - Sistema RAG Multi-Agente v2.0.0
+🚀 API Principal - Sistema RAG Multi-Agente
 
 API REST modular e bem estruturada para sistema RAG multi-agente.
 Atualizada para Pydantic V2 com arquitetura limpa e organizada.
@@ -41,7 +41,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(config.paths.log_dir / "api_multiagent_v2.log")
+        logging.FileHandler(config.paths.log_dir / "api_multiagent.log")
     ]
 )
 
@@ -98,7 +98,7 @@ app = FastAPI(
     
     ### Pesquisa
     ```bash
-    curl -X POST "http://localhost:8001/research" \\
+    curl -X POST "http://localhost:8000/api/v1/research" \\
          -H "Authorization: Bearer YOUR_TOKEN" \\
          -H "Content-Type: application/json" \\
          -d '{"query": "Como funciona machine learning?"}'
@@ -106,13 +106,13 @@ app = FastAPI(
     
     ### Indexação
     ```bash
-    curl -X POST "http://localhost:8001/index" \\
+    curl -X POST "http://localhost:8000/api/v1/index" \\
          -H "Authorization: Bearer YOUR_TOKEN" \\
          -H "Content-Type: application/json" \\
          -d '{"url": "https://example.com/document.pdf"}'
     ```
     """,
-    version="2.0.0",
+    version="1.0",
     lifespan=lifespan_manager,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -173,12 +173,12 @@ app.include_router(
 async def root():
     """Endpoint raiz com informações da API"""
     return {
-        "message": "🚀 Sistema RAG Multi-Agente v2.0.0",
+        "message": "🚀 Sistema RAG Multi-Agente",
         "status": "online",
         "documentation": "/docs",
         "alternative_docs": "/redoc",
         "health_check": "/api/v1/health",
-        "version": "2.0.0",
+        "version": "1.0",
         "architecture": "Multi-Agent RAG",
         "features": [
             "🤖 Sistema Multi-Agente",
@@ -194,7 +194,7 @@ async def root():
 # ═══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    logger.info("🚀 Iniciando Sistema RAG Multi-Agente v2.0.0")
+    logger.info("🚀 Iniciando Sistema RAG Multi-Agente")
     logger.info(f"📋 Configuração: {config.get_environment_summary()}")
     
     # Executar servidor

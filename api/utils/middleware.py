@@ -47,7 +47,7 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
         
         # Headers informativos
-        response.headers["X-API-Version"] = "2.0.0"
+        response.headers["X-API-Version"] = "1.0"
         response.headers["X-Powered-By"] = "FastAPI Multi-Agent RAG"
         
         return response

@@ -10,7 +10,7 @@ from .constants import (
     DEFAULT_MODELS, TOKEN_LIMITS, CACHE_CONFIG, TIMEOUT_CONFIG,
     PROCESSING_CONFIG, MULTIAGENT_CONFIG, SYSTEM_DEFAULTS,
     LOGGING_CONFIG, PRODUCTION_CONFIG, DEV_CONFIG, FALLBACK_CONFIG,
-    API_REFACTORED_CONFIG, NATIVE_MODELS_CONFIG, API_ENDPOINTS, DOCKER_CONFIG,
+    API_CONFIG, NATIVE_MODELS_CONFIG, API_ENDPOINTS, DOCKER_CONFIG,
     validate_production_config, get_production_config
 )
 
@@ -249,44 +249,34 @@ class ProductionConfig:
 
 
 @dataclass
-class APIRefactoredConfig:
-    """Configurações específicas para as APIs refatoradas."""
+class APIConfig:
+    """Configurações específicas para as APIs."""
     
-    # Multi-Agent API
-    multiagent_port: int = get_env_int('API_PORT', API_REFACTORED_CONFIG['MULTIAGENT_API_PORT'])
-    multiagent_workers: int = get_env_int('API_WORKERS', API_REFACTORED_CONFIG['MULTIAGENT_API_WORKERS'])
-    multiagent_timeout: int = get_env_int('MULTIAGENT_API_TIMEOUT', API_REFACTORED_CONFIG['MULTIAGENT_API_TIMEOUT'])
-    
-    # Simple API
-    simple_port: int = get_env_int('API_SIMPLE_PORT', API_REFACTORED_CONFIG['SIMPLE_API_PORT'])
-    simple_workers: int = get_env_int('API_SIMPLE_WORKERS', API_REFACTORED_CONFIG['SIMPLE_API_WORKERS'])
-    simple_timeout: int = get_env_int('SIMPLE_API_TIMEOUT', API_REFACTORED_CONFIG['SIMPLE_API_TIMEOUT'])
+    # API Única
+    api_port: int = get_env_int('API_PORT', API_CONFIG['API_PORT'])
+    api_workers: int = get_env_int('API_WORKERS', API_CONFIG['API_WORKERS'])
+    api_timeout: int = get_env_int('API_TIMEOUT', API_CONFIG['API_TIMEOUT'])
     
     # Common settings
-    health_check_interval: int = get_env_int('HEALTH_CHECK_INTERVAL', API_REFACTORED_CONFIG['HEALTH_CHECK_INTERVAL'])
-    health_check_timeout: int = get_env_int('HEALTH_CHECK_TIMEOUT', API_REFACTORED_CONFIG['HEALTH_CHECK_TIMEOUT'])
-    startup_timeout: int = get_env_int('STARTUP_TIMEOUT', API_REFACTORED_CONFIG['STARTUP_TIMEOUT'])
-    factory_pattern_enabled: bool = get_env_bool('FACTORY_PATTERN_ENABLED', API_REFACTORED_CONFIG['FACTORY_PATTERN_ENABLED'])
-    native_models_only: bool = get_env_bool('NATIVE_MODELS_ONLY', API_REFACTORED_CONFIG['NATIVE_MODELS_ONLY'])
+    health_check_interval: int = get_env_int('HEALTH_CHECK_INTERVAL', API_CONFIG['HEALTH_CHECK_INTERVAL'])
+    health_check_timeout: int = get_env_int('HEALTH_CHECK_TIMEOUT', API_CONFIG['HEALTH_CHECK_TIMEOUT'])
+    startup_timeout: int = get_env_int('STARTUP_TIMEOUT', API_CONFIG['STARTUP_TIMEOUT'])
+    factory_pattern_enabled: bool = get_env_bool('FACTORY_PATTERN_ENABLED', API_CONFIG['FACTORY_PATTERN_ENABLED'])
+    native_models_only: bool = get_env_bool('NATIVE_MODELS_ONLY', API_CONFIG['NATIVE_MODELS_ONLY'])
     
-    def get_multiagent_base_url(self) -> str:
-        """Retorna URL base da API Multi-Agente."""
-        return f"http://localhost:{self.multiagent_port}"
+    def get_api_base_url(self) -> str:
+        """Retorna URL base da API."""
+        return f"http://localhost:{self.api_port}"
     
-    def get_simple_base_url(self) -> str:
-        """Retorna URL base da API RAG Simples."""
-        return f"http://localhost:{self.simple_port}"
-    
-    def get_endpoints(self) -> Dict[str, Dict[str, str]]:
+    def get_endpoints(self) -> Dict[str, Any]:
         """Retorna endpoints configurados."""
         endpoints = API_ENDPOINTS.copy()
-        endpoints['MULTIAGENT']['BASE_URL'] = self.get_multiagent_base_url()
-        endpoints['SIMPLE']['BASE_URL'] = self.get_simple_base_url()
+        endpoints['BASE_URL'] = self.get_api_base_url()
         return endpoints
 
 
 class SystemConfig:
-    """Configuração central do sistema refatorado."""
+    """Configuração central do sistema."""
     
     def __init__(self):
         self.rag = RAGConfig()
@@ -294,7 +284,7 @@ class SystemConfig:
         self.processing = ProcessingConfig()
         self.memory = MemoryConfig()
         self.production = ProductionConfig()
-        self.api_refactored = APIRefactoredConfig()
+        self.api = APIConfig()
     
     def validate_all(self) -> Dict[str, Any]:
         """Valida todas as configurações."""
@@ -305,12 +295,12 @@ class SystemConfig:
         all_errors = rag_validation["errors"] + multiagent_validation["errors"] + production_validation["errors"]
         all_warnings = rag_validation["warnings"] + multiagent_validation["warnings"] + production_validation["warnings"]
         
-        # Validações específicas das APIs refatoradas
-        if not self.api_refactored.native_models_only:
-            all_warnings.append("APIs refatoradas devem usar apenas modelos nativos")
+        # Validações específicas das APIs
+        if not self.api.native_models_only:
+            all_warnings.append("APIs devem usar apenas modelos nativos")
         
-        if not self.api_refactored.factory_pattern_enabled:
-            all_warnings.append("Factory pattern recomendado para APIs refatoradas")
+        if not self.api.factory_pattern_enabled:
+            all_warnings.append("Factory pattern recomendado para APIs")
         
         return {
             "valid": len(all_errors) == 0,
@@ -319,14 +309,14 @@ class SystemConfig:
             "rag_valid": rag_validation["valid"],
             "multiagent_valid": multiagent_validation["valid"],
             "production_valid": production_validation["valid"],
-            "apis_refactored": True
+            "apis_ready": True
         }
     
     def print_status(self):
         """Imprime status das configurações."""
         validation = self.validate_all()
         
-        print("🔧 STATUS DAS CONFIGURAÇÕES REFATORADAS v2.0.0")
+        print("🔧 STATUS DAS CONFIGURAÇÕES")
         print("=" * 50)
         
         if validation["valid"]:
@@ -345,7 +335,7 @@ class SystemConfig:
         print(f"  • RAG: {'✅' if validation['rag_valid'] else '❌'}")
         print(f"  • Multi-Agente: {'✅' if validation['multiagent_valid'] else '❌'}")
         print(f"  • Produção: {'✅' if validation['production_valid'] else '❌'}")
-        print(f"  • APIs Refatoradas: {'✅' if validation['apis_refactored'] else '❌'}")
+        print(f"  • APIs: {'✅' if validation['apis_ready'] else '❌'}")
         
         print(f"\n🔧 Configurações ativas:")
         print(f"  • Modelo LLM: {self.rag.llm_model}")
@@ -355,13 +345,12 @@ class SystemConfig:
         print(f"  • Cache TTL: {self.rag.embedding_cache_ttl}s")
         print(f"  • Timeout Subagentes: {self.multiagent.subagent_timeout}s")
         
-        print(f"\n🚀 APIs Refatoradas:")
-        print(f"  • API Multi-Agente: {self.api_refactored.get_multiagent_base_url()}")
-        print(f"  • API RAG Simples: {self.api_refactored.get_simple_base_url()}")
-        print(f"  • Workers Multi-Agente: {self.api_refactored.multiagent_workers}")
-        print(f"  • Workers RAG Simples: {self.api_refactored.simple_workers}")
-        print(f"  • Modelos Nativos: {'✅' if self.api_refactored.native_models_only else '❌'}")
-        print(f"  • Factory Pattern: {'✅' if self.api_refactored.factory_pattern_enabled else '❌'}")
+        print(f"\n🚀 API:")
+        print(f"  • API Base URL: {self.api.get_api_base_url()}")
+        print(f"  • Workers: {self.api.api_workers}")
+        print(f"  • Timeout: {self.api.api_timeout}s")
+        print(f"  • Modelos Nativos: {'✅' if self.api.native_models_only else '❌'}")
+        print(f"  • Factory Pattern: {'✅' if self.api.factory_pattern_enabled else '❌'}")
         
         print(f"\n🚀 Configurações de Produção:")
         print(f"  • Modo Produção: {'✅' if self.production.production_mode else '❌'}")

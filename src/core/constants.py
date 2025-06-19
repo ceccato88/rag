@@ -1,7 +1,7 @@
 """
-Constantes e valores padrão para o sistema RAG Multi-Agente Refatorado v2.0.0
+Constantes e valores padrão para o sistema RAG Multi-Agente
 
-Este arquivo centraliza todas as constantes utilizadas no sistema refatorado,
+Este arquivo centraliza todas as constantes utilizadas no sistema,
 fornecendo valores padrão otimizados para as APIs que usam modelos nativos.
 """
 
@@ -262,23 +262,22 @@ PRODUCTION_CONFIG = {
 }
 
 # =============================================================================
-# CONFIGURAÇÕES DAS APIs REFATORADAS v2.0.0
+# CONFIGURAÇÕES DAS APIs
 # =============================================================================
 
-API_REFACTORED_CONFIG = {
-    # API Multi-Agente
-    'MULTIAGENT_API_PORT': 8001,
-    'MULTIAGENT_API_WORKERS': 4,
-    'MULTIAGENT_API_TIMEOUT': 300,
-    'MULTIAGENT_MEMORY_LIMIT': '3GB',
-    'MULTIAGENT_CPU_LIMIT': '3.0',
+API_CONFIG = {
+    # API Única com Rotas Multi-Agente e Simple RAG
+    'API_PORT': 8000,
+    'API_WORKERS': 4,
+    'API_TIMEOUT': 300,
+    'API_MEMORY_LIMIT': '3GB',
+    'API_CPU_LIMIT': '3.0',
     
-    # API RAG Simples  
-    'SIMPLE_API_PORT': 8001,
-    'SIMPLE_API_WORKERS': 2,
-    'SIMPLE_API_TIMEOUT': 60,
-    'SIMPLE_MEMORY_LIMIT': '1.5GB',
-    'SIMPLE_CPU_LIMIT': '1.5',
+    # Rotas específicas
+    'MULTIAGENT_ROUTE': '/api/v1/research',
+    'SIMPLE_RAG_ROUTE': '/api/v1/simple',
+    'INDEX_ROUTE': '/api/v1/index',
+    'HEALTH_ROUTE': '/api/v1/health',
     
     # Configurações comuns
     'HEALTH_CHECK_INTERVAL': 30,
@@ -311,30 +310,32 @@ NATIVE_MODELS_CONFIG = {
 }
 
 # =============================================================================
-# ENDPOINTS DAS APIs REFATORADAS
+# ENDPOINTS DAS APIs
 # =============================================================================
 
 API_ENDPOINTS = {
-    # API Multi-Agente (Port 8000)
-    'MULTIAGENT': {
-        'BASE_URL': 'http://localhost:8000',
-        'HEALTH': '/health',
-        'RESEARCH': '/research',
-        'INDEX': '/index', 
-        'DOCUMENTS': '/documents/{collection_name}',
-        'STATS': '/stats',
-        'DOCS': '/docs'
-    },
-    
-    # API RAG Simples (Port 8001)
-    'SIMPLE': {
-        'BASE_URL': 'http://localhost:8001',
-        'HEALTH': '/health',
-        'SEARCH': '/search',
-        'DOCUMENTS': '/documents/{collection_name}',
-        'CONFIG': '/config',
-        'STATS': '/stats',
-        'DOCS': '/docs'
+    # API Única (Port 8000) com Rotas Diferentes
+    'BASE_URL': 'http://localhost:8000',
+    'ROUTES': {
+        # Multi-Agent Research
+        'RESEARCH': '/api/v1/research',
+        'MULTIAGENT': '/api/v1/research',
+        
+        # Simple RAG
+        'SIMPLE_SEARCH': '/api/v1/simple',
+        'SIMPLE': '/api/v1/simple',
+        
+        # Indexação
+        'INDEX': '/api/v1/index',
+        
+        # Gerenciamento
+        'HEALTH': '/api/v1/health',
+        'STATS': '/api/v1/stats',
+        'DOCUMENTS': '/api/v1/documents/{collection_name}',
+        
+        # Documentação
+        'DOCS': '/docs',
+        'REDOC': '/redoc'
     }
 }
 

@@ -216,7 +216,7 @@ class DetailedHealthResponse(HealthResponse):
                 "timestamp": "2025-06-19T10:30:00Z",
                 "configuration": {
                     "production_mode": True,
-                    "server": "0.0.0.0:8001",
+                    "server": "0.0.0.0:8000",
                     "log_level": "INFO"
                 },
                 "memory_initialized": True,
