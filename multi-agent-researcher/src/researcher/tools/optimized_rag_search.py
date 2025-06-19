@@ -42,6 +42,12 @@ class OptimizedRAGSearchTool(Tool):
         """Lazy initialization of RAG search system."""
         if self.rag_system is None:
             try:
+                # Se um sistema RAG foi injetado, usar ele
+                if hasattr(self, 'injected_rag_system') and self.injected_rag_system:
+                    self.rag_system = self.injected_rag_system
+                    return
+                
+                # Tentar importar sistema padrão
                 from search import ProductionConversationalRAG
                 self.rag_system = ProductionConversationalRAG()
             except ImportError:
@@ -205,27 +211,63 @@ class OptimizedRAGSearchTool(Tool):
         """
         
         try:
-            # Usar o sistema RAG interno para busca e reranking
-            # Mas interceptar antes da geração final
+            # Usar o SimpleRAG diretamente
+            if hasattr(self.rag_system, 'search'):
+                # SimpleRAG: usar método search
+                result_text = self.rag_system.search(query)
+                
+                # Como SimpleRAG não retorna metadados estruturados,
+                # vamos criar uma estrutura básica
+                if result_text and "No results" not in result_text:
+                    # Simular documentos baseados no resultado
+                    documents = [{
+                        "page_number": 1,
+                        "content": result_text[:500],  # Primeiros 500 chars
+                        "doc_source": "search_result",
+                        "source": "SimpleRAG"
+                    }]
+                    
+                    if len(result_text) > 500:
+                        documents.append({
+                            "page_number": 2,
+                            "content": result_text[500:1000],
+                            "doc_source": "search_result",
+                            "source": "SimpleRAG"
+                        })
+                    
+                    return {
+                        "selected_pages_details": documents,
+                        "total_candidates": len(documents),
+                        "reranking_justification": "SimpleRAG search result",
+                        "search_successful": True
+                    }
+                else:
+                    return {
+                        "selected_pages_details": [],
+                        "total_candidates": 0,
+                        "reranking_justification": "No results found",
+                        "search_successful": False
+                    }
             
-            # HACK: Interceptar o pipeline do sistema RAG
-            # Em produção, isso seria uma refatoração do search.py
+            elif hasattr(self.rag_system, 'search_and_answer'):
+                # ProductionConversationalRAG: usar método completo
+                full_result = self.rag_system.search_and_answer(query)
+                
+                if "error" in full_result:
+                    return full_result
+                
+                # Extrair apenas as informações de busca e reranking
+                partial_result = {
+                    "selected_pages_details": full_result.get("selected_pages_details", []),
+                    "total_candidates": full_result.get("total_candidates", 0),
+                    "reranking_justification": full_result.get("reranking_justification", ""),
+                    "search_successful": True
+                }
+                
+                return partial_result
             
-            # Por enquanto, usar o resultado completo e extrair as partes relevantes
-            full_result = self.rag_system.search_and_answer(query)
-            
-            if "error" in full_result:
-                return full_result
-            
-            # Extrair apenas as informações de busca e reranking
-            partial_result = {
-                "selected_pages_details": full_result.get("selected_pages_details", []),
-                "total_candidates": full_result.get("total_candidates", 0),
-                "reranking_justification": full_result.get("reranking_justification", ""),
-                "search_successful": True
-            }
-            
-            return partial_result
+            else:
+                return {"error": "RAG system doesn't have compatible search method"}
             
         except Exception as e:
             return {"error": str(e)}
@@ -263,6 +305,12 @@ class OptimizedRAGSearchTool(Tool):
             },
             "success": True
         }
+    
+    def set_rag_system(self, rag_system):
+        """Inject a RAG system into this tool."""
+        self.rag_system = rag_system
+        # Also set as injected system for reference
+        self.injected_rag_system = rag_system
 
 
 class DocumentProcessor:

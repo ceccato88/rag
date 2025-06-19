@@ -21,7 +21,7 @@ DEFAULT_MODELS = {
 # =============================================================================
 
 TOKEN_LIMITS = {
-    'MAX_CANDIDATES': 5,
+    'MAX_CANDIDATES': 53,
     'MAX_TOKENS_RERANK': 512,
     'MAX_TOKENS_ANSWER': 2048,
     'MAX_TOKENS_QUERY_TRANSFORM': 150,

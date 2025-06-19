@@ -328,6 +328,11 @@ Return the decomposition in the exact JSON format specified in the system prompt
                 agent_id=str(uuid.uuid4()),
                 name=f"RAG-Agent-{i+1}"
             )
+            
+            # Inject RAG system if available
+            if hasattr(self, 'rag_system') and self.rag_system:
+                subagent.rag_tool.set_rag_system(self.rag_system)
+            
             self.subagents.append(subagent)
             
             # Create context
@@ -394,6 +399,11 @@ Return the decomposition in the exact JSON format specified in the system prompt
                 agent_id=str(uuid.uuid4()),
                 name=f"RAG-Agent-{i+1}"
             )
+            
+            # Inject RAG system if available
+            if hasattr(self, 'rag_system') and self.rag_system:
+                subagent.rag_tool.set_rag_system(self.rag_system)
+            
             self.subagents.append(subagent)
             
             # Create context
