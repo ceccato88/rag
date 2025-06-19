@@ -42,12 +42,12 @@ def delete_documents(all_docs: bool = False, doc_prefix: str = None) -> dict:
         
         # Validar configuração
         validation = config.validate_all()
-        if not validation["astra_valid"]:
+        if not validation["rag_valid"]:
             raise Exception("Configuração AstraDB inválida")
         
         # Conectar ao AstraDB
-        client = DataAPIClient(token=config.astra.application_token)
-        database = client.get_database(config.astra.api_endpoint)
+        client = DataAPIClient(token=config.rag.astra_db_application_token)
+        database = client.get_database(config.rag.astra_db_api_endpoint)
         collection = database.get_collection(config.rag.collection_name)
         
         # Determinar filtro
@@ -61,7 +61,7 @@ def delete_documents(all_docs: bool = False, doc_prefix: str = None) -> dict:
             raise ValueError("Especifique --all ou --doc <prefixo>")
         
         # Contar documentos antes
-        count_before = collection.count_documents(filter_query)
+        count_before = collection.count_documents(filter_query, upper_bound=10000)
         logger.info(f"📊 Encontrados {count_before} documentos para deletar")
         
         if count_before == 0:
@@ -70,6 +70,10 @@ def delete_documents(all_docs: bool = False, doc_prefix: str = None) -> dict:
         # Deletar documentos
         result = collection.delete_many(filter_query)
         deleted_count = result.deleted_count
+        
+        # AstraDB pode retornar -1 quando deleta todos os documentos
+        if deleted_count == -1:
+            deleted_count = count_before
         
         logger.info(f"✅ Deletados {deleted_count} documentos com sucesso")
         

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-🚀 API de Produção - Sistema RAG Simples
+🚀 API de Produção - Sistema RAG Simples Refatorado
 
-API REST para o sistema RAG simples com busca semântica direta.
-Fornece endpoints para consultas diretas ao sistema de recuperação.
+API REST simplificada usando modelos nativos do sistema RAG.
+Utiliza SimpleRAG diretamente com padrões de resposta padronizados.
 """
 
 import os
@@ -16,9 +16,8 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, status
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
@@ -29,13 +28,11 @@ from search import SimpleRAG
 from utils.validation import validate_query
 from utils.metrics import ProcessingMetrics
 
-# Import maintenance functions
+# Import de funções de manutenção
 sys.path.append(os.path.join(os.path.dirname(__file__), 'maintenance'))
 from delete_collection import delete_documents
-from delete_documents import delete_specific_documents  
-from delete_images import delete_images
 
-# Configuração de logging para produção
+# Configuração de logging
 log_level = os.getenv("API_LOG_LEVEL", "info").upper()
 logging.basicConfig(
     level=getattr(logging, log_level),
@@ -71,53 +68,79 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     return credentials.credentials
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# MODELOS DE DADOS
+# MODELOS DE DADOS SIMPLIFICADOS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class SimpleRAGQuery(BaseModel):
-    """Modelo para consultas ao sistema RAG simples"""
+class SearchQuery(BaseModel):
+    """Consulta de busca simplificada"""
     query: str = Field(..., min_length=3, max_length=500, description="Consulta do usuário")
     max_results: Optional[int] = Field(default=None, ge=1, le=20, description="Número máximo de resultados")
-    similarity_threshold: Optional[float] = Field(default=None, ge=0.0, le=1.0, description="Threshold de similaridade")
-    include_metadata: bool = Field(default=True, description="Incluir metadados na resposta")
 
-class SimpleRAGResponse(BaseModel):
-    """Modelo de resposta do sistema RAG simples"""
+class SearchResponse(BaseModel):
+    """Resposta de busca que encapsula resultado do SimpleRAG"""
     success: bool
     query: str
-    response: str
-    results_count: int
+    result: str
     processing_time: float
     timestamp: str
-    sources: List[Dict[str, Any]]
-    metadata: Dict[str, Any]
-
-class HealthResponse(BaseModel):
-    """Modelo de resposta do health check"""
-    status: str
-    version: str
-    system_config: Dict[str, Any]
-    uptime: float
-    timestamp: str
-
-class ErrorResponse(BaseModel):
-    """Modelo de resposta de erro"""
-    error: str
-    message: str
-    timestamp: str
-    request_id: Optional[str] = None
+    sources: List[Dict[str, Any]] = []
+    metadata: Dict[str, Any] = {}
+    error: Optional[str] = None
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ESTADO GLOBAL DA API
+# FACTORY PARA RESPOSTAS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class APIState:
-    """Estado global da API"""
+class SimpleResponseFactory:
+    """Factory para criar respostas a partir do resultado do SimpleRAG"""
+    
+    @staticmethod
+    def create_search_response(
+        query: str, 
+        result: str, 
+        processing_time: float,
+        max_results: Optional[int] = None
+    ) -> SearchResponse:
+        """Cria SearchResponse a partir do resultado do SimpleRAG"""
+        
+        # Preparar fontes baseadas na configuração
+        sources = [{
+            "type": "rag_search",
+            "model": system_config.rag.llm_model,
+            "embedding_model": system_config.rag.embedding_model,
+            "collection": system_config.rag.collection_name
+        }]
+        
+        # Preparar metadata
+        metadata = {
+            "max_results": max_results or system_config.rag.max_candidates,
+            "model_used": system_config.rag.llm_model,
+            "embedding_model": system_config.rag.embedding_model,
+            "processing_method": "simple_rag"
+        }
+        
+        return SearchResponse(
+            success=bool(result),
+            query=query,
+            result=result or "Nenhum resultado encontrado",
+            processing_time=processing_time,
+            timestamp=datetime.utcnow().isoformat(),
+            sources=sources,
+            metadata=metadata,
+            error=None if result else "Nenhum documento relevante encontrado"
+        )
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESTADO GLOBAL SIMPLIFICADO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class SimpleAPIState:
+    """Estado global simplificado da API"""
     def __init__(self):
         self.start_time = time.time()
         self.request_count = 0
-        self.metrics = ProcessingMetrics()
         self.is_ready = False
+        self.rag: Optional[SimpleRAG] = None
         
     def get_uptime(self) -> float:
         return time.time() - self.start_time
@@ -126,7 +149,7 @@ class APIState:
         self.request_count += 1
 
 # Estado global
-api_state = APIState()
+api_state = SimpleAPIState()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # INICIALIZAÇÃO E LIFECYCLE
@@ -136,7 +159,7 @@ api_state = APIState()
 async def lifespan(app: FastAPI):
     """Lifecycle da aplicação"""
     # Startup
-    logger.info("🚀 Iniciando API RAG Simples...")
+    logger.info("🚀 Iniciando API RAG Simples Refatorada...")
     
     try:
         # Carregar variáveis de ambiente
@@ -147,8 +170,8 @@ async def lifespan(app: FastAPI):
         if not validation["rag_valid"]:
             raise RuntimeError("Configuração RAG inválida")
         
-        # Verificar conexões essenciais
-        await verify_connections()
+        # Inicializar sistema RAG
+        await initialize_rag_system()
         
         api_state.is_ready = True
         logger.info("✅ API RAG Simples iniciada com sucesso")
@@ -163,11 +186,10 @@ async def lifespan(app: FastAPI):
     logger.info("🛑 Finalizando API RAG Simples...")
     api_state.is_ready = False
 
-async def verify_connections():
-    """Verifica conexões essenciais do sistema"""
+async def initialize_rag_system():
+    """Inicializa o sistema RAG"""
     try:
-        # Teste básico de conectividade
-        logger.info("🔍 Verificando conexões do sistema...")
+        logger.info("🔍 Inicializando sistema RAG...")
         
         # Verificar variáveis de ambiente essenciais
         required_vars = [
@@ -181,10 +203,13 @@ async def verify_connections():
         if missing_vars:
             raise RuntimeError(f"Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
         
-        logger.info("✅ Todas as conexões verificadas")
+        # Inicializar SimpleRAG
+        api_state.rag = SimpleRAG()
+        
+        logger.info("✅ Sistema RAG inicializado")
         
     except Exception as e:
-        logger.error(f"❌ Erro na verificação de conexões: {e}")
+        logger.error(f"❌ Erro na inicialização do sistema RAG: {e}")
         raise
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -192,9 +217,9 @@ async def verify_connections():
 # ═══════════════════════════════════════════════════════════════════════════════
 
 app = FastAPI(
-    title="Sistema RAG Simples - API de Produção",
-    description="API REST para consultas ao sistema RAG com busca semântica direta",
-    version="1.0.0",
+    title="Sistema RAG Simples - API Refatorada",
+    description="API REST simplificada usando modelos nativos do sistema RAG",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -210,254 +235,121 @@ if os.getenv("ENABLE_CORS", "false").lower() == "true":
     )
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# DEPENDÊNCIAS
+# DEPENDÊNCIAS E UTILITÁRIOS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def get_api_state() -> APIState:
+def get_api_state() -> SimpleAPIState:
     """Dependency para obter estado da API"""
     return api_state
 
-def check_api_ready(state: APIState = Depends(get_api_state)):
+def check_api_ready(state: SimpleAPIState = Depends(get_api_state)):
     """Verifica se a API está pronta"""
     if not state.is_ready:
         raise HTTPException(
-            status_code=503, 
+            status_code=503,
             detail="API ainda não está pronta. Tente novamente em alguns segundos."
         )
     return state
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ENDPOINTS DE MANUTENÇÃO (PROTEGIDOS)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-@app.delete("/maintenance/collection")
-async def delete_collection_endpoint(
-    all_docs: bool = False,
-    doc_prefix: str = None,
-    token: str = Depends(verify_token)
-):
-    """Endpoint para deletar documentos da collection AstraDB"""
-    if not all_docs and not doc_prefix:
-        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
-    
-    try:
-        result = delete_documents(all_docs=all_docs, doc_prefix=doc_prefix)
-        
-        if result["success"]:
-            return {
-                "success": True,
-                "message": result["message"],
-                "deleted": result["deleted"]
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/maintenance/documents")
-async def delete_documents_endpoint(
-    all_docs: bool = False,
-    doc_prefix: str = None,
-    token: str = Depends(verify_token)
-):
-    """Endpoint para deletar documentos específicos do AstraDB"""
-    if not all_docs and not doc_prefix:
-        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
-    
-    try:
-        result = delete_specific_documents(all_docs=all_docs, doc_prefix=doc_prefix)
-        
-        if result["success"]:
-            return {
-                "success": True,
-                "message": result["message"],
-                "deleted": result["deleted"],
-                "documents": result.get("documents", [])
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/maintenance/images")
-async def delete_images_endpoint(
-    all_images: bool = False,
-    doc_prefix: str = None,
-    token: str = Depends(verify_token)
-):
-    """Endpoint para deletar imagens extraídas dos PDFs"""
-    if not all_images and not doc_prefix:
-        raise HTTPException(status_code=400, detail="Especifique 'all_images=true' ou 'doc_prefix'")
-    
-    try:
-        result = delete_images(all_images=all_images, doc_prefix=doc_prefix)
-        
-        if result["success"]:
-            return {
-                "success": True,
-                "message": result["message"],
-                "deleted": result["deleted"],
-                "files": result.get("files", [])
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # ENDPOINTS PRINCIPAIS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@app.get("/", response_model=Dict[str, str])
-async def root():
-    """Endpoint raiz com informações básicas"""
+@app.get("/health")
+async def health_check(state: SimpleAPIState = Depends(get_api_state)):
+    """Endpoint de health check"""
     return {
-        "service": "Sistema RAG Simples - API de Produção",
-        "version": "1.0.0",
-        "status": "running" if api_state.is_ready else "starting",
-        "docs": "/docs",
-        "health": "/health"
+        "status": "healthy" if state.is_ready else "starting",
+        "uptime": state.get_uptime(),
+        "requests_processed": state.request_count,
+        "rag_ready": state.rag is not None,
+        "timestamp": datetime.utcnow().isoformat()
     }
 
-@app.get("/health", response_model=HealthResponse)
-async def health_check(state: APIState = Depends(get_api_state)):
-    """Health check detalhado do sistema"""
-    
-    config_info = {
-        "llm_model": system_config.rag.llm_model,
-        "embedding_model": system_config.rag.embedding_model,
-        "max_candidates": system_config.rag.max_candidates,
-        "collection_name": system_config.rag.collection_name
-    }
-    
-    return HealthResponse(
-        status="healthy" if state.is_ready else "starting",
-        version="1.0.0",
-        system_config=config_info,
-        uptime=state.get_uptime(),
-        timestamp=datetime.utcnow().isoformat()
-    )
-
-@app.post("/search", response_model=SimpleRAGResponse)
-async def simple_rag_search(
-    query_data: SimpleRAGQuery,
-    background_tasks: BackgroundTasks,
-    state: APIState = Depends(check_api_ready),
-    token: str = Depends(verify_token)
+@app.post("/search", response_model=SearchResponse)
+async def search_documents(
+    query: SearchQuery,
+    state: SimpleAPIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
 ):
     """
-    Endpoint principal para consultas RAG simples
-    
-    Realiza busca semântica direta no sistema RAG e retorna resposta baseada
-    nos documentos mais relevantes encontrados.
+    Endpoint principal para busca RAG simples.
+    Usa diretamente o SimpleRAG com modelos nativos.
     """
-    
     start_time = time.time()
-    request_id = f"req_{int(time.time())}_{state.request_count}"
+    state.increment_requests()
     
     try:
-        # Incrementar contador de requests
-        state.increment_requests()
+        logger.info(f"🔍 Nova busca: {query.query}")
         
-        # Validar query
-        if not validate_query(query_data.query):
+        # Validar consulta
+        validation_result = validate_query(query.query)
+        if not validation_result.is_valid:
             raise HTTPException(
                 status_code=400,
-                detail="Query inválida. Deve ter entre 3 e 500 caracteres."
+                detail=f"Consulta inválida: {validation_result.error_message}"
             )
         
-        logger.info(f"🔍 [{request_id}] Processando consulta RAG: {query_data.query[:100]}...")
+        # Executar busca usando SimpleRAG nativo
+        result = await asyncio.to_thread(state.rag.search, query.query)
         
-        # Configurar parâmetros da busca
-        max_results = query_data.max_results or system_config.rag.max_candidates
-        similarity_threshold = query_data.similarity_threshold or system_config.multiagent.similarity_threshold
-        
-        # Executar busca RAG
-        rag = SimpleRAG()
-        response = await asyncio.to_thread(
-            rag.search,
-            query_data.query
-        )
-        
-        if not response:
-            logger.warning(f"⚠️ [{request_id}] Nenhum resultado encontrado")
-            raise HTTPException(
-                status_code=404,
-                detail="Nenhum documento relevante encontrado para sua consulta."
-            )
-        
-        # Processar resultados
-        response_text = response
-        
-        # Preparar fontes (simplificado para o SimpleRAG)
-        sources = []
-        if query_data.include_metadata:
-            sources.append({
-                "message": "Resposta gerada pelo sistema RAG",
-                "model": system_config.rag.llm_model
-            })
-        
+        # Usar factory para criar resposta
         processing_time = time.time() - start_time
-        
-        logger.info(f"✅ [{request_id}] Consulta processada em {processing_time:.2f}s")
-        
-        # Adicionar tarefa em background para métricas
-        background_tasks.add_task(
-            record_usage_metrics,
-            request_id, 
-            query_data.query, 
-            1, 
-            processing_time
+        response = SimpleResponseFactory.create_search_response(
+            query.query, 
+            result, 
+            processing_time,
+            query.max_results
         )
         
-        return SimpleRAGResponse(
-            success=True,
-            query=query_data.query,
-            response=response_text,
-            results_count=1,
-            processing_time=processing_time,
-            timestamp=datetime.utcnow().isoformat(),
-            sources=sources,
-            metadata={
-                "request_id": request_id,
-                "max_results": max_results,
-                "similarity_threshold": similarity_threshold,
-                "model_used": system_config.rag.llm_model
-            }
-        )
+        logger.info(f"✅ Busca processada em {processing_time:.2f}s")
+        return response
         
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"❌ Erro no processamento: {e}")
         processing_time = time.time() - start_time
-        error_msg = f"Erro interno no processamento: {str(e)}"
         
-        logger.error(f"❌ [{request_id}] {error_msg}")
-        
-        raise HTTPException(
-            status_code=500,
-            detail=ErrorResponse(
-                error="internal_server_error",
-                message=error_msg,
-                timestamp=datetime.utcnow().isoformat(),
-                request_id=request_id
-            ).dict()
+        # Retornar resposta de erro usando factory
+        return SimpleResponseFactory.create_search_response(
+            query.query,
+            "",
+            processing_time,
+            query.max_results
         )
 
-# ═══════════════════════════════════════════════════════════════════════════════
-# ENDPOINTS DE UTILIDADE
-# ═══════════════════════════════════════════════════════════════════════════════
+@app.delete("/documents/{collection_name}")
+async def delete_documents_endpoint(
+    collection_name: str,
+    state: SimpleAPIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
+):
+    """Deleta documentos de uma coleção"""
+    try:
+        logger.info(f"🗑️ Deletando documentos da coleção: {collection_name}")
+        
+        result = delete_documents(collection_name)
+        
+        return {
+            "success": True,
+            "message": f"Documentos deletados da coleção {collection_name}",
+            "details": result
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Erro ao deletar documentos: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao deletar documentos: {str(e)}"
+        )
 
-@app.get("/config", response_model=Dict[str, Any])
+@app.get("/config")
 async def get_config(
-    state: APIState = Depends(check_api_ready),
-    token: str = Depends(verify_token)
+    state: SimpleAPIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
 ):
     """Retorna configuração atual do sistema (informações não-sensíveis)"""
-    
     return {
         "models": {
             "llm": system_config.rag.llm_model,
@@ -466,67 +358,47 @@ async def get_config(
         },
         "limits": {
             "max_candidates": system_config.rag.max_candidates,
-            "max_tokens_per_input": system_config.rag.max_tokens_per_input,
-            "similarity_threshold": system_config.multiagent.similarity_threshold
+            "max_tokens_per_input": system_config.rag.max_tokens_per_input
         },
         "database": {
             "collection_name": system_config.rag.collection_name,
             "embedding_dimension": system_config.rag.voyage_embedding_dim
-        },
-        "processing": {
-            "batch_size": system_config.processing.batch_size,
-            "concurrency": system_config.processing.processing_concurrency
         }
     }
 
-@app.get("/metrics", response_model=Dict[str, Any])
-async def get_metrics(
-    state: APIState = Depends(check_api_ready),
-    token: str = Depends(verify_token)
+@app.get("/stats")
+async def get_stats(
+    state: SimpleAPIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
 ):
-    """Retorna métricas de uso da API"""
-    
+    """Estatísticas da API"""
     return {
         "uptime_seconds": state.get_uptime(),
         "total_requests": state.request_count,
-        "status": "healthy" if state.is_ready else "starting",
+        "api_ready": state.is_ready,
+        "rag_initialized": state.rag is not None,
         "timestamp": datetime.utcnow().isoformat()
     }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# FUNÇÕES AUXILIARES
+# EXECUÇÃO
 # ═══════════════════════════════════════════════════════════════════════════════
-
-def record_usage_metrics(request_id: str, query: str, results_count: int, processing_time: float):
-    """Registra métricas de uso (tarefa em background)"""
-    try:
-        logger.info(f"📊 [{request_id}] Métricas: {results_count} resultados em {processing_time:.2f}s")
-        # Aqui você pode implementar logging para sistemas externos, bancos de dados, etc.
-    except Exception as e:
-        logger.error(f"❌ Erro ao registrar métricas: {e}")
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# PONTO DE ENTRADA
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def main():
-    """Função principal para executar a API"""
-    
-    # Configuração do servidor
-    config = {
-        "app": "api_simple:app",
-        "host": os.getenv("API_HOST", "0.0.0.0"),
-        "port": int(os.getenv("API_PORT", "8000")),
-        "reload": os.getenv("API_RELOAD", "false").lower() == "true",
-        "workers": int(os.getenv("API_WORKERS", "1")),
-        "log_level": os.getenv("API_LOG_LEVEL", "info").lower()
-    }
-    
-    logger.info(f"🚀 Iniciando API RAG Simples em {config['host']}:{config['port']}")
-    logger.info(f"📋 Configuração: {config}")
-    
-    # Executar servidor
-    uvicorn.run(**config)
 
 if __name__ == "__main__":
-    main()
+    # Configuração do servidor
+    host = os.getenv("API_HOST", "0.0.0.0")
+    port = int(os.getenv("API_PORT", 8001))
+    workers = int(os.getenv("API_WORKERS", 1))
+    reload = os.getenv("API_RELOAD", "false").lower() == "true"
+    
+    logger.info(f"🚀 Iniciando servidor API RAG Simples em {host}:{port}")
+    
+    uvicorn.run(
+        "api_simple:app",
+        host=host,
+        port=port,
+        workers=workers if not reload else 1,
+        reload=reload,
+        log_level=log_level.lower(),
+        access_log=True
+    )

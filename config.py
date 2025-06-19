@@ -8,7 +8,10 @@ from dataclasses import dataclass
 from dotenv import load_dotenv, find_dotenv
 from constants import (
     DEFAULT_MODELS, TOKEN_LIMITS, CACHE_CONFIG, TIMEOUT_CONFIG,
-    PROCESSING_CONFIG, MULTIAGENT_CONFIG, SYSTEM_DEFAULTS
+    PROCESSING_CONFIG, MULTIAGENT_CONFIG, SYSTEM_DEFAULTS,
+    LOGGING_CONFIG, PRODUCTION_CONFIG, DEV_CONFIG, FALLBACK_CONFIG,
+    API_REFACTORED_CONFIG, NATIVE_MODELS_CONFIG, API_ENDPOINTS, DOCKER_CONFIG,
+    validate_production_config, get_production_config
 )
 
 # Carregar variáveis de ambiente
@@ -186,37 +189,145 @@ class MemoryConfig:
     shard_strategy: str = os.getenv('SHARD_STRATEGY', 'agent_hash')
 
 
+@dataclass 
+class ProductionConfig:
+    """Configurações específicas para ambiente de produção."""
+    
+    # Configurações de desenvolvimento/debug
+    debug_mode: bool = get_env_bool('DEBUG_MODE', DEV_CONFIG['DEBUG_MODE'])
+    verbose_logging: bool = get_env_bool('VERBOSE_LOGGING', DEV_CONFIG['VERBOSE_LOGGING'])
+    production_mode: bool = get_env_bool('PRODUCTION_MODE', DEV_CONFIG['PRODUCTION_MODE'])
+    enable_performance_metrics: bool = get_env_bool('ENABLE_PERFORMANCE_METRICS', DEV_CONFIG['ENABLE_PERFORMANCE_METRICS'])
+    
+    # Logging
+    log_level: str = os.getenv('LOG_LEVEL', LOGGING_CONFIG['DEFAULT_LEVEL'])
+    max_log_file_size: int = get_env_int('MAX_LOG_FILE_SIZE', LOGGING_CONFIG['MAX_LOG_FILE_SIZE'])
+    log_rotation_count: int = get_env_int('LOG_ROTATION_COUNT', LOGGING_CONFIG['LOG_ROTATION_COUNT'])
+    async_logging: bool = get_env_bool('ASYNC_LOGGING', LOGGING_CONFIG['ASYNC_LOGGING'])
+    
+    # Segurança e Rate Limiting
+    enable_rate_limiting: bool = get_env_bool('ENABLE_RATE_LIMITING', PRODUCTION_CONFIG['ENABLE_RATE_LIMITING'])
+    max_requests_per_minute: int = get_env_int('MAX_REQUESTS_PER_MINUTE', PRODUCTION_CONFIG['MAX_REQUESTS_PER_MINUTE'])
+    max_concurrent_requests: int = get_env_int('MAX_CONCURRENT_REQUESTS', PRODUCTION_CONFIG['MAX_CONCURRENT_REQUESTS'])
+    
+    # Monitoramento
+    monitoring_enabled: bool = get_env_bool('MONITORING_ENABLED', PRODUCTION_CONFIG['MONITORING_ENABLED'])
+    health_check_interval: int = get_env_int('HEALTH_CHECK_INTERVAL', DEV_CONFIG['HEALTH_CHECK_INTERVAL'])
+    
+    # Timeouts específicos de produção
+    database_timeout: int = get_env_int('DATABASE_TIMEOUT', PRODUCTION_CONFIG['DATABASE_TIMEOUT'])
+    redis_timeout: int = get_env_int('REDIS_TIMEOUT', PRODUCTION_CONFIG['REDIS_TIMEOUT'])
+    external_api_timeout: int = get_env_int('EXTERNAL_API_TIMEOUT', PRODUCTION_CONFIG['EXTERNAL_API_TIMEOUT'])
+    
+    def validate(self) -> Dict[str, Any]:
+        """Valida configurações de produção."""
+        errors = []
+        warnings = []
+        
+        # Verificações críticas para produção
+        if self.debug_mode:
+            errors.append("DEBUG_MODE deve ser False em produção")
+        
+        if self.verbose_logging:
+            warnings.append("VERBOSE_LOGGING recomendado como False em produção")
+            
+        if not self.production_mode:
+            warnings.append("PRODUCTION_MODE deve ser True em produção")
+            
+        if not self.enable_rate_limiting:
+            warnings.append("Rate limiting recomendado para produção")
+            
+        # Validações da função validate_production_config
+        prod_warnings = validate_production_config()
+        warnings.extend(prod_warnings)
+        
+        return {
+            "valid": len(errors) == 0,
+            "errors": errors, 
+            "warnings": warnings
+        }
+
+
+@dataclass
+class APIRefactoredConfig:
+    """Configurações específicas para as APIs refatoradas."""
+    
+    # Multi-Agent API
+    multiagent_port: int = get_env_int('API_PORT', API_REFACTORED_CONFIG['MULTIAGENT_API_PORT'])
+    multiagent_workers: int = get_env_int('API_WORKERS', API_REFACTORED_CONFIG['MULTIAGENT_API_WORKERS'])
+    multiagent_timeout: int = get_env_int('MULTIAGENT_API_TIMEOUT', API_REFACTORED_CONFIG['MULTIAGENT_API_TIMEOUT'])
+    
+    # Simple API
+    simple_port: int = get_env_int('API_SIMPLE_PORT', API_REFACTORED_CONFIG['SIMPLE_API_PORT'])
+    simple_workers: int = get_env_int('API_SIMPLE_WORKERS', API_REFACTORED_CONFIG['SIMPLE_API_WORKERS'])
+    simple_timeout: int = get_env_int('SIMPLE_API_TIMEOUT', API_REFACTORED_CONFIG['SIMPLE_API_TIMEOUT'])
+    
+    # Common settings
+    health_check_interval: int = get_env_int('HEALTH_CHECK_INTERVAL', API_REFACTORED_CONFIG['HEALTH_CHECK_INTERVAL'])
+    health_check_timeout: int = get_env_int('HEALTH_CHECK_TIMEOUT', API_REFACTORED_CONFIG['HEALTH_CHECK_TIMEOUT'])
+    startup_timeout: int = get_env_int('STARTUP_TIMEOUT', API_REFACTORED_CONFIG['STARTUP_TIMEOUT'])
+    factory_pattern_enabled: bool = get_env_bool('FACTORY_PATTERN_ENABLED', API_REFACTORED_CONFIG['FACTORY_PATTERN_ENABLED'])
+    native_models_only: bool = get_env_bool('NATIVE_MODELS_ONLY', API_REFACTORED_CONFIG['NATIVE_MODELS_ONLY'])
+    
+    def get_multiagent_base_url(self) -> str:
+        """Retorna URL base da API Multi-Agente."""
+        return f"http://localhost:{self.multiagent_port}"
+    
+    def get_simple_base_url(self) -> str:
+        """Retorna URL base da API RAG Simples."""
+        return f"http://localhost:{self.simple_port}"
+    
+    def get_endpoints(self) -> Dict[str, Dict[str, str]]:
+        """Retorna endpoints configurados."""
+        endpoints = API_ENDPOINTS.copy()
+        endpoints['MULTIAGENT']['BASE_URL'] = self.get_multiagent_base_url()
+        endpoints['SIMPLE']['BASE_URL'] = self.get_simple_base_url()
+        return endpoints
+
+
 class SystemConfig:
-    """Configuração central do sistema."""
+    """Configuração central do sistema refatorado."""
     
     def __init__(self):
         self.rag = RAGConfig()
         self.multiagent = MultiAgentConfig()
         self.processing = ProcessingConfig()
         self.memory = MemoryConfig()
+        self.production = ProductionConfig()
+        self.api_refactored = APIRefactoredConfig()
     
     def validate_all(self) -> Dict[str, Any]:
         """Valida todas as configurações."""
         rag_validation = self.rag.validate()
         multiagent_validation = self.multiagent.validate()
+        production_validation = self.production.validate()
         
-        all_errors = rag_validation["errors"] + multiagent_validation["errors"]
-        all_warnings = rag_validation["warnings"] + multiagent_validation["warnings"]
+        all_errors = rag_validation["errors"] + multiagent_validation["errors"] + production_validation["errors"]
+        all_warnings = rag_validation["warnings"] + multiagent_validation["warnings"] + production_validation["warnings"]
+        
+        # Validações específicas das APIs refatoradas
+        if not self.api_refactored.native_models_only:
+            all_warnings.append("APIs refatoradas devem usar apenas modelos nativos")
+        
+        if not self.api_refactored.factory_pattern_enabled:
+            all_warnings.append("Factory pattern recomendado para APIs refatoradas")
         
         return {
             "valid": len(all_errors) == 0,
             "errors": all_errors,
             "warnings": all_warnings,
             "rag_valid": rag_validation["valid"],
-            "multiagent_valid": multiagent_validation["valid"]
+            "multiagent_valid": multiagent_validation["valid"],
+            "production_valid": production_validation["valid"],
+            "apis_refactored": True
         }
     
     def print_status(self):
         """Imprime status das configurações."""
         validation = self.validate_all()
         
-        print("🔧 STATUS DAS CONFIGURAÇÕES")
-        print("=" * 40)
+        print("🔧 STATUS DAS CONFIGURAÇÕES REFATORADAS v2.0.0")
+        print("=" * 50)
         
         if validation["valid"]:
             print("✅ Todas as configurações válidas!")
@@ -233,6 +344,8 @@ class SystemConfig:
         print(f"\n📊 Status dos componentes:")
         print(f"  • RAG: {'✅' if validation['rag_valid'] else '❌'}")
         print(f"  • Multi-Agente: {'✅' if validation['multiagent_valid'] else '❌'}")
+        print(f"  • Produção: {'✅' if validation['production_valid'] else '❌'}")
+        print(f"  • APIs Refatoradas: {'✅' if validation['apis_refactored'] else '❌'}")
         
         print(f"\n🔧 Configurações ativas:")
         print(f"  • Modelo LLM: {self.rag.llm_model}")
@@ -241,6 +354,30 @@ class SystemConfig:
         print(f"  • Max Subagentes: {self.multiagent.max_subagents}")
         print(f"  • Cache TTL: {self.rag.embedding_cache_ttl}s")
         print(f"  • Timeout Subagentes: {self.multiagent.subagent_timeout}s")
+        
+        print(f"\n🚀 APIs Refatoradas:")
+        print(f"  • API Multi-Agente: {self.api_refactored.get_multiagent_base_url()}")
+        print(f"  • API RAG Simples: {self.api_refactored.get_simple_base_url()}")
+        print(f"  • Workers Multi-Agente: {self.api_refactored.multiagent_workers}")
+        print(f"  • Workers RAG Simples: {self.api_refactored.simple_workers}")
+        print(f"  • Modelos Nativos: {'✅' if self.api_refactored.native_models_only else '❌'}")
+        print(f"  • Factory Pattern: {'✅' if self.api_refactored.factory_pattern_enabled else '❌'}")
+        
+        print(f"\n🚀 Configurações de Produção:")
+        print(f"  • Modo Produção: {'✅' if self.production.production_mode else '❌'}")
+        print(f"  • Debug Mode: {'❌' if not self.production.debug_mode else '⚠️'}")
+        print(f"  • Rate Limiting: {'✅' if self.production.enable_rate_limiting else '❌'}")
+        print(f"  • Monitoramento: {'✅' if self.production.monitoring_enabled else '❌'}")
+        print(f"  • Log Level: {self.production.log_level}")
+        print(f"  • Max Requests/min: {self.production.max_requests_per_minute}")
+    
+    def get_native_models(self) -> Dict[str, str]:
+        """Retorna configuração de modelos nativos."""
+        return NATIVE_MODELS_CONFIG
+    
+    def get_docker_config(self) -> Dict[str, Any]:
+        """Retorna configuração Docker."""
+        return DOCKER_CONFIG
 
 
 # Instância global de configuração

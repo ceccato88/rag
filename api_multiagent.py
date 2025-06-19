@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-🚀 API de Produção - Sistema RAG Multi-Agente Completo
+🚀 API de Produção - Sistema RAG Multi-Agente Refatorado
 
-API REST para o sistema RAG multi-agente com reasoning avançado e especialização.
-Fornece endpoints para consultas complexas processadas por agentes especializados.
+API REST simplificada usando modelos nativos do multi-agent-researcher.
+Utiliza AgentResult diretamente sem conversões manuais desnecessárias.
 """
 
 import os
@@ -12,20 +12,28 @@ import time
 import logging
 import asyncio
 import uuid
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, List, Any, Optional
 from datetime import datetime
 from contextlib import asynccontextmanager
-from enum import Enum
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, BackgroundTasks, Depends, WebSocket, WebSocketDisconnect, status
+from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 
-# Importações do sistema multi-agente
+# Importações de produção (opcionais)
+try:
+    from slowapi import Limiter, _rate_limit_exceeded_handler
+    from slowapi.util import get_remote_address
+    from slowapi.errors import RateLimitExceeded
+    SLOWAPI_AVAILABLE = True
+except ImportError:
+    SLOWAPI_AVAILABLE = False
+
+# Importações do sistema multi-agente (PATH)
 sys.path.append('/workspaces/rag/multi-agent-researcher/src')
 
 from config import SystemConfig
@@ -33,28 +41,31 @@ from search import SimpleRAG
 from utils.validation import validate_query
 from utils.metrics import ProcessingMetrics
 
-# Importações do sistema multi-agente
+# Modelos nativos do multi-agent-researcher
 from researcher.agents.openai_lead_researcher import OpenAILeadResearcher, OpenAILeadConfig
-from researcher.agents.enhanced_rag_subagent import (
-    EnhancedRAGSubagent, 
-    SpecialistSelector,
-    SpecialistType,
-    EnhancedRAGSubagentConfig
-)
 from researcher.agents.base import AgentContext, AgentResult, AgentState
 from researcher.memory.base import InMemoryStorage, ResearchMemory
-from researcher.memory.enhanced_memory import DistributedMemoryStorage
 
-# Import maintenance functions
+# Import de funções de manutenção
 sys.path.append(os.path.join(os.path.dirname(__file__), 'maintenance'))
 from delete_collection import delete_documents
-from delete_documents import delete_specific_documents
-from delete_images import delete_images
 
-# Import indexer functions
-from indexer import PDFIndexer, IndexingResult
+# Import do indexer (condicional)
+try:
+    from indexer_simple import process_pdf_from_url, create_doc_source_name
+    INDEXER_AVAILABLE = True
+except ImportError:
+    try:
+        from indexer import process_pdf_from_url, create_doc_source_name
+        INDEXER_AVAILABLE = True
+    except ImportError:
+        INDEXER_AVAILABLE = False
+        def process_pdf_from_url(url: str, doc_source: str = None) -> bool:
+            return False
+        def create_doc_source_name(url: str) -> str:
+            return url.split("/")[-1]
 
-# Configuração de logging para produção
+# Configuração de logging
 log_level = os.getenv("API_LOG_LEVEL", "info").upper()
 logging.basicConfig(
     level=getattr(logging, log_level),
@@ -90,70 +101,26 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
     return credentials.credentials
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# MODELOS DE DADOS
+# MODELOS DE DADOS SIMPLIFICADOS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class QueryComplexity(str, Enum):
-    """Níveis de complexidade da consulta"""
-    SIMPLE = "simple"
-    MODERATE = "moderate"
-    COMPLEX = "complex"
-    EXPERT = "expert"
-
-class ProcessingMode(str, Enum):
-    """Modos de processamento"""
-    SYNC = "sync"          # Síncrono - retorna resultado final
-    ASYNC = "async"        # Assíncrono - retorna job_id
-    STREAM = "stream"      # Streaming - resultados em tempo real
-
-class MultiAgentQuery(BaseModel):
-    """Modelo para consultas ao sistema multi-agente"""
+class ResearchQuery(BaseModel):
+    """Consulta de pesquisa simplificada"""
     query: str = Field(..., min_length=3, max_length=1000, description="Consulta do usuário")
     objective: Optional[str] = Field(default=None, max_length=500, description="Objetivo específico da pesquisa")
-    complexity: Optional[QueryComplexity] = Field(default=None, description="Complexidade estimada da consulta")
-    processing_mode: ProcessingMode = Field(default=ProcessingMode.SYNC, description="Modo de processamento")
-    max_agents: Optional[int] = Field(default=None, ge=1, le=10, description="Número máximo de agentes")
-    timeout_seconds: Optional[int] = Field(default=None, ge=30, le=600, description="Timeout em segundos")
-    include_reasoning: bool = Field(default=True, description="Incluir processo de reasoning na resposta")
-    specialist_types: Optional[List[SpecialistType]] = Field(default=None, description="Tipos específicos de especialistas")
 
-class AgentExecutionStep(BaseModel):
-    """Modelo para etapas de execução dos agentes"""
-    step_id: str
-    agent_id: str
-    agent_type: str
-    status: AgentState
-    start_time: str
-    end_time: Optional[str] = None
-    thinking: Optional[str] = None
-    output: Optional[str] = None
-    error: Optional[str] = None
-
-class MultiAgentResponse(BaseModel):
-    """Modelo de resposta do sistema multi-agente"""
+class ResearchResponse(BaseModel):
+    """Resposta de pesquisa que encapsula AgentResult nativo"""
     success: bool
-    job_id: str
     query: str
-    objective: str
-    final_answer: str
-    confidence_score: float
+    result: str
+    agent_id: str
+    status: str
     processing_time: float
-    complexity_detected: QueryComplexity
-    agents_used: List[Dict[str, Any]]
-    execution_steps: List[AgentExecutionStep]
-    reasoning_trace: Optional[List[str]] = None
-    sources: List[Dict[str, Any]]
-    metadata: Dict[str, Any]
     timestamp: str
-
-class JobStatus(BaseModel):
-    """Status de job assíncrono"""
-    job_id: str
-    status: str  # "pending", "running", "completed", "failed"
-    progress: float  # 0.0 to 1.0
-    current_step: Optional[str] = None
-    estimated_completion: Optional[str] = None
-    result: Optional[MultiAgentResponse] = None
+    confidence_score: Optional[float] = None
+    sources: List[Dict[str, Any]] = []
+    reasoning_trace: Optional[str] = None
     error: Optional[str] = None
 
 class IndexRequest(BaseModel):
@@ -166,72 +133,65 @@ class IndexResponse(BaseModel):
     success: bool
     message: str
     doc_source: str
-    pages_processed: int
-    chunks_created: int
-    images_extracted: int
-    processing_time: float
-    metadata: Dict[str, Any]
-
-class ComplexityAnalysis(BaseModel):
-    """Análise de complexidade da consulta"""
-    detected_complexity: QueryComplexity
-    reasoning: str
-    recommended_agents: List[SpecialistType]
-    estimated_time: int
-    confidence: float
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ESTADO GLOBAL DA API
+# FACTORY PARA RESPOSTAS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-class MultiAgentAPIState:
-    """Estado global da API multi-agente"""
+class ResponseFactory:
+    """Factory para criar respostas a partir de AgentResult nativo"""
+    
+    @staticmethod
+    def create_research_response(query: str, agent_result: AgentResult) -> ResearchResponse:
+        """Cria ResearchResponse a partir de AgentResult nativo"""
+        processing_time = 0.0
+        if agent_result.start_time and agent_result.end_time:
+            processing_time = (agent_result.end_time - agent_result.start_time).total_seconds()
+        
+        # Extrair informações da saída se disponível
+        confidence_score = None
+        sources = []
+        
+        # Se o resultado tem metadata, extrair informações
+        if hasattr(agent_result, 'metadata') and agent_result.metadata:
+            confidence_score = agent_result.metadata.get('confidence_score')
+            sources = agent_result.metadata.get('sources', [])
+        
+        return ResearchResponse(
+            success=agent_result.status == AgentState.COMPLETED,
+            query=query,
+            result=agent_result.output or agent_result.error or "Nenhum resultado disponível",
+            agent_id=agent_result.agent_id,
+            status=agent_result.status.name,
+            processing_time=processing_time,
+            timestamp=agent_result.end_time.isoformat() if agent_result.end_time else datetime.utcnow().isoformat(),
+            confidence_score=confidence_score,
+            sources=sources,
+            reasoning_trace=getattr(agent_result, 'reasoning_trace', None),
+            error=agent_result.error if agent_result.status == AgentState.FAILED else None
+        )
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ESTADO GLOBAL SIMPLIFICADO
+# ═══════════════════════════════════════════════════════════════════════════════
+
+class APIState:
+    """Estado global simplificado da API"""
     def __init__(self):
         self.start_time = time.time()
         self.request_count = 0
-        self.active_jobs: Dict[str, JobStatus] = {}
-        self.metrics = ProcessingMetrics()
         self.is_ready = False
-        
-        # Sistema multi-agente
         self.lead_researcher: Optional[OpenAILeadResearcher] = None
-        self.specialist_selector = SpecialistSelector()
-        self.memory_storage = DistributedMemoryStorage()
         self.research_memory: Optional[ResearchMemory] = None
-        
-        # WebSocket connections para streaming
-        self.active_connections: Dict[str, WebSocket] = {}
         
     def get_uptime(self) -> float:
         return time.time() - self.start_time
     
     def increment_requests(self):
         self.request_count += 1
-    
-    def add_job(self, job_id: str, job_status: JobStatus):
-        self.active_jobs[job_id] = job_status
-    
-    def update_job(self, job_id: str, **updates):
-        if job_id in self.active_jobs:
-            for key, value in updates.items():
-                setattr(self.active_jobs[job_id], key, value)
-    
-    def get_job(self, job_id: str) -> Optional[JobStatus]:
-        return self.active_jobs.get(job_id)
-    
-    def cleanup_old_jobs(self, max_age_hours: int = 24):
-        """Remove jobs antigos"""
-        cutoff_time = time.time() - (max_age_hours * 3600)
-        to_remove = [
-            job_id for job_id, job in self.active_jobs.items()
-            if job.status in ["completed", "failed"] and 
-               datetime.fromisoformat(job.result.timestamp if job.result else datetime.utcnow().isoformat()).timestamp() < cutoff_time
-        ]
-        for job_id in to_remove:
-            del self.active_jobs[job_id]
 
 # Estado global
-api_state = MultiAgentAPIState()
+api_state = APIState()
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # INICIALIZAÇÃO E LIFECYCLE
@@ -241,7 +201,7 @@ api_state = MultiAgentAPIState()
 async def lifespan(app: FastAPI):
     """Lifecycle da aplicação"""
     # Startup
-    logger.info("🚀 Iniciando API Multi-Agente...")
+    logger.info("🚀 Iniciando API Multi-Agente Refatorada...")
     
     try:
         # Carregar variáveis de ambiente
@@ -267,13 +227,6 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("🛑 Finalizando API Multi-Agente...")
     api_state.is_ready = False
-    
-    # Fechar conexões ativas
-    for connection in api_state.active_connections.values():
-        try:
-            await connection.close()
-        except:
-            pass
 
 async def initialize_multiagent_system():
     """Inicializa o sistema multi-agente"""
@@ -293,12 +246,15 @@ async def initialize_multiagent_system():
             raise RuntimeError(f"Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
         
         # Inicializar memória de pesquisa
-        api_state.research_memory = ResearchMemory(api_state.memory_storage)
+        memory_storage = InMemoryStorage()
+        api_state.research_memory = ResearchMemory(memory_storage)
         
         # Configurar lead researcher
         lead_config = OpenAILeadConfig.from_env()
         api_state.lead_researcher = OpenAILeadResearcher(
-            config=lead_config
+            config=lead_config,
+            agent_id=str(uuid.uuid4()),
+            name="API-Lead-Researcher"
         )
         
         logger.info("✅ Sistema multi-agente inicializado")
@@ -312,9 +268,9 @@ async def initialize_multiagent_system():
 # ═══════════════════════════════════════════════════════════════════════════════
 
 app = FastAPI(
-    title="Sistema RAG Multi-Agente - API de Produção",
-    description="API REST para consultas complexas com reasoning multi-agente especializado",
-    version="1.0.0",
+    title="Sistema RAG Multi-Agente - API Refatorada",
+    description="API REST simplificada usando modelos nativos do multi-agent-researcher",
+    version="2.0.0",
     lifespan=lifespan
 )
 
@@ -329,15 +285,34 @@ if os.getenv("ENABLE_CORS", "false").lower() == "true":
         allow_headers=["*"],
     )
 
+# Aplicar configurações de produção
+if system_config.production.production_mode:
+    
+    # Rate Limiting se habilitado e disponível
+    if system_config.production.enable_rate_limiting and SLOWAPI_AVAILABLE:
+        limiter = Limiter(key_func=get_remote_address)
+        app.state.limiter = limiter
+        app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    
+    # Headers de segurança
+    @app.middleware("http")
+    async def add_security_headers(request, call_next):
+        response = await call_next(request)
+        if system_config.production.production_mode:
+            response.headers["X-Content-Type-Options"] = "nosniff"
+            response.headers["X-Frame-Options"] = "DENY"
+            response.headers["X-XSS-Protection"] = "1; mode=block"
+        return response
+
 # ═══════════════════════════════════════════════════════════════════════════════
-# DEPENDÊNCIAS
+# DEPENDÊNCIAS E UTILITÁRIOS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def get_api_state() -> MultiAgentAPIState:
+def get_api_state() -> APIState:
     """Dependency para obter estado da API"""
     return api_state
 
-def check_api_ready(state: MultiAgentAPIState = Depends(get_api_state)):
+def check_api_ready(state: APIState = Depends(get_api_state)):
     """Verifica se a API está pronta"""
     if not state.is_ready:
         raise HTTPException(
@@ -347,641 +322,173 @@ def check_api_ready(state: MultiAgentAPIState = Depends(get_api_state)):
     return state
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# ENDPOINTS DE MANUTENÇÃO (PROTEGIDOS)
-# ═══════════════════════════════════════════════════════════════════════════════
-
-@app.delete("/maintenance/collection")
-async def delete_collection_endpoint(
-    all_docs: bool = False,
-    doc_prefix: str = None,
-    token: str = Depends(verify_token)
-):
-    """Endpoint para deletar documentos da collection AstraDB"""
-    if not all_docs and not doc_prefix:
-        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
-    
-    try:
-        result = delete_documents(all_docs=all_docs, doc_prefix=doc_prefix)
-        
-        if result["success"]:
-            return {
-                "success": True,
-                "message": result["message"],
-                "deleted": result["deleted"]
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/maintenance/documents")
-async def delete_documents_endpoint(
-    all_docs: bool = False,
-    doc_prefix: str = None,
-    token: str = Depends(verify_token)
-):
-    """Endpoint para deletar documentos específicos do AstraDB"""
-    if not all_docs and not doc_prefix:
-        raise HTTPException(status_code=400, detail="Especifique 'all_docs=true' ou 'doc_prefix'")
-    
-    try:
-        result = delete_specific_documents(all_docs=all_docs, doc_prefix=doc_prefix)
-        
-        if result["success"]:
-            return {
-                "success": True,
-                "message": result["message"],
-                "deleted": result["deleted"],
-                "documents": result.get("documents", [])
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.delete("/maintenance/images")
-async def delete_images_endpoint(
-    all_images: bool = False,
-    doc_prefix: str = None,
-    token: str = Depends(verify_token)
-):
-    """Endpoint para deletar imagens extraídas dos PDFs"""
-    if not all_images and not doc_prefix:
-        raise HTTPException(status_code=400, detail="Especifique 'all_images=true' ou 'doc_prefix'")
-    
-    try:
-        result = delete_images(all_images=all_images, doc_prefix=doc_prefix)
-        
-        if result["success"]:
-            return {
-                "success": True,
-                "message": result["message"],
-                "deleted": result["deleted"],
-                "files": result.get("files", [])
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result["error"])
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/index")
-async def index_document_endpoint(
-    url: str,
-    doc_source: str = None,
-    background_tasks: BackgroundTasks = None,
-    token: str = Depends(verify_token)
-):
-    """Endpoint para indexar documento por URL"""
-    try:
-        # Inicializar indexer
-        indexer = PDFIndexer()
-        
-        # Usar URL como doc_source se não fornecido
-        if not doc_source:
-            from indexer import create_doc_source_name
-            doc_source = create_doc_source_name(url)
-        
-        # Executar indexação
-        result = await indexer.process_pdf_async(url, doc_source)
-        
-        if result.success:
-            return {
-                "success": True,
-                "message": "Documento indexado com sucesso",
-                "doc_source": doc_source,
-                "pages_processed": result.pages_processed,
-                "chunks_created": result.chunks_created,
-                "images_extracted": result.images_extracted,
-                "processing_time": result.processing_time,
-                "metadata": result.metadata
-            }
-        else:
-            raise HTTPException(status_code=500, detail=result.error)
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ═══════════════════════════════════════════════════════════════════════════════
 # ENDPOINTS PRINCIPAIS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-@app.get("/")
-async def root():
-    """Endpoint raiz com informações básicas"""
-    return {
-        "service": "Sistema RAG Multi-Agente - API de Produção",
-        "version": "1.0.0",
-        "status": "running" if api_state.is_ready else "starting",
-        "capabilities": [
-            "Multi-agent reasoning",
-            "Specialized agent selection",
-            "ReAct pattern processing",
-            "Async and streaming processing",
-            "Complex query decomposition"
-        ],
-        "docs": "/docs",
-        "health": "/health"
-    }
-
 @app.get("/health")
-async def health_check(state: MultiAgentAPIState = Depends(get_api_state)):
-    """Health check detalhado do sistema"""
-    
+async def health_check(state: APIState = Depends(get_api_state)):
+    """Endpoint de health check"""
     return {
         "status": "healthy" if state.is_ready else "starting",
-        "version": "1.0.0",
-        "uptime_seconds": state.get_uptime(),
-        "total_requests": state.request_count,
-        "active_jobs": len(state.active_jobs),
-        "active_connections": len(state.active_connections),
-        "system_config": {
-            "max_subagents": system_config.multiagent.max_subagents,
-            "model": system_config.multiagent.model,
-            "timeout": system_config.multiagent.subagent_timeout
-        },
+        "uptime": state.get_uptime(),
+        "requests_processed": state.request_count,
+        "multiagent_ready": state.lead_researcher is not None,
         "timestamp": datetime.utcnow().isoformat()
     }
 
-@app.post("/analyze-complexity", response_model=ComplexityAnalysis)
-async def analyze_query_complexity(
-    query_data: Dict[str, str],
-    state: MultiAgentAPIState = Depends(check_api_ready),
-    token: str = Depends(verify_token)
+@app.post("/research", response_model=ResearchResponse)
+async def research_query(
+    query: ResearchQuery,
+    state: APIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
 ):
     """
-    Analisa a complexidade de uma consulta e recomenda estratégia de processamento
+    Endpoint principal para consultas de pesquisa.
+    Usa diretamente o OpenAILeadResearcher e modelos nativos AgentResult.
     """
-    
-    query = query_data.get("query", "")
-    if not query or len(query) < 3:
-        raise HTTPException(status_code=400, detail="Query muito curta")
+    start_time = time.time()
+    state.increment_requests()
     
     try:
-        # Análise de complexidade baseada em heurísticas
-        complexity = analyze_complexity(query)
-        recommended_agents = state.specialist_selector.select_specialists(
-            query, 
-            query_data.get("objective", ""), 
-            max_specialists=5
-        )
+        logger.info(f"🔍 Nova consulta: {query.query}")
         
-        return ComplexityAnalysis(
-            detected_complexity=complexity,
-            reasoning=get_complexity_reasoning(query, complexity),
-            recommended_agents=[get_specialist_type(agent) for agent in recommended_agents],
-            estimated_time=estimate_processing_time(complexity),
-            confidence=0.8  # Placeholder - poderia ser calculado com ML
-        )
-    
-    except Exception as e:
-        logger.error(f"❌ Erro na análise de complexidade: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-@app.post("/research", response_model=Union[MultiAgentResponse, Dict[str, str]])
-async def multi_agent_research(
-    query_data: MultiAgentQuery,
-    background_tasks: BackgroundTasks,
-    state: MultiAgentAPIState = Depends(check_api_ready),
-    token: str = Depends(verify_token)
-):
-    """
-    Endpoint principal para pesquisa multi-agente
-    
-    Suporta processamento síncrono, assíncrono e streaming baseado no processing_mode.
-    """
-    
-    job_id = f"job_{uuid.uuid4().hex[:8]}_{int(time.time())}"
-    
-    try:
-        state.increment_requests()
-        
-        # Validar query
-        if not validate_query(query_data.query):
+        # Validar consulta
+        validation_result = validate_query(query.query)
+        if not validation_result.is_valid:
             raise HTTPException(
                 status_code=400,
-                detail="Query inválida. Deve ter entre 3 e 1000 caracteres."
+                detail=f"Consulta inválida: {validation_result.error_message}"
             )
         
-        logger.info(f"🧠 [{job_id}] Iniciando pesquisa multi-agente: {query_data.query[:100]}...")
+        # Criar contexto usando modelo nativo
+        context = AgentContext(
+            query=query.query,
+            objective=query.objective or f"Pesquisar informações sobre: {query.query}",
+            metadata={"api_request": True, "timestamp": datetime.utcnow().isoformat()}
+        )
         
-        # Determinar complexidade se não fornecida
-        if query_data.complexity is None:
-            query_data.complexity = analyze_complexity(query_data.query)
+        # Executar pesquisa usando o lead researcher nativo
+        agent_result = await state.lead_researcher.run(context)
         
-        # Configurar objetivo padrão
-        if not query_data.objective:
-            query_data.objective = f"Fornecer resposta abrangente sobre: {query_data.query}"
+        # Usar factory para criar resposta
+        response = ResponseFactory.create_research_response(query.query, agent_result)
         
-        # Processamento baseado no modo
-        if query_data.processing_mode == ProcessingMode.ASYNC:
-            # Criar job assíncrono
-            job_status = JobStatus(
-                job_id=job_id,
-                status="pending",
-                progress=0.0
-            )
-            state.add_job(job_id, job_status)
-            
-            # Executar em background
-            background_tasks.add_task(
-                execute_multiagent_research_async,
-                job_id,
-                query_data,
-                state
-            )
-            
-            return {"job_id": job_id, "status": "accepted", "estimated_time": estimate_processing_time(query_data.complexity)}
+        logger.info(f"✅ Consulta processada em {time.time() - start_time:.2f}s")
+        return response
         
-        elif query_data.processing_mode == ProcessingMode.SYNC:
-            # Execução síncrona
-            return await execute_multiagent_research_sync(job_id, query_data, state)
-        
-        else:  # STREAM
-            raise HTTPException(
-                status_code=501,
-                detail="Modo streaming deve usar o endpoint WebSocket /research/stream"
-            )
-    
     except HTTPException:
         raise
     except Exception as e:
-        logger.error(f"❌ [{job_id}] Erro na pesquisa multi-agente: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"❌ Erro no processamento: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro interno do servidor: {str(e)}"
+        )
 
-@app.get("/research/{job_id}", response_model=JobStatus)
-async def get_job_status(
-    job_id: str,
-    state: MultiAgentAPIState = Depends(check_api_ready),
-    token: str = Depends(verify_token)
+@app.post("/index", response_model=IndexResponse)
+async def index_document(
+    request: IndexRequest,
+    state: APIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
 ):
-    """Consulta status de job assíncrono"""
-    
-    job = state.get_job(job_id)
-    if not job:
-        raise HTTPException(status_code=404, detail="Job não encontrado")
-    
-    return job
-
-@app.websocket("/research/stream")
-async def stream_research(websocket: WebSocket, state: MultiAgentAPIState = Depends(get_api_state)):
-    """WebSocket endpoint para pesquisa com streaming em tempo real"""
-    
-    await websocket.accept()
-    connection_id = f"conn_{uuid.uuid4().hex[:8]}"
-    state.active_connections[connection_id] = websocket
+    """Indexa documento PDF por URL"""
+    if not INDEXER_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="Serviço de indexação não disponível"
+        )
     
     try:
-        # Receber query inicial
-        data = await websocket.receive_json()
-        query_data = MultiAgentQuery(**data)
+        logger.info(f"📄 Indexando documento: {request.url}")
         
-        job_id = f"stream_{uuid.uuid4().hex[:8]}_{int(time.time())}"
+        # Criar nome do documento se não fornecido
+        doc_source = request.doc_source or create_doc_source_name(request.url)
         
-        logger.info(f"🌊 [{job_id}] Iniciando pesquisa streaming: {query_data.query[:100]}...")
+        # Processar PDF
+        success = process_pdf_from_url(request.url, doc_source)
         
-        # Executar com streaming
-        await execute_multiagent_research_stream(job_id, query_data, websocket)
-        
-    except WebSocketDisconnect:
-        logger.info(f"🔌 Conexão WebSocket {connection_id} desconectada")
-    except Exception as e:
-        logger.error(f"❌ Erro no WebSocket {connection_id}: {e}")
-        await websocket.send_json({"error": str(e)})
-    finally:
-        state.active_connections.pop(connection_id, None)
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# EXECUTORES DE PESQUISA
-# ═══════════════════════════════════════════════════════════════════════════════
-
-async def execute_multiagent_research_sync(
-    job_id: str, 
-    query_data: MultiAgentQuery,
-    state: MultiAgentAPIState
-) -> MultiAgentResponse:
-    """Execução síncrona da pesquisa multi-agente"""
-    
-    start_time = time.time()
-    execution_steps: List[AgentExecutionStep] = []
-    
-    try:
-        # Criar contexto da consulta
-        context = AgentContext(
-            query=query_data.query,
-            objective=query_data.objective,
-            constraints=[]
-        )
-        
-        # Configurar timeout
-        timeout = query_data.timeout_seconds or system_config.multiagent.subagent_timeout
-        
-        # Executar lead researcher
-        logger.info(f"🎯 [{job_id}] Executando lead researcher...")
-        
-        result = await asyncio.wait_for(
-            state.lead_researcher.run(context),
-            timeout=timeout
-        )
-        
-        # Processar resultado
-        processing_time = time.time() - start_time
-        
-        # Extrair informações dos agentes utilizados
-        agents_used = []
-        if hasattr(result, 'subagent_results') and result.subagent_results:
-            for subresult in result.subagent_results:
-                agents_used.append({
-                    "agent_id": subresult.agent_id,
-                    "agent_type": subresult.__class__.__name__,
-                    "status": subresult.status.value,
-                    "execution_time": getattr(subresult, 'execution_time', 0.0)
-                })
-        
-        # Calcular confidence score
-        confidence_score = calculate_confidence_score(result, len(agents_used))
-        
-        logger.info(f"✅ [{job_id}] Pesquisa concluída em {processing_time:.2f}s")
-        
-        return MultiAgentResponse(
-            success=result.status == AgentState.COMPLETED,
-            job_id=job_id,
-            query=query_data.query,
-            objective=query_data.objective,
-            final_answer=result.output,
-            confidence_score=confidence_score,
-            processing_time=processing_time,
-            complexity_detected=query_data.complexity,
-            agents_used=agents_used,
-            execution_steps=execution_steps,
-            reasoning_trace=result.thinking.split('\n') if query_data.include_reasoning and result.thinking else None,
-            sources=extract_sources_from_result(result),
-            metadata={
-                "job_id": job_id,
-                "lead_agent": state.lead_researcher.__class__.__name__,
-                "timeout_used": timeout,
-                "model": system_config.multiagent.model
-            },
-            timestamp=datetime.utcnow().isoformat()
-        )
-    
-    except asyncio.TimeoutError:
-        logger.error(f"⏰ [{job_id}] Timeout após {timeout}s")
-        raise HTTPException(status_code=408, detail=f"Pesquisa excedeu timeout de {timeout}s")
-    
-    except Exception as e:
-        logger.error(f"❌ [{job_id}] Erro na execução: {e}")
+        if success:
+            return IndexResponse(
+                success=True,
+                message="Documento indexado com sucesso",
+                doc_source=doc_source
+            )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="Falha na indexação do documento"
+            )
+            
+    except HTTPException:
         raise
-
-async def execute_multiagent_research_async(
-    job_id: str,
-    query_data: MultiAgentQuery,
-    state: MultiAgentAPIState
-):
-    """Execução assíncrona da pesquisa multi-agente"""
-    
-    try:
-        state.update_job(job_id, status="running", progress=0.1)
-        
-        # Executar pesquisa
-        result = await execute_multiagent_research_sync(job_id, query_data, state)
-        
-        # Atualizar job com resultado
-        state.update_job(
-            job_id,
-            status="completed",
-            progress=1.0,
-            result=result
+    except Exception as e:
+        logger.error(f"❌ Erro na indexação: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro na indexação: {str(e)}"
         )
+
+@app.delete("/documents/{collection_name}")
+async def delete_documents_endpoint(
+    collection_name: str,
+    state: APIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
+):
+    """Deleta documentos de uma coleção"""
+    try:
+        logger.info(f"🗑️ Deletando documentos da coleção: {collection_name}")
+        
+        result = delete_documents(collection_name)
+        
+        return {
+            "success": True,
+            "message": f"Documentos deletados da coleção {collection_name}",
+            "details": result
+        }
         
     except Exception as e:
-        logger.error(f"❌ [{job_id}] Erro na execução assíncrona: {e}")
-        state.update_job(
-            job_id,
-            status="failed",
-            error=str(e)
+        logger.error(f"❌ Erro ao deletar documentos: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao deletar documentos: {str(e)}"
         )
 
-async def execute_multiagent_research_stream(
-    job_id: str,
-    query_data: MultiAgentQuery,
-    websocket: WebSocket
+@app.get("/stats")
+async def get_stats(
+    state: APIState = Depends(check_api_ready),
+    _: str = Depends(verify_token)
 ):
-    """Execução com streaming em tempo real"""
-    
-    try:
-        # Enviar status inicial
-        await websocket.send_json({
-            "type": "status",
-            "job_id": job_id,
-            "status": "started",
-            "message": "Iniciando pesquisa multi-agente..."
-        })
-        
-        # Executar com updates em tempo real
-        # Por simplicidade, aqui fazemos a execução normal e enviamos resultado final
-        # Em uma implementação completa, integraria com callbacks dos agentes
-        
-        context = AgentContext(
-            query=query_data.query,
-            objective=query_data.objective,
-            constraints=[]
-        )
-        
-        result = await api_state.lead_researcher.run(context)
-        
-        # Enviar resultado final
-        response = MultiAgentResponse(
-            success=result.status == AgentState.COMPLETED,
-            job_id=job_id,
-            query=query_data.query,
-            objective=query_data.objective,
-            final_answer=result.output,
-            confidence_score=calculate_confidence_score(result, 1),
-            processing_time=0.0,  # Calculado em tempo real
-            complexity_detected=query_data.complexity,
-            agents_used=[],
-            execution_steps=[],
-            reasoning_trace=result.thinking.split('\n') if result.thinking else None,
-            sources=[],
-            metadata={"job_id": job_id},
-            timestamp=datetime.utcnow().isoformat()
-        )
-        
-        await websocket.send_json({
-            "type": "result",
-            "data": response.dict()
-        })
-        
-    except Exception as e:
-        await websocket.send_json({
-            "type": "error",
-            "error": str(e)
-        })
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# FUNÇÕES AUXILIARES
-# ═══════════════════════════════════════════════════════════════════════════════
-
-def analyze_complexity(query: str) -> QueryComplexity:
-    """Analisa complexidade da query baseado em heurísticas"""
-    
-    query_lower = query.lower()
-    
-    # Palavras que indicam complexidade
-    complex_indicators = [
-        "compare", "analyze", "evaluate", "pros and cons", "advantages", "disadvantages",
-        "methodology", "implementation", "architecture", "detailed", "comprehensive"
-    ]
-    
-    expert_indicators = [
-        "research paper", "academic", "technical specification", "algorithm",
-        "mathematical", "statistical", "optimization", "performance analysis"
-    ]
-    
-    # Contadores
-    complex_count = sum(1 for indicator in complex_indicators if indicator in query_lower)
-    expert_count = sum(1 for indicator in expert_indicators if indicator in query_lower)
-    word_count = len(query.split())
-    
-    # Determinar complexidade
-    if expert_count >= 2 or word_count > 50:
-        return QueryComplexity.EXPERT
-    elif complex_count >= 2 or word_count > 30:
-        return QueryComplexity.COMPLEX
-    elif complex_count >= 1 or word_count > 15:
-        return QueryComplexity.MODERATE
-    else:
-        return QueryComplexity.SIMPLE
-
-def get_complexity_reasoning(query: str, complexity: QueryComplexity) -> str:
-    """Gera explicação da complexidade detectada"""
-    
-    reasoning_map = {
-        QueryComplexity.SIMPLE: "Query simples com conceitos diretos",
-        QueryComplexity.MODERATE: "Query moderada que requer alguma análise",
-        QueryComplexity.COMPLEX: "Query complexa com múltiplos aspectos para análise",
-        QueryComplexity.EXPERT: "Query especializada que requer conhecimento técnico profundo"
-    }
-    
-    return reasoning_map.get(complexity, "Complexidade não determinada")
-
-def estimate_processing_time(complexity: QueryComplexity) -> int:
-    """Estima tempo de processamento baseado na complexidade"""
-    
-    time_estimates = {
-        QueryComplexity.SIMPLE: 30,
-        QueryComplexity.MODERATE: 60,
-        QueryComplexity.COMPLEX: 120,
-        QueryComplexity.EXPERT: 300
-    }
-    
-    return time_estimates.get(complexity, 60)
-
-def get_specialist_type(agent_class) -> SpecialistType:
-    """Mapeia classe de agente para tipo de especialista"""
-    
-    name = agent_class.__name__.lower()
-    
-    if "concept" in name or "extraction" in name:
-        return SpecialistType.CONCEPTUAL
-    elif "comparative" in name or "comparison" in name:
-        return SpecialistType.COMPARATIVE
-    elif "technical" in name or "detail" in name:
-        return SpecialistType.TECHNICAL
-    elif "example" in name or "finder" in name:
-        return SpecialistType.EXAMPLES
-    else:
-        return SpecialistType.GENERAL
-
-def calculate_confidence_score(result: AgentResult, agents_count: int) -> float:
-    """Calcula score de confiança baseado no resultado"""
-    
-    base_score = 0.7 if result.status == AgentState.COMPLETED else 0.3
-    
-    # Ajuste baseado no número de agentes
-    agent_bonus = min(0.2, agents_count * 0.05)
-    
-    # Ajuste baseado no tamanho da resposta
-    length_bonus = min(0.1, len(result.output) / 10000)
-    
-    return min(1.0, base_score + agent_bonus + length_bonus)
-
-def extract_sources_from_result(result: AgentResult) -> List[Dict[str, Any]]:
-    """Extrai fontes do resultado"""
-    
-    # Por simplicidade, retorna lista vazia
-    # Em implementação completa, extrairia fontes dos subagentes
-    return []
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# ENDPOINTS DE UTILIDADE
-# ═══════════════════════════════════════════════════════════════════════════════
-
-@app.get("/specialists", response_model=Dict[str, List[str]])
-async def list_available_specialists(token: str = Depends(verify_token)):
-    """Lista tipos de especialistas disponíveis"""
-    
+    """Estatísticas da API"""
     return {
-        "available_specialists": [spec.value for spec in SpecialistType],
-        "descriptions": {
-            "general": "Pesquisa geral e abrangente",
-            "conceptual": "Foco em definições e conceitos fundamentais",
-            "comparative": "Análises comparativas e alternativas",
-            "technical": "Detalhes técnicos e implementação",
-            "examples": "Exemplos práticos e casos de uso",
-            "historical": "Contexto histórico e evolução"
-        }
-    }
-
-@app.get("/jobs", response_model=Dict[str, Any])
-async def list_active_jobs(
-    state: MultiAgentAPIState = Depends(check_api_ready),
-    token: str = Depends(verify_token)
-):
-    """Lista jobs ativos"""
-    
-    # Limpar jobs antigos
-    state.cleanup_old_jobs()
-    
-    jobs_summary = {}
-    for job_id, job in state.active_jobs.items():
-        jobs_summary[job_id] = {
-            "status": job.status,
-            "progress": job.progress,
-            "current_step": job.current_step
-        }
-    
-    return {
-        "active_jobs": len(state.active_jobs),
-        "jobs": jobs_summary,
-        "total_processed": state.request_count
+        "uptime_seconds": state.get_uptime(),
+        "total_requests": state.request_count,
+        "api_ready": state.is_ready,
+        "multiagent_initialized": state.lead_researcher is not None,
+        "indexer_available": INDEXER_AVAILABLE,
+        "rate_limiting_available": SLOWAPI_AVAILABLE,
+        "production_mode": system_config.production.production_mode,
+        "timestamp": datetime.utcnow().isoformat()
     }
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PONTO DE ENTRADA
+# EXECUÇÃO
 # ═══════════════════════════════════════════════════════════════════════════════
-
-def main():
-    """Função principal para executar a API"""
-    
-    # Configuração do servidor
-    config = {
-        "app": "api_multiagent:app",
-        "host": os.getenv("API_HOST", "0.0.0.0"),
-        "port": int(os.getenv("API_PORT", "8001")),
-        "reload": os.getenv("API_RELOAD", "false").lower() == "true",
-        "workers": int(os.getenv("API_WORKERS", "1")),
-        "log_level": os.getenv("API_LOG_LEVEL", "info").lower()
-    }
-    
-    logger.info(f"🚀 Iniciando API Multi-Agente em {config['host']}:{config['port']}")
-    logger.info(f"📋 Configuração: {config}")
-    
-    # Executar servidor
-    uvicorn.run(**config)
 
 if __name__ == "__main__":
-    main()
+    # Configuração do servidor
+    host = os.getenv("API_HOST", "0.0.0.0")
+    port = int(os.getenv("API_PORT", 8000))
+    workers = int(os.getenv("API_WORKERS", 1))
+    reload = os.getenv("API_RELOAD", "false").lower() == "true"
+    
+    logger.info(f"🚀 Iniciando servidor API em {host}:{port}")
+    
+    uvicorn.run(
+        "api_multiagent:app",
+        host=host,
+        port=port,
+        workers=workers if not reload else 1,
+        reload=reload,
+        log_level=log_level.lower(),
+        access_log=True
+    )

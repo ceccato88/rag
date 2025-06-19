@@ -1,5 +1,10 @@
-# Dockerfile para API Multi-Agente - Produção
+# Dockerfile para API Multi-Agente Refatorada - Produção
 FROM python:3.11-slim
+
+# Metadados
+LABEL maintainer="Sistema RAG Multi-Agente"
+LABEL version="2.0.0"
+LABEL description="API Multi-Agente refatorada usando modelos nativos"
 
 # Definir diretório de trabalho
 WORKDIR /app
@@ -16,13 +21,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt requirements-api.txt ./
 
 # Instalar dependências Python
-RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir -r requirements-api.txt
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt \
+    && pip install --no-cache-dir -r requirements-api.txt
 
-# Copiar apenas arquivos necessários para produção
+# Copiar apenas arquivos necessários para a API refatorada
 COPY api_multiagent.py config.py constants.py search.py ./
 COPY utils/ ./utils/
 COPY multi-agent-researcher/ ./multi-agent-researcher/
+COPY maintenance/ ./maintenance/
 
 # Criar usuário não-root para segurança
 RUN groupadd -r appuser && useradd -r -g appuser -d /app -s /sbin/nologin appuser
@@ -37,16 +44,19 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PIP_NO_CACHE_DIR=1
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
+ENV API_PORT=8000
+ENV API_HOST=0.0.0.0
+ENV API_WORKERS=4
 
-# Expor porta
-EXPOSE 8001
+# Expor porta (mudança para 8000 por consistência)
+EXPOSE 8000
 
-# Healthcheck otimizado para produção
-HEALTHCHECK --interval=60s --timeout=30s --start-period=120s --retries=3 \
-  CMD curl -f http://localhost:8001/health || exit 1
+# Healthcheck otimizado para API refatorada
+HEALTHCHECK --interval=30s --timeout=15s --start-period=60s --retries=3 \
+  CMD curl -f http://localhost:8000/health || exit 1
 
 # Mudar para usuário não-root
 USER appuser
 
-# Comando para executar a aplicação em produção
-CMD ["python", "-m", "uvicorn", "api_multiagent:app", "--host", "0.0.0.0", "--port", "8001", "--workers", "4"]
+# Comando para executar a aplicação refatorada
+CMD ["python", "-m", "uvicorn", "api_multiagent:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "4", "--log-level", "info"]
