@@ -20,8 +20,8 @@ FACTORY_PATTERN_ENABLED=true    # Factory patterns ativos
 ```python
 # Novas configurações para APIs refatoradas
 API_REFACTORED_CONFIG = {
-    'MULTIAGENT_API_PORT': 8000,
-    'SIMPLE_API_PORT': 8001,
+    'MULTIAGENT_API_PORT': 8001,
+    'SIMPLE_API_PORT': 8000,
     'FACTORY_PATTERN_ENABLED': True,
     'NATIVE_MODELS_ONLY': True
 }

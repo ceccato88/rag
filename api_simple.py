@@ -387,7 +387,7 @@ async def get_stats(
 if __name__ == "__main__":
     # Configuração do servidor
     host = os.getenv("API_HOST", "0.0.0.0")
-    port = int(os.getenv("API_PORT", 8001))
+    port = int(os.getenv("API_PORT", 8000))
     workers = int(os.getenv("API_WORKERS", 1))
     reload = os.getenv("API_RELOAD", "false").lower() == "true"
     
