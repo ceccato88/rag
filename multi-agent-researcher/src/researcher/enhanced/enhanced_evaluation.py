@@ -25,6 +25,7 @@ except ImportError:
 
 # Configuração
 config = SystemConfig()
+system_config = SystemConfig()  # Para compatibilidade
 logger = logging.getLogger(__name__)
 
 
@@ -85,45 +86,80 @@ class DocumentAnalyzer:
             focus_context = ", ".join(focus_areas) if focus_areas else "general"
             
             prompt = f"""
-Avalie a relevância deste documento para a query específica:
+Evaluate document relevance for this specific query. RESPOND ONLY WITH ONE WORD.
 
 QUERY: "{query}"
-ÁREAS DE FOCO: {focus_context}
+FOCUS AREAS: {focus_context}
 
-CONTEÚDO DO DOCUMENTO:
+DOCUMENT CONTENT:
 {content[:2000]}...
 
-Classifique a relevância como:
-- HIGHLY_RELEVANT: Responde diretamente à query
-- RELEVANT: Contém informações úteis relacionadas
-- SOMEWHAT_RELEVANT: Menciona o tópico mas não é central
-- NOT_RELEVANT: Não relacionado ou irrelevante
+Classification options:
+- HIGHLY_RELEVANT: Directly answers the query
+- RELEVANT: Contains useful related information  
+- SOMEWHAT_RELEVANT: Mentions topic but not central
+- NOT_RELEVANT: Unrelated or irrelevant
 
-Responda apenas com: HIGHLY_RELEVANT, RELEVANT, SOMEWHAT_RELEVANT ou NOT_RELEVANT
+RESPOND WITH ONLY ONE OF THESE EXACT WORDS:
+HIGHLY_RELEVANT
+RELEVANT  
+SOMEWHAT_RELEVANT
+NOT_RELEVANT
 """
             
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=config.rag.max_tokens_evaluation,
+                max_tokens=config.rag.max_tokens_score,  # Reduzir tokens para forçar resposta curta
                 temperature=config.rag.temperature_precise
             )
             
             relevance_str = response.choices[0].message.content.strip().upper()
-            return DocumentRelevance(relevance_str.lower())
+            
+            # Validação mais robusta - mapear possíveis variações
+            relevance_mapping = {
+                "HIGHLY_RELEVANT": DocumentRelevance.HIGHLY_RELEVANT,
+                "HIGHLY RELEVANT": DocumentRelevance.HIGHLY_RELEVANT,
+                "HIGH": DocumentRelevance.HIGHLY_RELEVANT,
+                "RELEVANT": DocumentRelevance.RELEVANT,
+                "SOMEWHAT_RELEVANT": DocumentRelevance.SOMEWHAT_RELEVANT,
+                "SOMEWHAT RELEVANT": DocumentRelevance.SOMEWHAT_RELEVANT,
+                "PARTIAL": DocumentRelevance.SOMEWHAT_RELEVANT,
+                "NOT_RELEVANT": DocumentRelevance.NOT_RELEVANT,
+                "NOT RELEVANT": DocumentRelevance.NOT_RELEVANT,
+                "IRRELEVANT": DocumentRelevance.NOT_RELEVANT,
+                "NO": DocumentRelevance.NOT_RELEVANT
+            }
+            
+            # Tentar mapear a resposta
+            if relevance_str in relevance_mapping:
+                return relevance_mapping[relevance_str]
+            
+            # Se contém palavras-chave, fazer match parcial
+            if "HIGHLY" in relevance_str or "HIGH" in relevance_str:
+                return DocumentRelevance.HIGHLY_RELEVANT
+            elif "SOMEWHAT" in relevance_str or "PARTIAL" in relevance_str:
+                return DocumentRelevance.SOMEWHAT_RELEVANT
+            elif "NOT" in relevance_str or "IRRELEVANT" in relevance_str:
+                return DocumentRelevance.NOT_RELEVANT
+            elif "RELEVANT" in relevance_str:
+                return DocumentRelevance.RELEVANT
+            
+            # Se nada funcionar, usar fallback baseado em similarity
+            logger.warning(f"Resposta de relevância não reconhecida: '{relevance_str}' - usando fallback")
             
         except Exception as e:
-            logger.warning(f"Erro na avaliação de relevância: {e}")
-            # Fallback baseado no similarity score
-            # Usar similarity_score da função
-            if similarity_score > 0.8:
-                return DocumentRelevance.HIGHLY_RELEVANT
-            elif similarity_score > 0.6:
-                return DocumentRelevance.RELEVANT
-            elif similarity_score > 0.4:
-                return DocumentRelevance.SOMEWHAT_RELEVANT
-            else:
-                return DocumentRelevance.NOT_RELEVANT
+            logger.warning(f"Erro na avaliação de relevância: {e} - usando fallback")
+        
+        # Fallback baseado no similarity score
+        if similarity_score > 0.8:
+            return DocumentRelevance.HIGHLY_RELEVANT
+        elif similarity_score > 0.6:
+            return DocumentRelevance.RELEVANT
+        elif similarity_score > 0.4:
+            return DocumentRelevance.SOMEWHAT_RELEVANT
+        else:
+            return DocumentRelevance.NOT_RELEVANT
     
     def _extract_key_findings(self, content: str, query: str, focus_areas: List[str], image_base64: str = "") -> List[str]:
         """Extrai descobertas-chave do documento"""

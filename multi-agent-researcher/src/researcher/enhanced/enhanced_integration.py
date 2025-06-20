@@ -256,6 +256,7 @@ class EnhancedLeadResearcher:
                         self.output = output
                         self.error = error
                         self.metadata = metadata or {}
+                        self.start_time = datetime.utcnow()  # Campo obrigatório adicionado
                         self.end_time = datetime.utcnow()
                         self.reasoning_trace = []
         
@@ -282,6 +283,7 @@ class EnhancedLeadResearcher:
                 status=status,
                 output=output,
                 error=error,
+                start_time=datetime.utcnow(),  # Campo obrigatório
                 metadata={
                     "confidence_score": result.get("confidence_score"),
                     "sources": result.get("sources", []),
@@ -293,8 +295,9 @@ class EnhancedLeadResearcher:
             )
             
             # Adicionar reasoning trace se disponível
-            if "reasoning_trace" in result and result["reasoning_trace"]:
-                agent_result.reasoning_trace = result["reasoning_trace"]
+            # Commented out - AgentResult não tem reasoning_trace
+            # if "reasoning_trace" in result and result["reasoning_trace"]:
+            #     agent_result.reasoning_trace = result["reasoning_trace"]
             
             return agent_result
             
@@ -307,6 +310,7 @@ class EnhancedLeadResearcher:
                 status=AgentStatus.FAILED,
                 output=None,
                 error=str(e),
+                start_time=datetime.utcnow(),  # Campo obrigatório
                 metadata={"enhanced": False, "fallback_attempted": True}
             )
     

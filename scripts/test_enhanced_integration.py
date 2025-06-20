@@ -51,6 +51,30 @@ class MockRAGSystem:
                 }
             ]
         }
+    
+    def get_query_embedding(self, query: str):
+        """Mock do embedding da query"""
+        # Retorna um embedding mock de 1024 dimensões
+        import random
+        random.seed(hash(query))  # Embedding consistente para a mesma query
+        return [random.random() for _ in range(1024)]
+    
+    def search_candidates(self, embedding, limit=10):
+        """Mock para busca de candidatos enhanced"""
+        candidates = []
+        for i in range(min(limit, 5)):  # Retorna no máximo 5 candidatos
+            candidates.append({
+                "id": f"mock_candidate_{i}",
+                "document": f"doc_test_{i}",
+                "page_number": i + 1,
+                "similarity_score": 0.9 - (i * 0.1),
+                "content": f"Conteúdo mock do candidato {i+1}. Este texto contém informações relevantes para a query.",
+                "metadata": {
+                    "source": f"mock_source_{i}",
+                    "type": "text"
+                }
+            })
+        return candidates
 
 
 class MockAgentContext:
@@ -158,7 +182,9 @@ async def test_enhanced_lead_researcher():
         logger.info(f"   Status: {result.status}")
         logger.info(f"   Resposta: {result.output[:100] if result.output else 'N/A'}...")
         logger.info(f"   Erro: {result.error or 'Nenhum'}")
-        logger.info(f"   Enhanced: {result.metadata.get('enhanced', False)}")
+        # Verifica se metadata existe e tem o campo enhanced
+        enhanced_status = getattr(result, 'metadata', {}).get('enhanced', False) if hasattr(result, 'metadata') else 'N/A'
+        logger.info(f"   Enhanced: {enhanced_status}")
         
         return True
         

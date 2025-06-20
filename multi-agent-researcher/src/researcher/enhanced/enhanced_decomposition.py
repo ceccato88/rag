@@ -28,6 +28,9 @@ except ImportError:
 from .enhanced_unified_config import get_config_for_task, unified_config
 from .enhanced_config import SPECIALIST_OPTIMIZATIONS  # Manter para seções preferidas
 
+# Configuração do sistema
+system_config = SystemConfig()
+
 # Configuração
 config = SystemConfig()
 logger = logging.getLogger(__name__)
