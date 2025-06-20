@@ -176,9 +176,9 @@ class IndexingValidator:
     @staticmethod
     def validate_environment() -> Tuple[bool, List[str]]:
         """Valida variáveis de ambiente necessárias"""
+        from src.utils.env_validation import validate_required_env_vars
         required_vars = VALIDATION_CONFIG['REQUIRED_ENV_VARS']
-        missing_vars = [var for var in required_vars if not os.getenv(var)]
-        return len(missing_vars) == 0, missing_vars
+        return validate_required_env_vars(required_vars)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PROCESSADOR NATIVO OTIMIZADO

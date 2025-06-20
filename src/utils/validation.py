@@ -60,12 +60,12 @@ def validate_environment_vars(required_vars: List[str]) -> Dict[str, Any]:
     Returns:
         Dict com status da validação e variáveis faltando
     """
-    import os
+    from src.utils.env_validation import validate_required_env_vars
     
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    is_valid, missing_vars = validate_required_env_vars(required_vars)
     
     return {
-        "valid": len(missing_vars) == 0,
+        "valid": is_valid,
         "missing_vars": missing_vars,
         "total_required": len(required_vars),
         "total_found": len(required_vars) - len(missing_vars)

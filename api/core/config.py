@@ -13,6 +13,20 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 
+# Importar constantes do sistema principal
+try:
+    from src.core.constants import DEFAULT_MODELS, TOKEN_LIMITS, PROCESSING_CONFIG, PRODUCTION_CONFIG
+except ImportError:
+    # Fallback se não conseguir importar
+    DEFAULT_MODELS = {
+        'LLM': 'gpt-4.1-mini',
+        'COORDINATOR': 'gpt-4.1',
+        'EMBEDDING': 'voyage-multimodal-3'
+    }
+    TOKEN_LIMITS = {'MAX_TOKENS': 4000}
+    PROCESSING_CONFIG = {'TEMPERATURE': 0.1}
+    PRODUCTION_CONFIG = {'PRODUCTION_MODE': False}
+
 # Carregar variáveis de ambiente do arquivo .env
 load_dotenv()
 
@@ -32,11 +46,11 @@ class AIConfig(BaseSettings):
     
     openai_api_key: str = Field(..., description="Chave da API OpenAI")
     voyage_api_key: str = Field(..., description="Chave da API Voyage")
-    openai_model: str = Field(default="gpt-4.1-mini", description="Modelo OpenAI para subagentes")
-    coordinator_model: str = Field(default="gpt-4.1", description="Modelo OpenAI para coordenador")
-    embedding_model: str = Field(default="voyage-multimodal-3", description="Modelo de embedding")
-    max_tokens: int = Field(default=4000, ge=1, le=100000, description="Máximo de tokens")
-    temperature: float = Field(default=0.1, ge=0.0, le=2.0, description="Temperatura do modelo")
+    openai_model: str = Field(default=DEFAULT_MODELS['LLM'], description="Modelo OpenAI para subagentes")
+    coordinator_model: str = Field(default=DEFAULT_MODELS['COORDINATOR'], description="Modelo OpenAI para coordenador")
+    embedding_model: str = Field(default=DEFAULT_MODELS['EMBEDDING'], description="Modelo de embedding")
+    max_tokens: int = Field(default=TOKEN_LIMITS['MAX_TOKENS'], ge=1, le=100000, description="Máximo de tokens")
+    temperature: float = Field(default=float(os.getenv('TEMPERATURE', str(PROCESSING_CONFIG['TEMPERATURE']))), ge=0.0, le=2.0, description="Temperatura do modelo")
 
 
 class SecurityConfig(BaseSettings):
@@ -73,7 +87,7 @@ class SecurityConfig(BaseSettings):
     @field_validator('bearer_token')
     @classmethod
     def validate_bearer_token_in_production(cls, v):
-        production_mode = os.getenv("PRODUCTION_MODE", "false").lower() == "true"
+        production_mode = os.getenv("PRODUCTION_MODE", str(PRODUCTION_CONFIG['PRODUCTION_MODE'])).lower() == "true"
         if production_mode and not v:
             raise ValueError("Bearer token é obrigatório em modo de produção")
         return v

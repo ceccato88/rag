@@ -9,7 +9,9 @@ import sys
 from typing import Dict, Any
 from datetime import datetime
 
-from constants import LOGGING_CONFIG, DEV_CONFIG
+# Importar configuração centralizada
+from ..core.config import SystemConfig
+from ..core.constants import LOGGING_CONFIG, DEV_CONFIG
 
 
 def setup_production_logging() -> Dict[str, Any]:
@@ -45,7 +47,8 @@ def setup_production_logging() -> Dict[str, Any]:
         
         # Configurar rotação de arquivos se não em debug
         if not DEV_CONFIG.get('DEBUG_MODE', False):
-            log_dir = os.getenv('LOG_DIR', 'logs')
+            config = SystemConfig()
+            log_dir = config.rag.logs_dir
             os.makedirs(log_dir, exist_ok=True)
             
             # Handler com rotação

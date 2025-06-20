@@ -311,10 +311,16 @@ async def run_all_tests():
 
 if __name__ == "__main__":
     # Verificar variáveis de ambiente
-    required_vars = ["OPENAI_API_KEY"]
-    missing_vars = [var for var in required_vars if not os.getenv(var)]
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
     
-    if missing_vars:
+    from src.utils.env_validation import validate_required_env_vars
+    
+    required_vars = ["OPENAI_API_KEY"]
+    is_valid, missing_vars = validate_required_env_vars(required_vars)
+    
+    if not is_valid:
         logger.error(f"❌ Variáveis de ambiente ausentes: {', '.join(missing_vars)}")
         sys.exit(1)
     

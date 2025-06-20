@@ -111,8 +111,8 @@ Responda apenas com: SIMPLE, MODERATE, COMPLEX ou VERY_COMPLEX
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=10,
-                temperature=0.0
+                max_tokens=config.rag.max_tokens_score,
+                temperature=config.rag.temperature_precise
             )
             
             result = response.choices[0].message.content.strip().upper()
@@ -164,8 +164,8 @@ Formato: lista simples, um aspecto por linha.
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=200,
-                temperature=0.1
+                max_tokens=config.rag.max_tokens_decomposition_item,
+                temperature=system_config.rag.temperature
             )
             
             aspects_text = response.choices[0].message.content.strip()
@@ -251,8 +251,8 @@ Retorne apenas a query refinada, sem explicações.
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=100,
-                temperature=0.1
+                max_tokens=config.rag.max_tokens_subquery,
+                temperature=system_config.rag.temperature
             )
             
             refined = response.choices[0].message.content.strip()

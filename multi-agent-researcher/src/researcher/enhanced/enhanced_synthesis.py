@@ -85,8 +85,8 @@ Se NÃO, responda apenas: NO_CONFLICT
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=150,
-                temperature=0.0
+                max_tokens=config.rag.max_tokens_query_transform,
+                temperature=config.rag.temperature
             )
             
             result = response.choices[0].message.content.strip()
@@ -227,8 +227,8 @@ Responda apenas com o número (ex: 0.8)
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=10,
-                temperature=0.0
+                max_tokens=config.rag.max_tokens_score,
+                temperature=config.rag.temperature
             )
             
             score_text = response.choices[0].message.content.strip()
@@ -285,8 +285,8 @@ Responda apenas com o número.
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=10,
-                temperature=0.0
+                max_tokens=config.rag.max_tokens_score,
+                temperature=config.rag.temperature
             )
             
             return float(response.choices[0].message.content.strip())
@@ -516,7 +516,7 @@ RESPOSTA SINTETIZADA:
                 model=config.multiagent.model,  # Usar modelo coordinator
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=config.rag.max_tokens_answer,
-                temperature=0.2
+                temperature=config.rag.temperature_synthesis
             )
             
             return response.choices[0].message.content.strip()

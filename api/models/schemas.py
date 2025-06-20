@@ -9,6 +9,7 @@ Atualizado para Pydantic V2 com field_validator.
 from typing import Dict, List, Any, Optional
 from datetime import datetime
 from pydantic import BaseModel, Field, field_validator, ConfigDict
+from src.core.constants import VALIDATION_CONFIG, TOKEN_LIMITS
 
 
 class ResearchQuery(BaseModel):
@@ -24,13 +25,13 @@ class ResearchQuery(BaseModel):
     
     query: str = Field(
         ...,
-        min_length=3,
-        max_length=1000,
+        min_length=VALIDATION_CONFIG['MIN_QUERY_LENGTH'],
+        max_length=VALIDATION_CONFIG['MAX_QUERY_LENGTH'],
         description="Consulta do usuário para pesquisa"
     )
     objective: Optional[str] = Field(
         default=None,
-        max_length=500,
+        max_length=VALIDATION_CONFIG['MAX_OBJECTIVE_LENGTH'],
         description="Objetivo específico da pesquisa"
     )
     
@@ -45,7 +46,7 @@ class ResearchQuery(BaseModel):
         v = v.strip()
         
         # Verificar caracteres perigosos
-        dangerous_chars = ["<script", "</script", "javascript:", "data:", "vbscript:"]
+        dangerous_chars = VALIDATION_CONFIG['DANGEROUS_PATTERNS']
         v_lower = v.lower()
         if any(char in v_lower for char in dangerous_chars):
             raise ValueError("Query contém conteúdo potencialmente perigoso")
@@ -99,12 +100,12 @@ class IndexRequest(BaseModel):
     url: str = Field(
         ...,
         description="URL do PDF para indexar",
-        min_length=10,
-        max_length=2000
+        min_length=VALIDATION_CONFIG['MIN_URL_LENGTH'],
+        max_length=VALIDATION_CONFIG['MAX_URL_LENGTH']
     )
     doc_source: Optional[str] = Field(
         default=None,
-        max_length=200,
+        max_length=VALIDATION_CONFIG['MAX_DOC_SOURCE_LENGTH'],
         description="Nome/identificador do documento"
     )
     

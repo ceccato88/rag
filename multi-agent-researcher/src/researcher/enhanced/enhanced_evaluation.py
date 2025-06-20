@@ -105,8 +105,8 @@ Responda apenas com: HIGHLY_RELEVANT, RELEVANT, SOMEWHAT_RELEVANT ou NOT_RELEVAN
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=20,
-                temperature=0.0
+                max_tokens=config.rag.max_tokens_evaluation,
+                temperature=config.rag.temperature_precise
             )
             
             relevance_str = response.choices[0].message.content.strip().upper()
@@ -172,8 +172,8 @@ Formato: lista simples, uma descoberta por linha.
             response = self.openai_client.chat.completions.create(
                 model=config.rag.llm_model,
                 messages=messages,
-                max_tokens=300,
-                temperature=0.1
+                max_tokens=config.rag.max_tokens_rating,
+                temperature=system_config.rag.temperature
             )
             
             findings_text = response.choices[0].message.content.strip()

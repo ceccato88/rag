@@ -46,7 +46,14 @@ class UnifiedEnhancedConfig:
         """
         # Tentar ENV específica primeiro
         env_key = f"MAX_CANDIDATES_{complexity.upper()}"
-        env_value = os.getenv(env_key)
+        
+        # Importar função de validação centralizada
+        import sys
+        from pathlib import Path
+        sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent))
+        from src.utils.env_validation import get_env_var_safely
+        
+        env_value = get_env_var_safely(env_key)
         if env_value:
             try:
                 return int(env_value)
@@ -59,7 +66,7 @@ class UnifiedEnhancedConfig:
             return enhanced_value
         
         # Fallback para ENV geral ou padrão
-        general_env = os.getenv('MAX_CANDIDATES')
+        general_env = get_env_var_safely('MAX_CANDIDATES')
         if general_env:
             try:
                 return int(general_env)

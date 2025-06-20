@@ -26,7 +26,7 @@ from pydantic import BaseModel
 class RAGSubagentConfig(BaseModel):
     """Configuration for RAG-based subagent."""
     enable_thinking: bool = True
-    top_k: int = int(os.getenv('MAX_CANDIDATES', 5))
+    top_k: int = 5  # Will be overridden by centralized config
 
 
 class RAGResearchSubagent(Agent[str]):

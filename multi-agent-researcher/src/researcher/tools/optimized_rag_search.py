@@ -36,8 +36,10 @@ class OptimizedRAGSearchTool(Tool):
             description="Search and rerank documents without final answer generation"
         )
         self.collection_name = collection_name
-        # Usar MAX_CANDIDATES do ambiente, com fallback para 5
-        self.top_k = top_k if top_k is not None else int(os.getenv('MAX_CANDIDATES', 5))
+        # Usar MAX_CANDIDATES da configuração centralizada
+        from src.core.config import SystemConfig
+        config = SystemConfig()
+        self.top_k = top_k if top_k is not None else config.rag.max_candidates
         self.rag_system = None
         
     def _initialize_rag(self):

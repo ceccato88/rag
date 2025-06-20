@@ -279,7 +279,7 @@ RESPONDA APENAS COM A PERGUNTA TRANSFORMADA:"""
                 model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=system_config.rag.max_tokens_query_transform,
-                temperature=0.0
+                temperature=system_config.rag.temperature
             )
             
             transformed = response.choices[0].message.content.strip()
@@ -392,12 +392,16 @@ class ProductionConversationalRAG:
             "VOYAGE_API_KEY", "OPENAI_API_KEY",
             "ASTRA_DB_API_ENDPOINT", "ASTRA_DB_APPLICATION_TOKEN"
         ]
-        missing_vars = [var for var in required_vars if not os.getenv(var)]
-        if missing_vars:
+        
+        # Usar função de validação centralizada
+        from src.utils.env_validation import validate_required_env_vars
+        is_valid, missing_vars = validate_required_env_vars(required_vars)
+        
+        if not is_valid:
             raise ValueError(f"Variáveis de ambiente ausentes: {missing_vars}")
 
         # Inicialização dos clientes
-        voyageai.api_key = os.environ["VOYAGE_API_KEY"]
+        voyageai.api_key = system_config.rag.voyage_api_key
         self.voyage_client = voyageai.Client()
         self.openai_client = OpenAI()
         
@@ -418,8 +422,8 @@ class ProductionConversationalRAG:
             logger.info("Conectando ao Astra DB...")
             client = DataAPIClient()
             database = client.get_database(
-                os.environ["ASTRA_DB_API_ENDPOINT"], 
-                token=os.environ["ASTRA_DB_APPLICATION_TOKEN"]
+                system_config.rag.astra_db_api_endpoint, 
+                token=system_config.rag.astra_db_application_token
             )
             self.collection = database.get_collection(system_config.rag.collection_name)
             
@@ -523,7 +527,7 @@ class ProductionConversationalRAG:
         try:
             res = self.voyage_client.multimodal_embed(
                 inputs=[[query]],
-                model="voyage-multimodal-3",
+                model=system_config.rag.embedding_model,
                 input_type="query"
             )
             embedding = res.embeddings[0]
@@ -614,8 +618,8 @@ class ProductionConversationalRAG:
             response = self.openai_client.chat.completions.create(
                 model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
-                max_tokens=5,
-                temperature=0.0
+                max_tokens=system_config.rag.max_tokens_query_transform,
+                temperature=system_config.rag.temperature
             )
             
             verification_result = response.choices[0].message.content or ""
@@ -674,7 +678,7 @@ class ProductionConversationalRAG:
                 model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": content}],
                 max_tokens=system_config.rag.max_tokens_rerank,
-                temperature=0.0
+                temperature=system_config.rag.temperature
             )
             
             result = response.choices[0].message.content or ""
@@ -754,7 +758,7 @@ class ProductionConversationalRAG:
                 model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": content}],
                 max_tokens=system_config.rag.max_tokens_answer,
-                temperature=0.2
+                temperature=system_config.rag.temperature
             )
             
             return response.choices[0].message.content
@@ -944,7 +948,7 @@ DOCUMENTOS:"""
                 model=system_config.rag.llm_model,
                 messages=[{"role": "user", "content": content}],
                 response_format={"type": "json_object"},
-                temperature=0.1
+                temperature=system_config.rag.temperature
             )
             
             extracted_data = json.loads(response.choices[0].message.content)

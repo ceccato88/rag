@@ -101,7 +101,7 @@ class OpenAILeadResearcher(Agent[str]):
                     self.reasoner.add_reasoning_step(
                         "initialization",
                         f"✅ OpenAI client initialized for decomposition and synthesis",
-                        f"Models: decomposition={self.config.model}, coordinator={os.getenv('COORDINATOR_MODEL', 'gpt-4.1')}"
+                        f"Models: decomposition={self.config.model}, coordinator={system_config.rag.coordinator_model}"
                     )
                 except Exception as e:
                     self.reasoner.add_reasoning_step(
@@ -554,7 +554,7 @@ Return the decomposition in the exact JSON format specified in the system prompt
     
     def _advanced_ai_synthesis(self, tasks: List[Dict[str, Any]], successful_results: List[AgentResult]) -> str:
         """Advanced AI-powered synthesis using coordinator model (gpt-4.1)."""
-        coordinator_model = os.getenv('COORDINATOR_MODEL', 'gpt-4.1')
+        coordinator_model = system_config.rag.coordinator_model
         
         # Prepare subagent findings for analysis
         findings_summary = []
@@ -603,12 +603,12 @@ Produza uma síntese que demonstre continuidade e evolução do reasoning inicia
             
             # Create a separate OpenAI client for synthesis (synchronous)
             from openai import OpenAI
-            sync_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+            sync_client = OpenAI(api_key=self.api_key)
             response = sync_client.chat.completions.create(
                 model=coordinator_model,
                 messages=[{"role": "user", "content": synthesis_prompt}],
-                max_tokens=4000,
-                temperature=0.1
+                max_tokens=system_config.rag.max_tokens,
+                temperature=system_config.rag.temperature
             )
             
             synthesized_content = response.choices[0].message.content.strip()

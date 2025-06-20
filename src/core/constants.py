@@ -17,16 +17,29 @@ DEFAULT_MODELS = {
     'MULTIMODAL': 'voyage-multimodal-3'
 }
 
+# Modelos específicos para compatibility com .env
+MODEL_CONFIG = {
+    'OPENAI_MODEL': 'gpt-4.1-mini',
+    'COORDINATOR_MODEL': 'gpt-4.1',
+    'EMBEDDING_MODEL': 'voyage-multimodal-3'
+}
+
 # =============================================================================
 # LIMITES DE TOKENS
 # =============================================================================
 
 TOKEN_LIMITS = {
     'MAX_CANDIDATES': 5,
+    'MAX_TOKENS': 4000,
     'MAX_TOKENS_RERANK': 512,
     'MAX_TOKENS_ANSWER': 2048,
     'MAX_TOKENS_QUERY_TRANSFORM': 150,
     'MAX_TOKENS_DECOMPOSITION': 1000,
+    'MAX_TOKENS_SCORE': 10,  # Para scores numéricos simples
+    'MAX_TOKENS_EVALUATION': 20,  # Para avaliações simples
+    'MAX_TOKENS_RATING': 300,  # Para ratings mais detalhados
+    'MAX_TOKENS_DECOMPOSITION_ITEM': 200,  # Para itens de decomposição
+    'MAX_TOKENS_SUBQUERY': 100,  # Para subqueries
     'VOYAGE_EMBEDDING_DIM': 1024,
     'MAX_TOKENS_PER_INPUT': 32000
 }
@@ -52,6 +65,8 @@ CACHE_CONFIG = {
 
 TIMEOUT_CONFIG = {
     'SUBAGENT_TIMEOUT': 300.0,       
+    'MULTIAGENT_TIMEOUT': 300.0,
+    'REQUEST_TIMEOUT': 60.0,
     'DOWNLOAD_TIMEOUT': 30,          
     'MAX_RETRIES': 3,
     'RETRY_DELAY': 1.0,             
@@ -73,7 +88,13 @@ PROCESSING_CONFIG = {
     'TOKENS_PER_PIXEL': 1 / 560,  
     'TOKEN_CHARS_RATIO': 4,
     'PROCESSING_CONCURRENCY': 5,
-    'CLEANUP_MAX_AGE': 24        
+    'CLEANUP_MAX_AGE': 24,
+    'TOP_K': 5,
+    'CHUNK_SIZE': 1000,
+    'CHUNK_OVERLAP': 200,
+    'TEMPERATURE': 0.1,
+    'TEMPERATURE_SYNTHESIS': 0.2,  # Para síntese criativa
+    'TEMPERATURE_PRECISE': 0.0     # Para operações precisas
 }
 
 # =============================================================================
@@ -104,7 +125,22 @@ MEMORY_CONFIG = {
 SYSTEM_DEFAULTS = {
     'COLLECTION_NAME': 'pdf_documents',
     'IMAGE_DIR': 'pdf_images',
-    'DEFAULT_PDF_URL': 'https://arxiv.org/pdf/2501.13956'
+    'DEFAULT_PDF_URL': 'https://arxiv.org/pdf/2501.13956',
+    'DATA_DIR': 'data',
+    'PDF_IMAGES_DIR': 'pdf_images', 
+    'LOGS_DIR': 'logs'
+}
+
+# =============================================================================
+# LIMITES DE ARQUIVO
+# =============================================================================
+
+FILE_LIMITS = {
+    'MAX_REQUEST_SIZE': 16777216,    # 16MB
+    'MAX_PDF_SIZE': 52428800,        # 50MB
+    'MAX_UPLOAD_SIZE': 104857600,    # 100MB
+    'ALLOWED_EXTENSIONS': ['.pdf', '.txt', '.md'],
+    'MAX_FILENAME_LENGTH': 255
 }
 
 # =============================================================================
@@ -257,6 +293,7 @@ ORIGINAL_FOCUS_AREA_PATTERNS = {
 
 LOGGING_CONFIG = {
     'DEFAULT_LEVEL': 'INFO',                        # INFO para produção (não DEBUG)
+    'LOG_LEVEL': 'INFO',                            # Compatibility com .env
     'MAX_LOG_FILE_SIZE': 50,                        # Aumentado para 50MB
     'LOG_ROTATION_COUNT': 10,                       # Mais arquivos para histórico
     'LOG_FORMAT': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -275,6 +312,14 @@ LOGGING_CONFIG = {
 VALIDATION_CONFIG = {
     'MIN_QUERY_LENGTH': 3,
     'MAX_QUERY_LENGTH': 1000,
+    'MAX_OBJECTIVE_LENGTH': 500,
+    'MIN_URL_LENGTH': 10,
+    'MAX_URL_LENGTH': 2000,
+    'MAX_DOC_SOURCE_LENGTH': 200,
+    'DANGEROUS_PATTERNS': [
+        '<script', '</script', 'javascript:', 'data:', 'vbscript:',
+        'onload=', 'onerror=', 'onclick=', 'eval(', 'expression('
+    ],
     'REQUIRED_ENV_VARS': [
         'OPENAI_API_KEY',
         'VOYAGE_API_KEY', 
@@ -314,7 +359,28 @@ DEV_CONFIG = {
     'CACHE_WARMING': True,                  # Pre-carrega caches importantes
     'HEALTH_CHECK_INTERVAL': 60,            # Health checks a cada minuto
     'MEMORY_OPTIMIZATION': True,            # Otimizações de memória ativas
-    'ASYNC_CLEANUP': True                   # Limpeza assíncrona de recursos
+    'ASYNC_CLEANUP': True,                  # Limpeza assíncrona de recursos
+    'ENABLE_DEBUG_LOGS': False,             # Logs de debug detalhados
+    'ENABLE_TEST_ENDPOINTS': False,         # Endpoints de teste
+    'MOCK_AI_RESPONSES': False,             # Respostas mockadas da IA
+    'PYTEST_TIMEOUT': 300,                  # Timeout para testes pytest
+    'TEST_COLLECTION_NAME': 'test_collection' # Nome da coleção de teste
+}
+
+# =============================================================================
+# CONFIGURAÇÕES DE SEGURANÇA
+# =============================================================================
+
+SECURITY_CONFIG = {
+    'API_BEARER_TOKEN': 'your_secure_bearer_token_here',
+    'ENABLE_RATE_LIMITING': True,
+    'RATE_LIMIT': '100/minute',
+    'ENABLE_CORS': False,
+    'MAX_REQUESTS_PER_MINUTE': 100,
+    'MAX_CONCURRENT_REQUESTS': 20,
+    'ENABLE_REQUEST_VALIDATION': True,
+    'SECURITY_HEADERS_ENABLED': True,
+    'CORS_STRICT_MODE': True
 }
 
 # =============================================================================
@@ -353,6 +419,8 @@ API_UNIFIED_CONFIG = {
     'API_TIMEOUT': 300,
     'API_MEMORY_LIMIT': '3GB',
     'API_CPU_LIMIT': '3.0',
+    'HOST': '0.0.0.0',
+    'RELOAD': True,
     
     # Configurações comuns
     'HEALTH_CHECK_INTERVAL': 30,
