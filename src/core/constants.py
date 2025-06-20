@@ -1,7 +1,7 @@
 """
-Constantes e valores padrão para o sistema RAG Multi-Agente
+Constantes e valores padrão para o sistema RAG Multi-Agente Refatorado v2.0.0
 
-Este arquivo centraliza todas as constantes utilizadas no sistema,
+Este arquivo centraliza todas as constantes utilizadas no sistema refatorado,
 fornecendo valores padrão otimizados para as APIs que usam modelos nativos.
 """
 
@@ -22,7 +22,7 @@ DEFAULT_MODELS = {
 # =============================================================================
 
 TOKEN_LIMITS = {
-    'MAX_CANDIDATES': 5,
+    'MAX_CANDIDATES': 53,
     'MAX_TOKENS_RERANK': 512,
     'MAX_TOKENS_ANSWER': 2048,
     'MAX_TOKENS_QUERY_TRANSFORM': 150,
@@ -103,7 +103,7 @@ MEMORY_CONFIG = {
 
 SYSTEM_DEFAULTS = {
     'COLLECTION_NAME': 'pdf_documents',
-    'IMAGE_DIR': 'data/pdf_images',
+    'IMAGE_DIR': 'pdf_images',
     'DEFAULT_PDF_URL': 'https://arxiv.org/pdf/2501.13956'
 }
 
@@ -142,13 +142,10 @@ FALLBACK_CONFIG = {
 # =============================================================================
 
 SPECIALIST_TYPES = {
-    'CONCEPTUAL': 'ConceptExtractionSubagent',
+    'CONCEPT': 'ConceptExtractionSubagent',
     'COMPARATIVE': 'ComparativeAnalysisSubagent', 
     'TECHNICAL': 'TechnicalDetailSubagent',
-    'EXAMPLES': 'ExampleFinderSubagent',
-    'OVERVIEW': 'OverviewSubagent',
-    'APPLICATIONS': 'ApplicationsSubagent',
-    'GENERAL': 'GeneralResearchSubagent'
+    'EXAMPLES': 'ExampleFinderSubagent'
 }
 
 # =============================================================================
@@ -156,7 +153,7 @@ SPECIALIST_TYPES = {
 # =============================================================================
 
 SPECIALIST_PATTERNS = {
-    'CONCEPTUAL': [
+    'CONCEPT': [
         'what is', 'define', 'definition', 'concept', 'meaning',
         'o que é', 'definição', 'conceito', 'significado'
     ],
@@ -171,18 +168,6 @@ SPECIALIST_PATTERNS = {
     'EXAMPLES': [
         'example', 'case study', 'use case', 'application',
         'exemplo', 'caso de uso', 'aplicação', 'demonstração'
-    ],
-    'OVERVIEW': [
-        'overview', 'introduction', 'general', 'summary',
-        'visão geral', 'introdução', 'geral', 'resumo'
-    ],
-    'APPLICATIONS': [
-        'practical', 'real-world', 'usage', 'applications',
-        'prático', 'mundo real', 'uso', 'aplicações'
-    ],
-    'GENERAL': [
-        'general', 'broad', 'comprehensive', 'overall',
-        'geral', 'amplo', 'abrangente', 'global'
     ]
 }
 
@@ -278,22 +263,23 @@ PRODUCTION_CONFIG = {
 }
 
 # =============================================================================
-# CONFIGURAÇÕES DAS APIs
+# CONFIGURAÇÕES DAS APIs REFATORADAS v2.0.0
 # =============================================================================
 
-API_CONFIG = {
-    # API Única com Rotas Multi-Agente e Simple RAG
-    'API_PORT': 8000,
-    'API_WORKERS': 4,  # Usando 4 workers para produção
-    'API_TIMEOUT': 300,
-    'API_MEMORY_LIMIT': '3GB',
-    'API_CPU_LIMIT': '3.0',
+API_REFACTORED_CONFIG = {
+    # API Multi-Agente
+    'MULTIAGENT_API_PORT': 8001,
+    'MULTIAGENT_API_WORKERS': 4,
+    'MULTIAGENT_API_TIMEOUT': 300,
+    'MULTIAGENT_MEMORY_LIMIT': '3GB',
+    'MULTIAGENT_CPU_LIMIT': '3.0',
     
-    # Rotas específicas
-    'MULTIAGENT_ROUTE': '/api/v1/research',
-    'SIMPLE_RAG_ROUTE': '/api/v1/simple',
-    'INDEX_ROUTE': '/api/v1/index',
-    'HEALTH_ROUTE': '/api/v1/health',
+    # API RAG Simples  
+    'SIMPLE_API_PORT': 8001,
+    'SIMPLE_API_WORKERS': 2,
+    'SIMPLE_API_TIMEOUT': 60,
+    'SIMPLE_MEMORY_LIMIT': '1.5GB',
+    'SIMPLE_CPU_LIMIT': '1.5',
     
     # Configurações comuns
     'HEALTH_CHECK_INTERVAL': 30,
@@ -326,32 +312,30 @@ NATIVE_MODELS_CONFIG = {
 }
 
 # =============================================================================
-# ENDPOINTS DAS APIs
+# ENDPOINTS DAS APIs REFATORADAS
 # =============================================================================
 
 API_ENDPOINTS = {
-    # API Única (Port 8000) com Rotas Diferentes
-    'BASE_URL': 'http://localhost:8000',
-    'ROUTES': {
-        # Multi-Agent Research
-        'RESEARCH': '/api/v1/research',
-        'MULTIAGENT': '/api/v1/research',
-        
-        # Simple RAG
-        'SIMPLE_SEARCH': '/api/v1/simple',
-        'SIMPLE': '/api/v1/simple',
-        
-        # Indexação
-        'INDEX': '/api/v1/index',
-        
-        # Gerenciamento
-        'HEALTH': '/api/v1/health',
-        'STATS': '/api/v1/stats',
-        'DOCUMENTS': '/api/v1/documents/{collection_name}',
-        
-        # Documentação
-        'DOCS': '/docs',
-        'REDOC': '/redoc'
+    # API Multi-Agente (Port 8000)
+    'MULTIAGENT': {
+        'BASE_URL': 'http://localhost:8000',
+        'HEALTH': '/health',
+        'RESEARCH': '/research',
+        'INDEX': '/index', 
+        'DOCUMENTS': '/documents/{collection_name}',
+        'STATS': '/stats',
+        'DOCS': '/docs'
+    },
+    
+    # API RAG Simples (Port 8001)
+    'SIMPLE': {
+        'BASE_URL': 'http://localhost:8001',
+        'HEALTH': '/health',
+        'SEARCH': '/search',
+        'DOCUMENTS': '/documents/{collection_name}',
+        'CONFIG': '/config',
+        'STATS': '/stats',
+        'DOCS': '/docs'
     }
 }
 

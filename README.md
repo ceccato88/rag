@@ -182,7 +182,7 @@ EMBEDDING_MODEL=voyage-multimodal-3 # Embeddings multimodais
 MAX_SUBAGENTS=3                    # Máximo 3 subagentes paralelos
 PARALLEL_EXECUTION=true            # Execução paralela
 SUBAGENT_TIMEOUT=300.0            # Timeout por subagente (5min)
-MAX_CANDIDATES=5                   # Documentos por busca
+MAX_CANDIDATES=3                   # Documentos por busca (padrão)
 ```
 
 ### Segurança
@@ -213,15 +213,24 @@ curl http://localhost:8000/api/v1/stats \
 ## 🧪 Testes
 
 ```bash
-# Testes unitários
-pytest tests/
+# 🧪 Testes Unitários
+python -m pytest tests/unit/ -v
 
-# Teste da API
+# 🔧 Teste da API
 python scripts/test_api.py
+python scripts/test_api.py --quick  # Teste rápido
 
-# Teste completo do pipeline
+# 🚀 Teste Completo do Pipeline  
 python scripts/test_full_pipeline.py
 ```
+
+### Estrutura de Testes
+- **`tests/unit/`** - Testes unitários (config, reasoning, agents, API)
+- **`tests/integration/`** - Testes de integração  
+- **`scripts/test_api.py`** - Teste completo da API com relatório
+- **`scripts/test_full_pipeline.py`** - Pipeline end-to-end com indexação real
+
+Relatórios salvos em `/logs/`.
 
 ## 📚 Documentação
 
@@ -243,7 +252,7 @@ python scripts/test_full_pipeline.py
 
 ## 📄 Licença
 
-Este projeto está sob a licença MIT. Veja `LICENSE` para mais detalhes.
+Este projeto está sob a licença MIT.
 
 ## 🆘 Suporte
 

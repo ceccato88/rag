@@ -41,8 +41,11 @@ ASTRA_DB_APPLICATION_TOKEN=AstraCS:your_token_here
 
 # Modelos (Configuração hierárquica)
 OPENAI_MODEL=gpt-4.1-mini          # Subagentes (eficiência)
-COORDINATOR_MODEL=gpt-4.1          # Coordenador (qualidade)
+COORDINATOR_MODEL=gpt-4.1          # Coordenador (qualidade crítica)
 EMBEDDING_MODEL=voyage-multimodal-3
+
+# Segurança
+API_BEARER_TOKEN=your_secure_token_here
 ```
 
 ### 3. Inicie a API

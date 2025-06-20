@@ -18,7 +18,7 @@ Bem-vindo à documentação completa do Sistema RAG Multi-Agente. Esta documenta
 ### 🛠️ Desenvolvimento
 - [📝 Guia da API](api-guide.md) - Endpoints e exemplos de uso
 - [🔌 Integrações](integrations.md) - OpenAI, Voyage AI, AstraDB
-- [🧪 Testes](testing.md) - Estratégias de teste e validação
+- [🧪 Guia de Testes](testing.md) - Estratégias de teste e validação completa
 - [🔒 Segurança](security.md) - Autenticação, rate limiting, validações
 
 ### 🚀 Produção

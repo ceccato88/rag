@@ -10,7 +10,7 @@ from .constants import (
     DEFAULT_MODELS, TOKEN_LIMITS, CACHE_CONFIG, TIMEOUT_CONFIG,
     PROCESSING_CONFIG, MULTIAGENT_CONFIG, SYSTEM_DEFAULTS,
     LOGGING_CONFIG, PRODUCTION_CONFIG, DEV_CONFIG, FALLBACK_CONFIG,
-    API_CONFIG, NATIVE_MODELS_CONFIG, API_ENDPOINTS, DOCKER_CONFIG,
+    NATIVE_MODELS_CONFIG, API_ENDPOINTS, DOCKER_CONFIG,
     validate_production_config, get_production_config
 )
 
@@ -255,17 +255,17 @@ class ProductionConfig:
 class APIConfig:
     """Configurações específicas para as APIs."""
     
-    # API Única
-    api_port: int = get_env_int('API_PORT', API_CONFIG['API_PORT'])
-    api_workers: int = get_env_int('API_WORKERS', API_CONFIG['API_WORKERS'])
-    api_timeout: int = get_env_int('API_TIMEOUT', API_CONFIG['API_TIMEOUT'])
+    # API Settings
+    api_port: int = get_env_int('API_PORT', 8000)
+    api_workers: int = get_env_int('API_WORKERS', 1)
+    api_timeout: int = get_env_int('API_TIMEOUT', 300)
     
     # Common settings
-    health_check_interval: int = get_env_int('HEALTH_CHECK_INTERVAL', API_CONFIG['HEALTH_CHECK_INTERVAL'])
-    health_check_timeout: int = get_env_int('HEALTH_CHECK_TIMEOUT', API_CONFIG['HEALTH_CHECK_TIMEOUT'])
-    startup_timeout: int = get_env_int('STARTUP_TIMEOUT', API_CONFIG['STARTUP_TIMEOUT'])
-    factory_pattern_enabled: bool = get_env_bool('FACTORY_PATTERN_ENABLED', API_CONFIG['FACTORY_PATTERN_ENABLED'])
-    native_models_only: bool = get_env_bool('NATIVE_MODELS_ONLY', API_CONFIG['NATIVE_MODELS_ONLY'])
+    health_check_interval: int = get_env_int('HEALTH_CHECK_INTERVAL', 30)
+    health_check_timeout: int = get_env_int('HEALTH_CHECK_TIMEOUT', 10)
+    startup_timeout: int = get_env_int('STARTUP_TIMEOUT', 60)
+    factory_pattern_enabled: bool = get_env_bool('FACTORY_PATTERN_ENABLED', True)
+    native_models_only: bool = get_env_bool('NATIVE_MODELS_ONLY', True)
     
     def get_api_base_url(self) -> str:
         """Retorna URL base da API."""

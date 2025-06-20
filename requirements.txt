@@ -1,2 +1,8 @@
+# RAG Multi-Agent System - Main Requirements
+# Use this file for production installations
+
 -r config/requirements/base.txt
 -r config/requirements/api.txt
+
+# Optional development dependencies
+# -r config/requirements/dev.txt
