@@ -28,7 +28,7 @@ from astrapy import DataAPIClient
 from astrapy.collection import Collection
 
 from .config import SystemConfig
-from .constants import NATIVE_MODELS_CONFIG, API_REFACTORED_CONFIG, VALIDATION_CONFIG
+from .constants import NATIVE_MODELS_CONFIG, API_UNIFIED_CONFIG, VALIDATION_CONFIG
 from ..utils.validation import validate_document, validate_embedding
 from ..utils.resource_manager import ResourceManager
 from ..utils.metrics import ProcessingMetrics
@@ -447,8 +447,8 @@ def process_pdf_from_url(url: str, doc_source: str = None) -> Tuple[bool, int, i
             content = processor.extract_page_content(pdf, i, doc_source)
             if content:
                 contents.append(content)
-                # Contar imagens se houver
-                if hasattr(content, 'image_data') and content.image_data:
+                # Contar imagens se houver (verifica se arquivo de imagem existe)
+                if content.image_path and os.path.exists(content.image_path):
                     images_extracted += 1
         
         if not contents:

@@ -120,8 +120,12 @@ class IndexRequest(BaseModel):
         if not v.startswith(("http://", "https://")):
             raise ValueError("URL deve começar com http:// ou https://")
         
-        if not v.lower().endswith(".pdf"):
-            raise ValueError("URL deve apontar para um arquivo PDF")
+        # Permitir URLs do arXiv ou URLs que terminam com .pdf
+        is_arxiv_url = "arxiv.org/pdf/" in v.lower()
+        is_pdf_url = v.lower().endswith(".pdf")
+        
+        if not (is_arxiv_url or is_pdf_url):
+            raise ValueError("URL deve apontar para um arquivo PDF ou ser uma URL do arXiv")
         
         return v
     

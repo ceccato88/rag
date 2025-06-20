@@ -257,7 +257,7 @@ class APIConfig:
     
     # API Settings
     api_port: int = get_env_int('API_PORT', 8000)
-    api_workers: int = get_env_int('API_WORKERS', 1)
+    api_workers: int = get_env_int('API_WORKERS', 4)
     api_timeout: int = get_env_int('API_TIMEOUT', 300)
     
     # Common settings
@@ -273,7 +273,7 @@ class APIConfig:
     
     def get_endpoints(self) -> Dict[str, Any]:
         """Retorna endpoints configurados."""
-        endpoints = API_ENDPOINTS.copy()
+        endpoints = API_ENDPOINTS['UNIFIED'].copy()
         endpoints['BASE_URL'] = self.get_api_base_url()
         return endpoints
 

@@ -219,28 +219,46 @@ async def simple_search(
         if not simple_rag:
             raise ProcessingError("simple_rag", "SimpleRAG não inicializado")
         
-        # Executar busca direta
+        # Executar busca direta usando o método RAG completo para obter sources
         logger.info("🔍 Executando busca direta com SimpleRAG...")
-        result = simple_rag.search(query.query)
+        
+        # Usar o método search_and_answer do RAG interno para obter sources
+        rag_result = simple_rag.rag.search_and_answer(query.query)
         
         # Calcular tempo de processamento
         processing_time = time.time() - start_time
         
         # Verificar se houve resultado
-        success = bool(result and result.strip() and "No results" not in result)
+        if "error" in rag_result:
+            success = False
+            result = f"Erro: {rag_result['error']}"
+            sources = []
+        else:
+            success = bool(rag_result.get("answer") and rag_result["answer"].strip())
+            result = rag_result.get("answer", "")
+            # Extrair sources dos detalhes das páginas selecionadas
+            sources = []
+            for page_detail in rag_result.get("selected_pages_details", []):
+                sources.append({
+                    "document": page_detail.get("document", ""),
+                    "page": page_detail.get("page_number", 0),
+                    "score": page_detail.get("similarity_score", 0.0)
+                })
         
         return {
             "success": success,
             "query": query.query,
             "result": result[:500] + "..." if len(result) > 500 else result,
             "result_length": len(result) if result else 0,
+            "sources": sources,
             "processing_time": processing_time,
             "timestamp": datetime.utcnow().isoformat(),
             "simple_rag_available": simple_rag is not None,
             "diagnostic": {
                 "has_result": bool(result),
                 "result_not_empty": bool(result and result.strip()),
-                "no_error_message": "No results" not in (result or "")
+                "no_error_message": "No results" not in (result or ""),
+                "sources_count": len(sources)
             }
         }
         

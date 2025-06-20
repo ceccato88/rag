@@ -292,8 +292,12 @@ class ErrorHandler:
         if not url.startswith(("http://", "https://")):
             raise ValidationError("URL deve começar com http:// ou https://", "url", url)
         
-        if not url.lower().endswith(".pdf"):
-            raise ValidationError("URL deve apontar para um arquivo PDF", "url", url)
+        # Permitir URLs do arXiv ou URLs que terminam com .pdf
+        is_arxiv_url = "arxiv.org/pdf/" in url.lower()
+        is_pdf_url = url.lower().endswith(".pdf")
+        
+        if not (is_arxiv_url or is_pdf_url):
+            raise ValidationError("URL deve apontar para um arquivo PDF ou ser uma URL do arXiv", "url", url)
     
     @staticmethod
     def validate_token(token: Optional[str]) -> None:

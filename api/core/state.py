@@ -182,7 +182,7 @@ class APIStateManager:
             raise
     
     async def _initialize_lead_researcher(self):
-        """Inicializa o lead researcher"""
+        """Inicializa o lead researcher (enhanced ou padrão)"""
         try:
             import sys
             import os
@@ -201,16 +201,41 @@ class APIStateManager:
             # Mudar para o diretório correto
             os.chdir(workspace_root)
             
-            from researcher.agents.openai_lead_researcher import OpenAILeadResearcher, OpenAILeadConfig
+            # Verificar se deve usar sistema enhanced
+            use_enhanced = getattr(config, 'use_enhanced_system', True)  # Padrão enhanced
             
-            lead_config = OpenAILeadConfig.from_env()
+            if use_enhanced and self._simple_rag:
+                try:
+                    # Tentar usar Enhanced Lead Researcher
+                    from researcher.enhanced.enhanced_integration import create_enhanced_lead_researcher
+                    
+                    logger.info("🔥 Inicializando Enhanced Lead Researcher...")
+                    
+                    # Usar sistema RAG interno se disponível (multimodal)
+                    rag_system = self._simple_rag.rag if hasattr(self._simple_rag, 'rag') else self._simple_rag
+                    
+                    self._lead_researcher = create_enhanced_lead_researcher(rag_system)
+                    self._components_initialized["enhanced_lead_researcher"] = True
+                    
+                    logger.info("✅ Enhanced Lead Researcher inicializado")
+                    
+                except Exception as enhanced_error:
+                    logger.warning(f"⚠️ Falha ao inicializar Enhanced System: {enhanced_error}")
+                    logger.info("🔄 Fallback para Lead Researcher padrão...")
+                    use_enhanced = False
             
-            # Criar Lead Researcher
-            self._lead_researcher = OpenAILeadResearcher(
-                config=lead_config,
-                agent_id=str(uuid.uuid4()),
-                name="API-Lead-Researcher"
-            )
+            if not use_enhanced:
+                # Usar Lead Researcher padrão
+                from researcher.agents.openai_lead_researcher import OpenAILeadResearcher, OpenAILeadConfig
+                
+                lead_config = OpenAILeadConfig.from_env()
+                
+                # Criar Lead Researcher padrão
+                self._lead_researcher = OpenAILeadResearcher(
+                    config=lead_config,
+                    agent_id=str(uuid.uuid4()),
+                    name="API-Lead-Researcher"
+                )
             
             # Injetar o ProductionConversationalRAG (sistema completo) no Lead Researcher para dados multimodais
             if self._simple_rag:

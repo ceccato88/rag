@@ -22,7 +22,7 @@ DEFAULT_MODELS = {
 # =============================================================================
 
 TOKEN_LIMITS = {
-    'MAX_CANDIDATES': 53,
+    'MAX_CANDIDATES': 5,
     'MAX_TOKENS_RERANK': 512,
     'MAX_TOKENS_ANSWER': 2048,
     'MAX_TOKENS_QUERY_TRANSFORM': 150,
@@ -142,10 +142,60 @@ FALLBACK_CONFIG = {
 # =============================================================================
 
 SPECIALIST_TYPES = {
-    'CONCEPT': 'ConceptExtractionSubagent',
+    'GENERAL': 'RAGResearchSubagent',
+    'CONCEPTUAL': 'ConceptExtractionSubagent',
     'COMPARATIVE': 'ComparativeAnalysisSubagent', 
     'TECHNICAL': 'TechnicalDetailSubagent',
     'EXAMPLES': 'ExampleFinderSubagent'
+}
+
+# =============================================================================
+# ÁREAS DE FOCO (FOCUS AREAS) - Sistema Original + Atual
+# =============================================================================
+
+# Focus areas do sistema original (mais específicas)
+ORIGINAL_FOCUS_AREAS = {
+    'CONCEPTUAL_UNDERSTANDING': 'conceptual_understanding',
+    'TECHNICAL_IMPLEMENTATION': 'technical_implementation', 
+    'COMPARATIVE_ANALYSIS': 'comparative_analysis',
+    'EXAMPLES_AND_USE_CASES': 'examples_and_use_cases',
+    'METHODOLOGICAL_APPROACH': 'methodological_approach',
+    'PERFORMANCE_METRICS': 'performance_metrics',
+    'LIMITATIONS_AND_CHALLENGES': 'limitations_and_challenges'
+}
+
+# Focus areas do sistema atual (simplificadas)
+CURRENT_FOCUS_AREAS = {
+    'CONCEPTUAL': 'conceptual',
+    'TECHNICAL': 'technical',
+    'COMPARATIVE': 'comparative',
+    'EXAMPLES': 'examples',
+    'OVERVIEW': 'overview',
+    'APPLICATIONS': 'applications',
+    'GENERAL': 'general'
+}
+
+# Alias para compatibilidade
+FOCUS_AREAS = CURRENT_FOCUS_AREAS
+
+# =============================================================================
+# ESTRATÉGIAS DE PESQUISA (Sistema Original)
+# =============================================================================
+
+SEARCH_STRATEGIES = {
+    'BROAD_TO_SPECIFIC': 'broad_to_specific',
+    'SPECIFIC_TO_BROAD': 'specific_to_broad', 
+    'COMPARATIVE_ANALYSIS': 'comparative_analysis',
+    'ITERATIVE_REFINEMENT': 'iterative_refinement',
+    'COMPREHENSIVE_COVERAGE': 'comprehensive_coverage',
+    'FOCUSED_DEEP_DIVE': 'focused_deep_dive'
+}
+
+QUERY_COMPLEXITY = {
+    'SIMPLE': 'simple',
+    'MODERATE': 'moderate', 
+    'COMPLEX': 'complex',
+    'VERY_COMPLEX': 'very_complex'
 }
 
 # =============================================================================
@@ -153,22 +203,52 @@ SPECIALIST_TYPES = {
 # =============================================================================
 
 SPECIALIST_PATTERNS = {
-    'CONCEPT': [
-        'what is', 'define', 'definition', 'concept', 'meaning',
-        'o que é', 'definição', 'conceito', 'significado'
+    'GENERAL': [
+        'general', 'overview', 'summary', 'introduction',
+        'geral', 'visão geral', 'resumo', 'introdução'
+    ],
+    'CONCEPTUAL': [
+        'what is', 'define', 'definition', 'concept', 'meaning', 'explain',
+        'o que é', 'definição', 'conceito', 'significado', 'explicar'
     ],
     'COMPARATIVE': [
-        'compare', 'versus', 'vs', 'difference', 'similar',
-        'comparar', 'diferença', 'similar', 'parecido'
+        'compare', 'versus', 'vs', 'difference', 'similar', 'comparison', 'alternative',
+        'comparar', 'diferença', 'similar', 'parecido', 'comparação', 'alternativa'
     ],
     'TECHNICAL': [
-        'how to', 'implement', 'technical', 'architecture', 'algorithm',
-        'como implementar', 'técnico', 'arquitetura', 'algoritmo'
+        'how to', 'implement', 'technical', 'architecture', 'algorithm', 'implementation',
+        'como implementar', 'técnico', 'arquitetura', 'algoritmo', 'implementação'
     ],
     'EXAMPLES': [
-        'example', 'case study', 'use case', 'application',
-        'exemplo', 'caso de uso', 'aplicação', 'demonstração'
+        'example', 'case study', 'use case', 'application', 'demonstrate',
+        'exemplo', 'caso de uso', 'aplicação', 'demonstração', 'demonstrar'
     ]
+}
+
+# =============================================================================
+# PADRÕES DE FOCUS AREAS
+# =============================================================================
+
+# Padrões para focus areas atuais (simplificadas)
+FOCUS_AREA_PATTERNS = {
+    'CONCEPTUAL': ['conceptual', 'understanding', 'theory', 'fundamental'],
+    'TECHNICAL': ['technical', 'implementation', 'details', 'how-to'],
+    'COMPARATIVE': ['comparative', 'analysis', 'comparison', 'versus'],
+    'EXAMPLES': ['examples', 'cases', 'use_cases', 'demonstrations'],
+    'OVERVIEW': ['overview', 'summary', 'general', 'broad'],
+    'APPLICATIONS': ['applications', 'practical', 'real-world', 'usage'],
+    'GENERAL': ['general', 'default', 'standard', 'basic']
+}
+
+# Padrões para focus areas originais (mais específicas)
+ORIGINAL_FOCUS_AREA_PATTERNS = {
+    'CONCEPTUAL_UNDERSTANDING': ['concept', 'definition', 'theory', 'principle', 'fundamental'],
+    'TECHNICAL_IMPLEMENTATION': ['implementation', 'technical', 'architecture', 'algorithm', 'code'],
+    'COMPARATIVE_ANALYSIS': ['compare', 'contrast', 'versus', 'alternative', 'difference'],
+    'EXAMPLES_AND_USE_CASES': ['example', 'case study', 'use case', 'application', 'scenario'],
+    'METHODOLOGICAL_APPROACH': ['methodology', 'approach', 'method', 'process', 'framework'],
+    'PERFORMANCE_METRICS': ['performance', 'metrics', 'benchmark', 'evaluation', 'results'],
+    'LIMITATIONS_AND_CHALLENGES': ['limitation', 'challenge', 'problem', 'issue', 'constraint']
 }
 
 # =============================================================================
@@ -263,23 +343,16 @@ PRODUCTION_CONFIG = {
 }
 
 # =============================================================================
-# CONFIGURAÇÕES DAS APIs REFATORADAS v2.0.0
+# CONFIGURAÇÕES DA API ÚNICA v2.0.0
 # =============================================================================
 
-API_REFACTORED_CONFIG = {
-    # API Multi-Agente
-    'MULTIAGENT_API_PORT': 8001,
-    'MULTIAGENT_API_WORKERS': 4,
-    'MULTIAGENT_API_TIMEOUT': 300,
-    'MULTIAGENT_MEMORY_LIMIT': '3GB',
-    'MULTIAGENT_CPU_LIMIT': '3.0',
-    
-    # API RAG Simples  
-    'SIMPLE_API_PORT': 8001,
-    'SIMPLE_API_WORKERS': 2,
-    'SIMPLE_API_TIMEOUT': 60,
-    'SIMPLE_MEMORY_LIMIT': '1.5GB',
-    'SIMPLE_CPU_LIMIT': '1.5',
+API_UNIFIED_CONFIG = {
+    # API Única (Multi-Agente + SimpleRAG)
+    'API_PORT': 8000,
+    'API_WORKERS': 4,
+    'API_TIMEOUT': 300,
+    'API_MEMORY_LIMIT': '3GB',
+    'API_CPU_LIMIT': '3.0',
     
     # Configurações comuns
     'HEALTH_CHECK_INTERVAL': 30,
@@ -316,25 +389,15 @@ NATIVE_MODELS_CONFIG = {
 # =============================================================================
 
 API_ENDPOINTS = {
-    # API Multi-Agente (Port 8000)
-    'MULTIAGENT': {
+    # API Única (Multi-Agente + SimpleRAG) na porta 8000
+    'UNIFIED': {
         'BASE_URL': 'http://localhost:8000',
-        'HEALTH': '/health',
-        'RESEARCH': '/research',
-        'INDEX': '/index', 
-        'DOCUMENTS': '/documents/{collection_name}',
-        'STATS': '/stats',
-        'DOCS': '/docs'
-    },
-    
-    # API RAG Simples (Port 8001)
-    'SIMPLE': {
-        'BASE_URL': 'http://localhost:8001',
-        'HEALTH': '/health',
-        'SEARCH': '/search',
-        'DOCUMENTS': '/documents/{collection_name}',
-        'CONFIG': '/config',
-        'STATS': '/stats',
+        'HEALTH': '/api/v1/health',
+        'RESEARCH': '/api/v1/research',
+        'RESEARCH_SIMPLE': '/api/v1/research/simple',
+        'INDEX': '/api/v1/index',
+        'DOCUMENTS': '/api/v1/documents/{collection_name}',
+        'STATS': '/api/v1/stats',
         'DOCS': '/docs'
     }
 }
@@ -345,8 +408,7 @@ API_ENDPOINTS = {
 
 DOCKER_CONFIG = {
     # Containers
-    'MULTIAGENT_CONTAINER': 'rag-api-multiagent',
-    'SIMPLE_CONTAINER': 'rag-api-simple',
+    'UNIFIED_API_CONTAINER': 'rag-api-unified',
     'REDIS_CONTAINER': 'rag-redis',
     'NGINX_CONTAINER': 'rag-nginx',
     'PROMETHEUS_CONTAINER': 'rag-prometheus',
@@ -407,7 +469,13 @@ def get_all_defaults() -> dict:
         **FALLBACK_CONFIG,
         **LOGGING_CONFIG,
         **PRODUCTION_CONFIG,
-        **DEV_CONFIG
+        **DEV_CONFIG,
+        **API_UNIFIED_CONFIG,
+        'SPECIALIST_TYPES': SPECIALIST_TYPES,
+        'FOCUS_AREAS': FOCUS_AREAS,
+        'ORIGINAL_FOCUS_AREAS': ORIGINAL_FOCUS_AREAS,
+        'SEARCH_STRATEGIES': SEARCH_STRATEGIES,
+        'QUERY_COMPLEXITY': QUERY_COMPLEXITY
     }
 
 def get_production_config() -> dict:
