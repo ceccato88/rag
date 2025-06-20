@@ -29,7 +29,11 @@ MODEL_CONFIG = {
 # =============================================================================
 
 TOKEN_LIMITS = {
-    'MAX_CANDIDATES': 5,
+    # IMPORTANTE: MAX_CANDIDATES não é usado como valor fixo global!
+    # O valor real é sempre calculado dinamicamente no enhanced_config.py baseado na complexidade:
+    # SIMPLE=2, MODERATE=3, COMPLEX=4, VERY_COMPLEX=5
+    # Este valor existe apenas para compatibilidade legacy e NÃO deve ser usado
+    'MAX_CANDIDATES': 3,  # ⚠️ DEPRECATED - não usar! Valor dinâmico no enhanced_config.py
     'MAX_TOKENS': 4000,
     'MAX_TOKENS_RERANK': 512,
     'MAX_TOKENS_ANSWER': 2048,
@@ -94,7 +98,8 @@ PROCESSING_CONFIG = {
     'CHUNK_OVERLAP': 200,
     'TEMPERATURE': 0.1,
     'TEMPERATURE_SYNTHESIS': 0.2,  # Para síntese criativa
-    'TEMPERATURE_PRECISE': 0.0     # Para operações precisas
+    'TEMPERATURE_PRECISE': 0.0,    # Para operações precisas
+    'CONFIDENCE_THRESHOLD': 0.5    # Threshold mínimo para sucesso da API
 }
 
 # =============================================================================

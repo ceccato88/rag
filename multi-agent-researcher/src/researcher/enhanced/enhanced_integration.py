@@ -159,7 +159,7 @@ class EnhancedAPIAdapter:
                 enhanced_result = await self.enhanced_system.enhanced_search(query)
                 
                 return {
-                    "success": enhanced_result.confidence_score > 0.5,
+                    "success": enhanced_result.confidence_score > SystemConfig().rag.confidence_threshold,
                     "query": query,
                     "result": enhanced_result.final_answer,
                     "agent_id": "enhanced-rag",

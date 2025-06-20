@@ -133,23 +133,23 @@ ENHANCED_FALLBACK = {
 
 SPECIALIST_OPTIMIZATIONS = {
     'CONCEPTUAL': {
-        'similarity_threshold': 0.70,  # Mais restritivo para definições
+        'similarity_threshold': 0.70,  # Muito restritivo - só conceitos precisos
         'preferred_sections': ['definitions', 'introductions', 'concepts']
     },
     'COMPARATIVE': {
-        'similarity_threshold': 0.60,  # Permissivo para capturar comparações
+        'similarity_threshold': 0.60,  # Moderado - comparações relevantes
         'preferred_sections': ['comparisons', 'analysis', 'versus']
     },
     'TECHNICAL': {
-        'similarity_threshold': 0.55,  # Muito permissivo para detalhes técnicos
+        'similarity_threshold': 0.65,  # Moderadamente restritivo - detalhes técnicos
         'preferred_sections': ['implementation', 'technical', 'methodology']
     },
     'EXAMPLES': {
-        'similarity_threshold': 0.65,  # Moderado para exemplos específicos
+        'similarity_threshold': 0.55,  # Permissivo - exemplos práticos
         'preferred_sections': ['examples', 'case_studies', 'applications']
     },
     'GENERAL': {
-        'similarity_threshold': 0.65,  # Balanceado para overview
+        'similarity_threshold': 0.50,  # Mais permissivo - informações gerais
         'preferred_sections': ['overview', 'summary', 'general']
     }
 }

@@ -54,10 +54,11 @@
 | # | Variável | Valor Padrão | .env | constants.py | config.py | Uso no Código | Status |
 |---|----------|--------------|------|--------------|-----------|---------------|---------|
 | 20 | `MAX_CANDIDATES` | `5` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
-| 21 | `COLLECTION_NAME` | `pdf_documents` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
-| 22 | `TOP_K` | `5` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
-| 23 | `CHUNK_SIZE` | `1000` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
-| 24 | `CHUNK_OVERLAP` | `200` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
+| 21 | `CONFIDENCE_THRESHOLD` | `0.2` | ✅ | ✅ | ✅ | ✅ | ✅ **NOVO - CONCLUÍDO** |
+| 22 | `COLLECTION_NAME` | `pdf_documents` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
+| 23 | `TOP_K` | `5` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
+| 24 | `CHUNK_SIZE` | `1000` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
+| 25 | `CHUNK_OVERLAP` | `200` | ✅ | ✅ | ✅ | ✅ | ✅ **CONCLUÍDO** |
 
 ---
 

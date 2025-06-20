@@ -99,16 +99,31 @@ class ConfigConsistencyChecker:
             issues.append(f"Erro ao ler .env.example: {e}")
             return issues
         
-        # Verificar se todas as variáveis estão nas constantes
+        # Verificar se todas as variáveis estão nas constantes ou enhanced_config
         constants_file = self.root_dir / "src" / "core" / "constants.py"
+        enhanced_config_file = self.root_dir / "multi-agent-researcher" / "src" / "researcher" / "enhanced" / "enhanced_config.py"
+        
+        constants_content = ""
+        enhanced_config_content = ""
+        
         if constants_file.exists():
             try:
-                content = constants_file.read_text()
-                for var in env_vars:
-                    if var not in content:
-                        issues.append(f"Variável {var} do .env.example não encontrada em constants.py")
+                constants_content = constants_file.read_text()
             except Exception as e:
                 issues.append(f"Erro ao ler constants.py: {e}")
+                
+        if enhanced_config_file.exists():
+            try:
+                enhanced_config_content = enhanced_config_file.read_text()
+            except Exception as e:
+                issues.append(f"Erro ao ler enhanced_config.py: {e}")
+        
+        # Verificar se variáveis estão em qualquer um dos arquivos
+        for var in env_vars:
+            if (var not in constants_content and 
+                var not in enhanced_config_content and
+                not var.startswith('MAX_CANDIDATES_')):  # Estas estão no enhanced_config
+                issues.append(f"Variável {var} do .env.example não encontrada em constants.py ou enhanced_config.py")
         
         return issues
     

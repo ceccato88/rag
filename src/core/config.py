@@ -73,6 +73,7 @@ class RAGConfig:
     temperature: float = get_env_float('TEMPERATURE', PROCESSING_CONFIG['TEMPERATURE'])
     temperature_synthesis: float = get_env_float('TEMPERATURE_SYNTHESIS', PROCESSING_CONFIG['TEMPERATURE_SYNTHESIS'])
     temperature_precise: float = get_env_float('TEMPERATURE_PRECISE', PROCESSING_CONFIG['TEMPERATURE_PRECISE'])
+    confidence_threshold: float = get_env_float('CONFIDENCE_THRESHOLD', PROCESSING_CONFIG['CONFIDENCE_THRESHOLD'])
     
     # Database
     collection_name: str = os.getenv('COLLECTION_NAME', SYSTEM_DEFAULTS['COLLECTION_NAME'])

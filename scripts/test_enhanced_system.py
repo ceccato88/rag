@@ -168,11 +168,11 @@ def test_specialist_threshold_logic():
         
         # Testar thresholds esperados
         expected_thresholds = {
-            'conceptual': 0.70,  # Mais restritivo
-            'comparative': 0.60,  # Permissivo
-            'technical': 0.55,   # Muito permissivo
-            'examples': 0.65,    # Moderado
-            'general': 0.65      # Balanceado
+            'conceptual': 0.70,  # Muito restritivo - só conceitos precisos
+            'comparative': 0.60,  # Moderado - comparações relevantes
+            'technical': 0.65,   # Moderadamente restritivo - detalhes técnicos
+            'examples': 0.55,    # Permissivo - exemplos práticos
+            'general': 0.50      # Mais permissivo - informações gerais
         }
         
         for specialist, expected in expected_thresholds.items():
@@ -180,7 +180,8 @@ def test_specialist_threshold_logic():
             assert actual == expected, f"Expected {expected} for {specialist}, got {actual}"
         
         print("✅ Lógica de thresholds por especialista correta")
-        print(f"   Conceptual: 0.70, Technical: 0.55, Comparative: 0.60")
+        print(f"   Conceptual: 0.70, Technical: 0.65, Comparative: 0.60")
+        print(f"   Examples: 0.55, General: 0.50")
         return True
         
     except Exception as e:
