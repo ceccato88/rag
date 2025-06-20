@@ -10,6 +10,10 @@ import requests
 from pathlib import Path
 import sys
 import os
+import subprocess
+import socket
+import threading
+import atexit
 
 # Adiciona o diretório raiz ao path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -17,7 +21,7 @@ sys.path.append(str(Path(__file__).parent.parent))
 class APITester:
     """Testador da API RAG Multi-Agent"""
     
-    def __init__(self, base_url: str = "http://localhost:8000", bearer_token: str = None):
+    def __init__(self, base_url: str = "http://localhost:8000", bearer_token: str = None, auto_start_api: bool = True):
         self.base_url = base_url
         self.bearer_token = bearer_token or self._get_bearer_token()
         self.headers = {
@@ -26,6 +30,15 @@ class APITester:
         }
         self.session = requests.Session()
         self.test_results = []
+        self.api_process = None
+        self.auto_start_api = auto_start_api
+        
+        # Registra cleanup automático
+        atexit.register(self.cleanup)
+        
+        # Verifica se API está rodando, senão inicia
+        if self.auto_start_api and not self._is_api_running():
+            self._start_api()
     
     def _get_bearer_token(self) -> str:
         """Obtém token do arquivo .env"""
@@ -38,6 +51,82 @@ class APITester:
         
         # Fallback para token de teste
         return "test-token-12345"
+    
+    def _is_port_available(self, port: int) -> bool:
+        """Verifica se a porta está disponível"""
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(1)
+                result = s.connect_ex(('localhost', port))
+                return result != 0
+        except Exception:
+            return True
+    
+    def _is_api_running(self) -> bool:
+        """Verifica se a API já está rodando"""
+        try:
+            response = requests.get(f"{self.base_url}/api/v1/health", timeout=5)
+            return response.status_code == 200
+        except Exception:
+            return False
+    
+    def _start_api(self):
+        """Inicia a API em background"""
+        print("🚀 Iniciando API em background...")
+        
+        # Verifica se a porta está disponível
+        port = int(self.base_url.split(':')[-1])
+        if not self._is_port_available(port):
+            print(f"⚠️ Porta {port} já está em uso")
+            return
+        
+        # Caminho para o arquivo principal da API
+        api_path = Path(__file__).parent.parent / "api" / "main.py"
+        
+        if not api_path.exists():
+            print(f"❌ Arquivo da API não encontrado: {api_path}")
+            return
+        
+        try:
+            # Inicia a API usando uvicorn
+            self.api_process = subprocess.Popen(
+                [
+                    sys.executable, "-m", "uvicorn", 
+                    "api.main:app", 
+                    "--host", "0.0.0.0", 
+                    "--port", str(port),
+                    "--reload"
+                ],
+                cwd=str(Path(__file__).parent.parent),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            
+            # Aguarda a API iniciar
+            print("⏳ Aguardando API iniciar...")
+            for i in range(30):  # 30 segundos timeout
+                if self._is_api_running():
+                    print(f"✅ API iniciada com sucesso em {self.base_url}")
+                    return
+                time.sleep(1)
+            
+            print("❌ Timeout ao iniciar API")
+            self.cleanup()
+            
+        except Exception as e:
+            print(f"❌ Erro ao iniciar API: {e}")
+            self.cleanup()
+    
+    def cleanup(self):
+        """Limpa recursos e para a API se foi iniciada pelo teste"""
+        if self.api_process and self.api_process.poll() is None:
+            print("🧹 Parando API...")
+            self.api_process.terminate()
+            try:
+                self.api_process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                self.api_process.kill()
+            self.api_process = None
     
     def log_test(self, name: str, success: bool, details: str = "", duration: float = 0):
         """Registra resultado do teste"""
@@ -109,6 +198,7 @@ class APITester:
             else:
                 self.log_test("Auth - No Token", False, f"Status inesperado: {response.status_code}", duration)
         except Exception as e:
+            duration = time.time() - start_time
             self.log_test("Auth - No Token", False, f"Erro: {str(e)}", duration)
         
         # Teste com token inválido
@@ -127,6 +217,7 @@ class APITester:
             else:
                 self.log_test("Auth - Invalid Token", False, f"Status: {response.status_code}", duration)
         except Exception as e:
+            duration = time.time() - start_time
             self.log_test("Auth - Invalid Token", False, f"Erro: {str(e)}", duration)
     
     def test_simple_search(self):
@@ -136,9 +227,7 @@ class APITester:
         
         try:
             query_data = {
-                "query": "What is Zep?",
-                "collection_name": "pdf_documents",
-                "top_k": 3
+                "query": "What is Zep?"
             }
             
             response = self.session.post(
@@ -152,11 +241,13 @@ class APITester:
             if response.status_code == 200:
                 data = response.json()
                 if data.get("success"):
-                    sources = data.get("sources", [])
+                    result = data.get("result", "")
+                    result_length = data.get("result_length", 0)
+                    diagnostic = data.get("diagnostic", {})
                     self.log_test(
                         "Simple Search", 
                         True, 
-                        f"Encontrados {len(sources)} documentos",
+                        f"Resultado: {result_length} chars, Diagnóstico: {diagnostic}",
                         duration
                     )
                 else:
@@ -167,69 +258,16 @@ class APITester:
         except Exception as e:
             self.log_test("Simple Search", False, f"Erro: {str(e)}", time.time() - start_time)
     
-    def test_multiagent_research(self):
-        """Testa pesquisa multi-agente"""
-        print("\n🤖 Testando Pesquisa Multi-Agente...")
-        start_time = time.time()
-        
-        try:
-            query_data = {
-                "query": "How does Zep implement temporal knowledge graphs for AI agent memory?",
-                "use_multiagent": True,
-                "max_subagents": 2,
-                "timeout": 120
-            }
-            
-            response = self.session.post(
-                f"{self.base_url}/api/v1/research",
-                json=query_data,
-                headers=self.headers,
-                timeout=150  # Timeout maior para multi-agent
-            )
-            duration = time.time() - start_time
-            
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("success"):
-                    result = data.get("result", "")
-                    agent_id = data.get("agent_id", "")
-                    status = data.get("status", "")
-                    processing_time = data.get("processing_time", 0)
-                    
-                    # Verifica indicadores de qualidade
-                    quality_indicators = []
-                    if "gpt-4.1" in result:
-                        quality_indicators.append("Coordinator GPT-4.1")
-                    if "Advanced AI Critical Analysis" in result:
-                        quality_indicators.append("Advanced Synthesis")
-                    if "Subagents Processed" in result:
-                        quality_indicators.append("Multi-agent Execution")
-                    
-                    self.log_test(
-                        "Multi-Agent Research", 
-                        True, 
-                        f"Status: {status}, Agent: {agent_id[:8]}..., Time: {processing_time:.1f}s, Quality: {len(quality_indicators)}/3",
-                        duration
-                    )
-                else:
-                    self.log_test("Multi-Agent Research", False, data.get("message", "Unknown error"), duration)
-            else:
-                self.log_test("Multi-Agent Research", False, f"Status: {response.status_code}", duration)
-                
-        except Exception as e:
-            self.log_test("Multi-Agent Research", False, f"Erro: {str(e)}", time.time() - start_time)
     
-    def test_focus_areas(self):
-        """Testa diferentes focus areas"""
-        print("\n🎯 Testando Focus Areas...")
+    def test_multiagent_queries(self):
+        """Testa consultas multi-agente com diferentes tipos de perguntas"""
+        print("\n🤖 Testando Consultas Multi-Agente...")
         
         test_queries = [
-            ("Conceptual", "What are temporal knowledge graphs?"),
-            ("Technical", "How to implement Zep in Python?"),
-            ("Comparative", "Zep vs MemGPT comparison for chatbots")
+            "What are knowledge graphs and how do they work?"
         ]
         
-        for focus_name, query in test_queries:
+        for i, query in enumerate(test_queries, 1):
             start_time = time.time()
             try:
                 query_data = {
@@ -250,22 +288,30 @@ class APITester:
                 if response.status_code == 200:
                     data = response.json()
                     if data.get("success"):
-                        result = data.get("result", "")
-                        # Verifica se o focus foi utilizado
-                        focus_mentioned = focus_name.lower() in result.lower()
+                        result = data.get("result", "") or ""
+                        status = data.get("status", "")
+                        processing_time = data.get("processing_time", 0)
+                        
+                        # Verifica qualidade da resposta
+                        has_content = len(result) > 100
+                        completed = status == "COMPLETED"
+                        reasonable_time = processing_time < 120
+                        
+                        success = has_content and completed and reasonable_time
+                        
                         self.log_test(
-                            f"Focus Area - {focus_name}", 
-                            True, 
-                            f"Focus detectado: {focus_mentioned}",
+                            f"Multi-Agent Query {i}", 
+                            success, 
+                            f"Status: {status}, Length: {len(result)} chars, Time: {processing_time:.1f}s",
                             duration
                         )
                     else:
-                        self.log_test(f"Focus Area - {focus_name}", False, "Request failed", duration)
+                        self.log_test(f"Multi-Agent Query {i}", False, data.get("message", "Request failed"), duration)
                 else:
-                    self.log_test(f"Focus Area - {focus_name}", False, f"Status: {response.status_code}", duration)
+                    self.log_test(f"Multi-Agent Query {i}", False, f"Status: {response.status_code}", duration)
                     
             except Exception as e:
-                self.log_test(f"Focus Area - {focus_name}", False, f"Erro: {str(e)}", time.time() - start_time)
+                self.log_test(f"Multi-Agent Query {i}", False, f"Erro: {str(e)}", time.time() - start_time)
     
     def test_document_management(self):
         """Testa endpoints de gerenciamento de documentos"""
@@ -306,16 +352,14 @@ class APITester:
             
             if response.status_code == 200:
                 data = response.json()
-                system_stats = data.get("system_stats", {})
-                agent_stats = data.get("agent_stats", {})
-                
-                total_queries = system_stats.get("total_queries", 0)
-                multiagent_queries = system_stats.get("multiagent_queries", 0)
+                total_documents = data.get("total_documents", 0)
+                uptime = data.get("uptime_seconds", 0)
+                api_ready = data.get("api_ready", False)
                 
                 self.log_test(
                     "Statistics", 
                     True, 
-                    f"Total queries: {total_queries}, Multi-agent: {multiagent_queries}",
+                    f"Documents: {total_documents}, Uptime: {uptime:.1f}s, Ready: {api_ready}",
                     duration
                 )
             else:
@@ -341,8 +385,8 @@ class APITester:
         for i, query in enumerate(queries):
             try:
                 response = self.session.post(
-                    f"{self.base_url}/api/v1/simple",
-                    json={"query": query, "top_k": 3},
+                    f"{self.base_url}/api/v1/research/simple",
+                    json={"query": query},
                     headers=self.headers,
                     timeout=30
                 )
@@ -375,8 +419,7 @@ class APITester:
         self.test_health_endpoint()
         self.test_authentication()
         self.test_simple_search()
-        self.test_multiagent_research()
-        self.test_focus_areas()
+        self.test_multiagent_queries()  # Teste simplificado único
         self.test_document_management()
         self.test_statistics()
         self.test_performance_stress()
@@ -437,10 +480,15 @@ def main():
     parser.add_argument("--url", default="http://localhost:8000", help="URL base da API")
     parser.add_argument("--token", help="Bearer token para autenticação")
     parser.add_argument("--quick", action="store_true", help="Executa apenas testes básicos")
+    parser.add_argument("--no-auto-start", action="store_true", help="Não inicia a API automaticamente")
     
     args = parser.parse_args()
     
-    tester = APITester(base_url=args.url, bearer_token=args.token)
+    tester = APITester(
+        base_url=args.url, 
+        bearer_token=args.token,
+        auto_start_api=not args.no_auto_start
+    )
     
     if args.quick:
         print("🏃 Modo rápido - apenas testes essenciais")

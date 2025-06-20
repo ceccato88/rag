@@ -114,6 +114,7 @@ async def get_system_stats(
     - Status de componentes
     - Informações de disponibilidade
     - Configurações ativas
+    - Estatísticas de documentos indexados
     """
     try:
         # Verificar disponibilidade de componentes opcionais
@@ -130,6 +131,51 @@ async def get_system_stats(
         except ImportError:
             indexer_available = False
         
+        # Obter estatísticas de documentos
+        total_documents = 0
+        unique_doc_sources = 0
+        
+        try:
+            # Importar configuração e conectar ao AstraDB
+            from src.core.config import SystemConfig
+            from astrapy import DataAPIClient
+            from dotenv import load_dotenv
+            
+            load_dotenv()
+            config = SystemConfig()
+            
+            # Verificar se configuração está válida
+            validation = config.validate_all()
+            if validation.get("rag_valid", False):
+                # Conectar ao AstraDB
+                client = DataAPIClient(token=config.rag.astra_db_application_token)
+                database = client.get_database(config.rag.astra_db_api_endpoint)
+                collection = database.get_collection(config.rag.collection_name)
+                
+                # Contar documentos
+                total_documents = collection.count_documents({}, upper_bound=10000)
+                
+                # Contar fontes únicas
+                pipeline = [
+                    {"$group": {"_id": "$doc_source"}},
+                    {"$count": "unique_sources"}
+                ]
+                
+                try:
+                    # AstraDB pode não suportar aggregation, usar fallback
+                    distinct_sources = collection.distinct("doc_source")
+                    unique_doc_sources = len(distinct_sources) if distinct_sources else 0
+                except Exception:
+                    # Fallback: estimar baseado em documentos únicos
+                    if total_documents > 0:
+                        sample_docs = list(collection.find({}, limit=100, projection={"doc_source": 1}))
+                        sources_set = set(doc.get("doc_source") for doc in sample_docs if doc.get("doc_source"))
+                        unique_doc_sources = len(sources_set)
+                    
+        except Exception as e:
+            logger.warning(f"⚠️ Não foi possível obter estatísticas de documentos: {e}")
+            # Manter valores padrão (0, 0)
+        
         stats = StatsResponse(
             uptime_seconds=state_manager.get_uptime(),
             total_requests=state_manager.metrics.total_requests,
@@ -138,6 +184,8 @@ async def get_system_stats(
             indexer_available=indexer_available,
             rate_limiting_available=rate_limiting_available,
             production_mode=state_manager._components_initialized.get('production_mode', False),
+            total_documents=total_documents,
+            unique_doc_sources=unique_doc_sources,
             timestamp=datetime.utcnow().isoformat()
         )
         

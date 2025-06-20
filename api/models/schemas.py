@@ -244,6 +244,8 @@ class StatsResponse(BaseModel):
                 "indexer_available": True,
                 "rate_limiting_available": True,
                 "production_mode": False,
+                "total_documents": 125,
+                "unique_doc_sources": 5,
                 "timestamp": "2025-06-19T10:30:00Z"
             }
         }
@@ -256,6 +258,8 @@ class StatsResponse(BaseModel):
     indexer_available: bool = Field(description="Se o indexer está disponível")
     rate_limiting_available: bool = Field(description="Se rate limiting está disponível")
     production_mode: bool = Field(description="Se está em modo de produção")
+    total_documents: int = Field(default=0, description="Total de documentos indexados")
+    unique_doc_sources: int = Field(default=0, description="Número de fontes únicas de documentos")
     timestamp: str = Field(description="Timestamp das estatísticas")
 
 
