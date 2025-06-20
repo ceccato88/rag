@@ -247,9 +247,7 @@ Este projeto está sob a licença MIT. Veja `LICENSE` para mais detalhes.
 
 ## 🆘 Suporte
 
-- 📧 Email: support@yourcompany.com
-- 💬 Discord: [Link do servidor]
-- 🐛 Issues: [GitHub Issues](https://github.com/yourorg/rag/issues)
+- 🐛 Issues: [GitHub Issues](https://github.com/ceccato88/rag/issues)
 
 ---
 
