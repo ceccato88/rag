@@ -213,22 +213,17 @@ curl http://localhost:8000/api/v1/stats \
 ## 🧪 Testes
 
 ```bash
-# 🧪 Testes Unitários
-python -m pytest tests/unit/ -v
-
 # 🔧 Teste da API
-python scripts/test_api.py
-python scripts/test_api.py --quick  # Teste rápido
+python tests/test_api.py
+python tests/test_api.py --quick  # Teste rápido
 
 # 🚀 Teste Completo do Pipeline  
-python scripts/test_full_pipeline.py
+python tests/test_full_pipeline.py
 ```
 
 ### Estrutura de Testes
-- **`tests/unit/`** - Testes unitários (config, reasoning, agents, API)
-- **`tests/integration/`** - Testes de integração  
-- **`scripts/test_api.py`** - Teste completo da API com relatório
-- **`scripts/test_full_pipeline.py`** - Pipeline end-to-end com indexação real
+- **`tests/test_api.py`** - Teste completo da API com relatório
+- **`tests/test_full_pipeline.py`** - Pipeline end-to-end com indexação real
 
 Relatórios salvos em `/logs/`.
 

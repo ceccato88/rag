@@ -131,12 +131,12 @@ class FullPipelineTester:
     
     def test_document_indexing(self) -> bool:
         """Testa indexação de documentos"""
-        print("\\n📚 Testando Indexação de Documentos...")
+        print("\n📚 Testando Indexação de Documentos...")
         
         all_success = True
         
         for doc in self.test_documents:
-            print(f"\\n📄 Indexando: {doc['name']}")
+            print(f"\n📄 Indexando: {doc['name']}")
             start_time = time.time()
             
             try:
@@ -189,7 +189,7 @@ class FullPipelineTester:
     
     def test_document_verification(self) -> bool:
         """Verifica se documentos foram indexados corretamente"""
-        print("\\n🔍 Verificando Indexação...")
+        print("\n🔍 Verificando Indexação...")
         start_time = time.time()
         
         try:
@@ -224,7 +224,7 @@ class FullPipelineTester:
     
     def test_simple_rag_search(self) -> bool:
         """Testa busca RAG simples"""
-        print("\\n🔍 Testando Busca RAG Simples...")
+        print("\n🔍 Testando Busca RAG Simples...")
         
         all_success = True
         
@@ -287,7 +287,7 @@ class FullPipelineTester:
     
     def test_multiagent_research(self) -> bool:
         """Testa sistema multi-agente completo"""
-        print("\\n🤖 Testando Sistema Multi-Agente...")
+        print("\n🤖 Testando Sistema Multi-Agente...")
         
         all_success = True
         
@@ -311,7 +311,7 @@ class FullPipelineTester:
         ]
         
         for i, test_case in enumerate(multiagent_queries):
-            print(f"\\n🧠 Multi-Agent Test {i+1}: {test_case['query'][:50]}...")
+            print(f"\n🧠 Multi-Agent Test {i+1}: {test_case['query'][:50]}...")
             start_time = time.time()
             
             try:
@@ -387,7 +387,7 @@ class FullPipelineTester:
     
     def test_reasoning_continuity(self):
         """Testa continuidade do reasoning ReAct"""
-        print("\\n🧠 Testando Continuidade do Reasoning...")
+        print("\n🧠 Testando Continuidade do Reasoning...")
         start_time = time.time()
         
         try:
@@ -439,7 +439,7 @@ class FullPipelineTester:
     
     def test_performance_metrics(self):
         """Testa métricas de performance"""
-        print("\\n⚡ Testando Performance...")
+        print("\n⚡ Testando Performance...")
         
         # Testa múltiplas queries simultâneas (stress test)
         queries = [
@@ -483,7 +483,7 @@ class FullPipelineTester:
     
     def generate_comprehensive_report(self):
         """Gera relatório abrangente"""
-        print("\\n📊 Gerando Relatório Abrangente...")
+        print("\n📊 Gerando Relatório Abrangente...")
         
         # Calcula métricas gerais
         total_tests = len(self.test_results)
@@ -550,7 +550,7 @@ class FullPipelineTester:
         with open(report_path, "w") as f:
             json.dump(report, f, indent=2)
         
-        print(f"\\n📝 Relatório completo salvo em: {report_path}")
+        print(f"\n📝 Relatório completo salvo em: {report_path}")
         return report
     
     def run_full_pipeline_test(self):
@@ -587,7 +587,7 @@ class FullPipelineTester:
         self.test_performance_metrics()
         
         # 9. Limpar ambiente de teste
-        print("\\n🧹 Limpando ambiente de teste...")
+        print("\n🧹 Limpando ambiente de teste...")
         self.clean_test_environment()
         
         total_duration = time.time() - total_start_time
@@ -596,20 +596,20 @@ class FullPipelineTester:
         report = self.generate_comprehensive_report()
         
         # Resultado final
-        print(f"\\n🏁 TESTE COMPLETO FINALIZADO")
+        print(f"\n🏁 TESTE COMPLETO FINALIZADO")
         print(f"{'='*60}")
         print(f"Tempo total: {total_duration:.2f}s")
         print(f"Taxa de sucesso: {report['pipeline_test_summary']['success_rate']:.1f}%")
         
         # Status por categoria
-        print("\\n📋 Resultado por Categoria:")
+        print("\n📋 Resultado por Categoria:")
         for category, stats in report["category_breakdown"].items():
             status = "✅" if stats["success_rate"] >= 80 else "⚠️" if stats["success_rate"] >= 60 else "❌"
             print(f"{status} {category}: {stats['success_rate']:.1f}% ({stats['passed']}/{stats['total']})")
         
         # Recomendações
         if report["recommendations"]:
-            print("\\n💡 Recomendações:")
+            print("\n💡 Recomendações:")
             for rec in report["recommendations"]:
                 print(f"  • {rec}")
         
@@ -618,10 +618,10 @@ class FullPipelineTester:
         pipeline_working = all(critical_components)
         
         if pipeline_working:
-            print("\\n🎉 PIPELINE ESTÁ FUNCIONANDO CORRETAMENTE!")
+            print("\n🎉 PIPELINE ESTÁ FUNCIONANDO CORRETAMENTE!")
             return True
         else:
-            print("\\n❌ PIPELINE TEM PROBLEMAS CRÍTICOS")
+            print("\n❌ PIPELINE TEM PROBLEMAS CRÍTICOS")
             return False
 
 

@@ -6,29 +6,14 @@ O sistema RAG Multi-Agent possui uma estrutura abrangente de testes para garanti
 
 ## 📁 Estrutura de Testes
 
-### `/tests/unit/` - Testes Unitários
-Testes isolados de componentes individuais:
+### `/tests/` - Diretório Principal de Testes
 
-- **`test_config.py`** - Configurações e constantes
-- **`test_reasoning.py`** - ReAct reasoning pattern
-- **`test_agents.py`** - Sistema multi-agente
-- **`test_api_endpoints.py`** - Endpoints da API
-
-### `/tests/integration/` - Testes de Integração  
-Testes de interação entre componentes:
-
-- **`test_multiagent_system.py`** - Sistema multi-agente completo
-- **`test_api_complete.py`** - API end-to-end
-
-### `/tests/e2e/` - Testes End-to-End
-Testes com dados reais e API rodando:
-
-- **`test_live_api.py`** - API em execução
-- **`test_zep_memory_search.py`** - Busca com documentos reais
+- **`test_api.py`** - Teste completo da API com relatório detalhado
+- **`test_full_pipeline.py`** - Teste completo do pipeline com dados reais
 
 ## 🔧 Scripts de Teste
 
-### `scripts/test_api.py`
+### `tests/test_api.py`
 Teste completo da API com relatório detalhado.
 
 **Funcionalidades:**
@@ -40,16 +25,16 @@ Teste completo da API com relatório detalhado.
 
 ```bash
 # Teste completo
-python scripts/test_api.py
+python tests/test_api.py
 
 # Teste rápido (apenas essenciais)
-python scripts/test_api.py --quick
+python tests/test_api.py --quick
 
 # Com configurações customizadas
-python scripts/test_api.py --url http://localhost:8000 --token your-token
+python tests/test_api.py --url http://localhost:8000 --token your-token
 ```
 
-### `scripts/test_full_pipeline.py`
+### `tests/test_full_pipeline.py`
 Teste completo do pipeline com dados reais.
 
 **Funcionalidades:**
@@ -63,39 +48,30 @@ Teste completo do pipeline com dados reais.
 
 ```bash
 # Pipeline completo
-python scripts/test_full_pipeline.py
+python tests/test_full_pipeline.py
 
 # Com configurações customizadas  
-python scripts/test_full_pipeline.py --url http://localhost:8000 --token your-token
+python tests/test_full_pipeline.py --url http://localhost:8000 --token your-token
 ```
 
 ## 🚀 Executando Testes
 
-### Testes Unitários
+### Testes de API
 ```bash
-# Todos os testes unitários
-python -m pytest tests/unit/ -v
+# Teste completo da API
+python tests/test_api.py
 
-# Teste específico
-python -m pytest tests/unit/test_config.py -v
-
-# Com coverage
-python -m pytest tests/unit/ --cov=src --cov-report=html
+# Teste rápido (apenas essenciais)
+python tests/test_api.py --quick
 ```
 
-### Testes de Integração
+### Testes de Pipeline Completo
 ```bash
-# Testes de integração (requer API rodando)
-python -m pytest tests/integration/ -v
+# Pipeline completo com indexação e busca
+python tests/test_full_pipeline.py
 
-# Teste específico
-python -m pytest tests/integration/test_multiagent_system.py -v
-```
-
-### Testes End-to-End
-```bash
-# E2E (requer API rodando com dados indexados)
-python -m pytest tests/e2e/ -v
+# Com collection customizada
+python tests/test_full_pipeline.py --collection my_test_collection
 ```
 
 ## 📊 Relatórios de Teste
@@ -162,7 +138,7 @@ python -m pytest tests/unit/test_agents.py::TestOpenAILeadResearcher -v
 
 ### Focus Areas
 ```bash
-python scripts/test_api.py
+python tests/test_api.py
 # Observar logs para verificar seleção automática de focus areas
 ```
 
@@ -208,7 +184,7 @@ python -m pytest tests/unit/ -v -m "not slow"
 ### Stress Testing
 ```bash
 # Múltiplas requisições simultâneas
-python scripts/test_api.py  # Inclui stress test
+python tests/test_api.py  # Inclui stress test
 
 # Load testing manual
 for i in {1..10}; do
@@ -238,7 +214,7 @@ ENABLE_TEST_ENDPOINTS=true
   run: python -m pytest tests/unit/ -v --cov=src
 
 - name: Run API Tests  
-  run: python scripts/test_api.py --quick
+  run: python tests/test_api.py --quick
 
 - name: Upload Coverage
   uses: codecov/codecov-action@v3

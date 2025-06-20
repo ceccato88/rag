@@ -55,7 +55,7 @@ class APITester:
     
     def test_health_endpoint(self):
         """Testa endpoint de health"""
-        print("\\n🏥 Testando Health Endpoint...")
+        print("\n🏥 Testando Health Endpoint...")
         start_time = time.time()
         
         try:
@@ -92,7 +92,7 @@ class APITester:
     
     def test_authentication(self):
         """Testa autenticação da API"""
-        print("\\n🔐 Testando Autenticação...")
+        print("\n🔐 Testando Autenticação...")
         
         # Teste sem token
         start_time = time.time()
@@ -131,7 +131,7 @@ class APITester:
     
     def test_simple_search(self):
         """Testa busca simples"""
-        print("\\n🔍 Testando Busca Simples...")
+        print("\n🔍 Testando Busca Simples...")
         start_time = time.time()
         
         try:
@@ -142,7 +142,7 @@ class APITester:
             }
             
             response = self.session.post(
-                f"{self.base_url}/api/v1/simple",
+                f"{self.base_url}/api/v1/research/simple",
                 json=query_data,
                 headers=self.headers,
                 timeout=30
@@ -169,7 +169,7 @@ class APITester:
     
     def test_multiagent_research(self):
         """Testa pesquisa multi-agente"""
-        print("\\n🤖 Testando Pesquisa Multi-Agente...")
+        print("\n🤖 Testando Pesquisa Multi-Agente...")
         start_time = time.time()
         
         try:
@@ -221,7 +221,7 @@ class APITester:
     
     def test_focus_areas(self):
         """Testa diferentes focus areas"""
-        print("\\n🎯 Testando Focus Areas...")
+        print("\n🎯 Testando Focus Areas...")
         
         test_queries = [
             ("Conceptual", "What are temporal knowledge graphs?"),
@@ -269,13 +269,13 @@ class APITester:
     
     def test_document_management(self):
         """Testa endpoints de gerenciamento de documentos"""
-        print("\\n📚 Testando Gerenciamento de Documentos...")
+        print("\n📚 Testando Gerenciamento de Documentos...")
         
         # Listar documentos
         start_time = time.time()
         try:
             response = self.session.get(
-                f"{self.base_url}/api/v1/documents/pdf_documents",
+                f"{self.base_url}/api/v1/stats",
                 headers=self.headers,
                 timeout=10
             )
@@ -293,7 +293,7 @@ class APITester:
     
     def test_statistics(self):
         """Testa endpoint de estatísticas"""
-        print("\\n📊 Testando Estatísticas...")
+        print("\n📊 Testando Estatísticas...")
         start_time = time.time()
         
         try:
@@ -326,7 +326,7 @@ class APITester:
     
     def test_performance_stress(self):
         """Teste de stress/performance"""
-        print("\\n⚡ Testando Performance (Stress Test)...")
+        print("\n⚡ Testando Performance (Stress Test)...")
         
         # Múltiplas requisições simultâneas
         queries = [
@@ -388,7 +388,7 @@ class APITester:
         total_tests = len(self.test_results)
         success_rate = (passed_tests / total_tests) * 100 if total_tests > 0 else 0
         
-        print(f"\\n📊 RELATÓRIO FINAL")
+        print(f"\n📊 RELATÓRIO FINAL")
         print(f"{'='*50}")
         print(f"Total de testes: {total_tests}")
         print(f"Testes aprovados: {passed_tests}")
@@ -401,13 +401,13 @@ class APITester:
         
         # Status final
         if success_rate >= 80:
-            print("\\n🎉 API está funcionando bem!")
+            print("\n🎉 API está funcionando bem!")
             return True
         elif success_rate >= 60:
-            print("\\n⚠️ API tem alguns problemas, mas está funcional")
+            print("\n⚠️ API tem alguns problemas, mas está funcional")
             return True
         else:
-            print("\\n❌ API tem problemas críticos")
+            print("\n❌ API tem problemas críticos")
             return False
     
     def save_report(self):
@@ -426,7 +426,7 @@ class APITester:
         with open(report_path, "w") as f:
             json.dump(report_data, f, indent=2)
         
-        print(f"\\n📝 Relatório salvo em: {report_path}")
+        print(f"\n📝 Relatório salvo em: {report_path}")
 
 
 def main():
