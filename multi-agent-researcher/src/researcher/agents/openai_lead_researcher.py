@@ -19,14 +19,15 @@ from dotenv import load_dotenv, find_dotenv
 env_file = find_dotenv()
 if env_file:
     load_dotenv(env_file)
-    print(f"✅ Loaded .env from: {env_file}")
 else:
-    print("⚠️ No .env file found in parent directories")
+    # .env file not found, using default environment variables
+    pass
 
 from researcher.agents.base import Agent, AgentContext, AgentResult, AgentState
 from researcher.agents.document_search_agent import RAGResearchSubagent, RAGSubagentConfig
 from researcher.reasoning.react_reasoning import ReActReasoner, ValidationResult
 from researcher.reasoning.react_prompts import ReActPrompts
+from researcher.utils.multiagent_logger import get_multiagent_logger
 from pydantic import BaseModel
 
 # OpenAI imports
@@ -91,6 +92,9 @@ class OpenAILeadResearcher(Agent[str]):
         self.client = None
         self.reasoner = ReActReasoner(f"OpenAI Lead Researcher ({self.agent_id})")
         
+        # Configurar logger específico para este agente
+        self.logger = get_multiagent_logger(f"OpenAILeadResearcher-{self.agent_id[:8]}")
+        
         # Initialize OpenAI client for both decomposition AND synthesis
         if OPENAI_AVAILABLE:
             api_key = self.config.api_key
@@ -103,12 +107,14 @@ class OpenAILeadResearcher(Agent[str]):
                         f"✅ OpenAI client initialized for decomposition and synthesis",
                         f"Models: decomposition={self.config.model}, coordinator={system_config.rag.coordinator_model}"
                     )
+                    self.logger.info("✅ OpenAI client inicializado com sucesso")
                 except Exception as e:
                     self.reasoner.add_reasoning_step(
                         "initialization",
                         f"❌ Failed to initialize OpenAI client: {e}",
                         "Will use fallback methods"
                     )
+                    self.logger.error(f"❌ Erro ao inicializar cliente OpenAI: {e}")
                     self.client = None
             else:
                 self.reasoner.add_reasoning_step(
@@ -116,6 +122,7 @@ class OpenAILeadResearcher(Agent[str]):
                     "⚠️ No OpenAI API key found",
                     "Cannot use advanced synthesis"
                 )
+                self.logger.warning("⚠️ API key não fornecida - cliente OpenAI não inicializado")
                 self.client = None
         else:
             self.reasoner.add_reasoning_step(
@@ -123,7 +130,10 @@ class OpenAILeadResearcher(Agent[str]):
                 "⚠️ OpenAI/instructor not available",
                 "Cannot use advanced synthesis"
             )
-            self.client = None
+            self.logger.warning("⚠️ OpenAI não disponível - usando modo heurístico")
+        
+        self.logger.info(f"🤖 OpenAI Lead Researcher inicializado - ID: {self.agent_id}")
+        self.logger.info(f"⚙️ Config: max_subagents={self.config.max_subagents}, parallel={self.config.parallel_execution}, model={self.config.model}")
 
     async def plan(self, context: AgentContext) -> List[Dict[str, Any]]:
         """Create research plan using ReAct reasoning pattern."""
@@ -272,15 +282,15 @@ Return the decomposition in the exact JSON format specified in the system prompt
 """
 
         try:
-            print(f"🔧 [DEBUG] Starting LLM decomposition for query: {context.query}")
-            print(f"🔧 [DEBUG] LLM client available: {self.client is not None}")
+            self.logger.planning(f"Iniciando decomposição LLM para query: {context.query[:100]}...")
+            self.logger.debug(f"Cliente LLM disponível: {self.client is not None}")
             self.reasoner.add_reasoning_step(
                 "execution",
                 "Executing LLM-based query decomposition",
                 f"Sending request to {self.config.model}"
             )
             
-            print(f"🔧 [DEBUG] Calling OpenAI with model: {self.config.model}")
+            self.logger.debug(f"Chamando OpenAI com modelo: {self.config.model}")
             decomposition = await self.client.chat.completions.create(
                 model=self.config.model,
                 max_tokens=self.config.max_tokens,
@@ -290,7 +300,7 @@ Return the decomposition in the exact JSON format specified in the system prompt
                 ],
                 response_model=QueryDecomposition
             )
-            print(f"🔧 [DEBUG] LLM response received: {decomposition}")
+            self.logger.planning(f"Resposta LLM recebida: {len(str(decomposition))} caracteres")
             
             self.reasoner.add_reasoning_step(
                 "execution",
@@ -301,7 +311,7 @@ Return the decomposition in the exact JSON format specified in the system prompt
             # Limit subagents to config max
             tasks = decomposition.subagent_tasks[:self.config.max_subagents]
             
-            print(f"🔧 [DEBUG] LLM plan returning {len(tasks)} tasks: {tasks}")
+            self.logger.planning(f"Plano LLM retornando {len(tasks)} tasks", {"tasks": [task.get('focus', 'general') for task in tasks]})
             return tasks
             
         except Exception as e:
@@ -350,13 +360,12 @@ Return the decomposition in the exact JSON format specified in the system prompt
             f"📝 Heuristic decomposition created {len(tasks)} tasks",
             f"Tasks: {[task.get('focus', 'general') for task in tasks]}"
         )
-        print(f"🔧 [DEBUG] Heuristic plan returning {len(tasks)} tasks: {tasks}")
+        self.logger.planning(f"Plano heurístico retornando {len(tasks)} tasks", {"tasks": [task.get('focus', 'general') for task in tasks]})
         return tasks
     
     async def execute(self, plan: List[Dict[str, Any]]) -> str:
         """Execute research plan with RAG subagents."""
-        print(f"🔧 [DEBUG] Execute called with plan length: {len(plan)}")
-        print(f"🔧 [DEBUG] Plan contents: {plan}")
+        self.logger.coordination(f"Execute chamado com plano de {len(plan)} tasks", {"plan_summary": plan})
         
         self.reasoner.add_reasoning_step(
             "execution",
@@ -386,13 +395,13 @@ Return the decomposition in the exact JSON format specified in the system prompt
             
             # Inject RAG system if available
             if hasattr(self, 'rag_system') and self.rag_system:
-                print(f"🔧 [DEBUG] Lead Researcher injecting RAG into subagent: {type(self.rag_system).__name__}")
+                self.logger.subagent_execution(f"subagent-{i+1}", f"Injetando RAG system: {type(self.rag_system).__name__}")
                 subagent.rag_tool.set_rag_system(self.rag_system)
             elif hasattr(self, 'inject_rag_to_subagent'):
-                print(f"🔧 [DEBUG] Using external RAG injection method")
+                self.logger.subagent_execution(f"subagent-{i+1}", "Usando método externo de injeção RAG")
                 self.inject_rag_to_subagent(subagent)
             else:
-                print(f"🔧 [DEBUG] Lead Researcher has no RAG system to inject. Has rag_system attr: {hasattr(self, 'rag_system')}, Value: {getattr(self, 'rag_system', None)}")
+                self.logger.warning(f"Lead Researcher sem sistema RAG para injetar. Tem atributo rag_system: {hasattr(self, 'rag_system')}")
             
             self.subagents.append(subagent)
             
@@ -463,13 +472,13 @@ Return the decomposition in the exact JSON format specified in the system prompt
             
             # Inject RAG system if available
             if hasattr(self, 'rag_system') and self.rag_system:
-                print(f"🔧 [DEBUG] Lead Researcher injecting RAG into subagent: {type(self.rag_system).__name__}")
+                self.logger.subagent_execution(f"subagent-{i+1}", f"Injetando RAG system: {type(self.rag_system).__name__}")
                 subagent.rag_tool.set_rag_system(self.rag_system)
             elif hasattr(self, 'inject_rag_to_subagent'):
-                print(f"🔧 [DEBUG] Using external RAG injection method")
+                self.logger.subagent_execution(f"subagent-{i+1}", "Usando método externo de injeção RAG")
                 self.inject_rag_to_subagent(subagent)
             else:
-                print(f"🔧 [DEBUG] Lead Researcher has no RAG system to inject. Has rag_system attr: {hasattr(self, 'rag_system')}, Value: {getattr(self, 'rag_system', None)}")
+                self.logger.warning(f"Lead Researcher sem sistema RAG para injetar. Tem atributo rag_system: {hasattr(self, 'rag_system')}")
             
             self.subagents.append(subagent)
             
@@ -741,6 +750,9 @@ Produza uma síntese que demonstre continuidade e evolução do reasoning inicia
             self._result.output = output
             self._result.end_time = datetime.utcnow()
             
+            # SEMPRE incluir o reasoning trace no resultado
+            self._result.reasoning_trace = self.reasoner.get_reasoning_trace()
+            
             return self._result
             
         except Exception as e:
@@ -753,6 +765,9 @@ Produza uma síntese que demonstre continuidade e evolução do reasoning inicia
                 f"❌ OpenAI research failed: {e}",
                 "Critical error in research process"
             )
+            
+            # SEMPRE incluir o reasoning trace, mesmo em caso de erro
+            self._result.reasoning_trace = self.reasoner.get_reasoning_trace()
             
             return self._result
     

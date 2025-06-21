@@ -3,7 +3,7 @@
 import asyncio
 import uuid
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Load environment variables from project root
 from dotenv import load_dotenv, find_dotenv
@@ -17,11 +17,17 @@ from researcher.agents.base import Agent, AgentContext, AgentResult, AgentState
 from researcher.agents.document_search_agent import RAGResearchSubagent, RAGSubagentConfig
 from pydantic import BaseModel
 
+# Import constants
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../../../..'))
+from src.core.constants import MULTIAGENT_CONFIG
+
 
 class SimpleLeadConfig(BaseModel):
     """Configuration for simplified lead researcher."""
-    max_subagents: int = 2
-    parallel_execution: bool = True
+    max_subagents: int = MULTIAGENT_CONFIG['MAX_SUBAGENTS']
+    parallel_execution: bool = MULTIAGENT_CONFIG['PARALLEL_EXECUTION']
 
 
 class SimpleLeadResearcher(Agent[str]):
@@ -44,22 +50,40 @@ class SimpleLeadResearcher(Agent[str]):
         """Create simple research plan."""
         self.add_thinking(f"Planning multi-agent RAG research for: {context.query}")
         
-        # Simple decomposition: create different search angles
-        tasks = [
-            {
-                "query": context.query,
-                "objective": f"General research: {context.objective}",
-                "focus": "general"
-            }
-        ]
+        # Create specialized research tasks based on available focus areas
+        # Available focus areas: conceptual, technical, comparative, examples, general
+        focus_areas = ["conceptual", "technical", "comparative", "examples"]
         
-        # Add a second task with slightly different angle if max_subagents > 1
-        if self.config.max_subagents > 1:
-            tasks.append({
-                "query": f"{context.query} detailed analysis",
-                "objective": f"Detailed analysis: {context.objective}",
-                "focus": "detailed"
-            })
+        tasks = []
+        
+        # Always start with conceptual analysis
+        tasks.append({
+            "query": context.query,
+            "objective": f"Conceptual analysis: {context.objective}",
+            "focus_area": "conceptual"
+        })
+        
+        # Add additional specialized tasks based on max_subagents
+        additional_areas = focus_areas[1:self.config.max_subagents]  # Skip conceptual (already added)
+        for area in additional_areas:
+            if area == "technical":
+                tasks.append({
+                    "query": f"{context.query} technical implementation",
+                    "objective": f"Technical details: {context.objective}",
+                    "focus_area": "technical"
+                })
+            elif area == "comparative":
+                tasks.append({
+                    "query": f"{context.query} comparison analysis",
+                    "objective": f"Comparative analysis: {context.objective}",
+                    "focus_area": "comparative"
+                })
+            elif area == "examples":
+                tasks.append({
+                    "query": f"{context.query} examples and use cases",
+                    "objective": f"Examples and use cases: {context.objective}",
+                    "focus_area": "examples"
+                })
         
         self.add_thinking(f"Created {len(tasks)} research tasks")
         return tasks
@@ -78,30 +102,38 @@ class SimpleLeadResearcher(Agent[str]):
         return synthesis
     
     async def _execute_parallel(self, tasks: List[Dict[str, Any]]) -> List[AgentResult]:
-        """Execute subagents in parallel."""
-        coroutines = []
+        """Execute subagents in parallel with concurrency control."""
+        # Control concurrency
+        semaphore = asyncio.Semaphore(MULTIAGENT_CONFIG['CONCURRENCY_LIMIT'])
         
-        for i, task in enumerate(tasks):
-            # Create RAG subagent
-            subagent = RAGResearchSubagent(
-                agent_id=str(uuid.uuid4()),
-                name=f"RAG-Agent-{i+1}"
-            )
-            self.subagents.append(subagent)
-            
-            # Create context
-            context = AgentContext(
-                query=task["query"],
-                objective=task["objective"],
-                metadata={"focus": task["focus"]}
-            )
-            
-            # Add to parallel execution
-            coroutines.append(subagent.run(context))
+        async def run_with_semaphore(task_data):
+            async with semaphore:
+                i, task = task_data
+                # Create RAG subagent
+                subagent = RAGResearchSubagent(
+                    agent_id=str(uuid.uuid4()),
+                    name=f"RAG-Agent-{i+1}"
+                )
+                self.subagents.append(subagent)
+                
+                # Create context
+                context = AgentContext(
+                    query=task["query"],
+                    objective=task["objective"],
+                    metadata={"focus_area": task["focus_area"]}
+                )
+                
+                return await subagent.run(context)
         
-        # Execute all in parallel
+        # Create tasks with concurrency control
+        task_data = [(i, task) for i, task in enumerate(tasks)]
+        
+        # Execute all in parallel with concurrency limit
         try:
-            results = await asyncio.gather(*coroutines, return_exceptions=True)
+            results = await asyncio.gather(
+                *[run_with_semaphore(td) for td in task_data], 
+                return_exceptions=True
+            )
             
             # Process results
             processed_results = []
@@ -113,8 +145,8 @@ class SimpleLeadResearcher(Agent[str]):
                         agent_id=f"failed-{i}",
                         status=AgentState.FAILED,
                         error=str(result),
-                        start_time=datetime.utcnow(),
-                        end_time=datetime.utcnow()
+                        start_time=datetime.now(timezone.utc),
+                        end_time=datetime.now(timezone.utc)
                     ))
                 else:
                     processed_results.append(result)
@@ -143,7 +175,7 @@ class SimpleLeadResearcher(Agent[str]):
             context = AgentContext(
                 query=task["query"],
                 objective=task["objective"],
-                metadata={"focus": task["focus"]}
+                metadata={"focus_area": task["focus_area"]}
             )
             
             # Execute
@@ -158,8 +190,8 @@ class SimpleLeadResearcher(Agent[str]):
                     agent_id=f"error-{i}",
                     status=AgentState.FAILED,
                     error=str(e),
-                    start_time=datetime.utcnow(),
-                    end_time=datetime.utcnow()
+                    start_time=datetime.now(timezone.utc),
+                    end_time=datetime.now(timezone.utc)
                 ))
         
         return results
@@ -185,7 +217,7 @@ class SimpleLeadResearcher(Agent[str]):
         for i, (task, result) in enumerate(zip(tasks, results)):
             if result.status == AgentState.COMPLETED and result.output:
                 report_lines.extend([
-                    f"## Task {i+1}: {task['focus'].title()} Analysis",
+                    f"## Task {i+1}: {task['focus_area'].title()} Analysis",
                     f"**Query**: {task['query']}",
                     "",
                     result.output,
@@ -195,7 +227,7 @@ class SimpleLeadResearcher(Agent[str]):
                 ])
             else:
                 report_lines.extend([
-                    f"## Task {i+1}: {task['focus'].title()} Analysis ❌",
+                    f"## Task {i+1}: {task['focus_area'].title()} Analysis ❌",
                     f"**Status**: Failed - {result.error or 'Unknown error'}",
                     "",
                     "---",
@@ -216,7 +248,7 @@ class SimpleLeadResearcher(Agent[str]):
     async def run(self, context: AgentContext) -> AgentResult:
         """Execute the complete multi-agent research process."""
         self.state = AgentState.PLANNING
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         # Initialize result
         self._result = AgentResult(
@@ -240,7 +272,7 @@ class SimpleLeadResearcher(Agent[str]):
             self.state = AgentState.COMPLETED
             self._result.status = AgentState.COMPLETED
             self._result.output = output
-            self._result.end_time = datetime.utcnow()
+            self._result.end_time = datetime.now(timezone.utc)
             
             return self._result
             
@@ -248,7 +280,7 @@ class SimpleLeadResearcher(Agent[str]):
             self.state = AgentState.FAILED
             self._result.status = AgentState.FAILED
             self._result.error = str(e)
-            self._result.end_time = datetime.utcnow()
+            self._result.end_time = datetime.now(timezone.utc)
             self.add_thinking(f"Multi-agent research failed: {e}")
             
             return self._result

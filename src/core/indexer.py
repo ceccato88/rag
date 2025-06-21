@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Indexador Refatorado v2.0.0 - Sistema RAG Multi-Agente
+Indexador - Sistema RAG Multi-Agente
 
 Indexador simplificado e otimizado que integra com as APIs refatoradas.
 Usa modelos nativos e factory patterns para consistência com o sistema.
@@ -109,7 +109,7 @@ class IndexingResultFactory:
             images_extracted=images_extracted,
             processing_time=processing_time,
             metadata={
-                "indexer_version": "2.0.0",
+                "indexer_version": "1.0.0",
                 "model_used": system_config.rag.multimodal_model,
                 "embedding_dimension": system_config.rag.voyage_embedding_dim,
                 "native_processing": True,
@@ -131,7 +131,7 @@ class IndexingResultFactory:
             error=error,
             processing_time=processing_time,
             metadata={
-                "indexer_version": "2.0.0",
+                "indexer_version": "1.0.0",
                 "error_occurred": True,
                 **kwargs
             }
@@ -598,7 +598,7 @@ def main():
     """Função principal para execução via linha de comando"""
     import argparse
     
-    parser = argparse.ArgumentParser(description="Indexador Refatorado v2.0.0 - Sistema RAG Multi-Agente")
+    parser = argparse.ArgumentParser(description="Indexador - Sistema RAG Multi-Agente")
     parser.add_argument("url", help="URL ou caminho do PDF")
     parser.add_argument("--doc-source", help="Nome/identificador do documento")
     parser.add_argument("--native-result", action="store_true", help="Retornar resultado nativo detalhado")

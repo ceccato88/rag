@@ -4,7 +4,7 @@ import sys
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from datetime import datetime
+from datetime import datetime, timezone
 
 # Load environment variables from project root
 from dotenv import load_dotenv, find_dotenv
@@ -26,7 +26,8 @@ from pydantic import BaseModel
 class RAGSubagentConfig(BaseModel):
     """Configuration for RAG-based subagent."""
     enable_thinking: bool = True
-    top_k: int = 5  # Will be overridden by centralized config
+    # top_k is now dynamic based on query complexity:
+    # SIMPLE=2, MODERATE=3, COMPLEX=4, VERY_COMPLEX=5
 
 
 class RAGResearchSubagent(Agent[str]):
@@ -43,7 +44,8 @@ class RAGResearchSubagent(Agent[str]):
     ):
         super().__init__(**kwargs)
         self.config = config or RAGSubagentConfig()
-        self.rag_tool = OptimizedRAGSearchTool(top_k=self.config.top_k)
+        # OptimizedRAGSearchTool now handles dynamic candidates internally
+        self.rag_tool = OptimizedRAGSearchTool()
         self.search_results: List[Dict[str, Any]] = []
         
     async def plan(self, context: AgentContext) -> List[Dict[str, Any]]:
@@ -62,16 +64,17 @@ class RAGResearchSubagent(Agent[str]):
         action_plan = plan[0]
         query = action_plan["query"]
         objective = action_plan["objective"]
-        focus_area = action_plan.get("focus_area", "general")
+        # Get focus_area from context metadata (passed from lead researcher)
+        focus_area = getattr(self, '_context', {}).metadata.get("focus_area", "general") if hasattr(self, '_context') else "general"
         
         self.add_thinking(f"Executing optimized RAG search for: {query}")
         self.add_thinking(f"Focus area: {focus_area}")
         
         try:
             # Execute optimized RAG search (search + rerank only, no answer generation)
+            # top_k is now calculated dynamically based on query complexity
             search_result = await self.rag_tool._execute(
                 query=query,
-                top_k=self.config.top_k,
                 focus_area=focus_area
             )
             
@@ -332,7 +335,7 @@ class RAGResearchSubagent(Agent[str]):
     async def run(self, context: AgentContext) -> AgentResult:
         """Execute the complete RAG research process."""
         self.state = AgentState.PLANNING
-        start_time = datetime.utcnow()
+        start_time = datetime.now(timezone.utc)
         
         # Initialize result
         self._result = AgentResult(
@@ -356,7 +359,7 @@ class RAGResearchSubagent(Agent[str]):
             self.state = AgentState.COMPLETED
             self._result.status = AgentState.COMPLETED
             self._result.output = output
-            self._result.end_time = datetime.utcnow()
+            self._result.end_time = datetime.now(timezone.utc)
             
             return self._result
             
@@ -364,7 +367,7 @@ class RAGResearchSubagent(Agent[str]):
             self.state = AgentState.FAILED
             self._result.status = AgentState.FAILED
             self._result.error = str(e)
-            self._result.end_time = datetime.utcnow()
+            self._result.end_time = datetime.now(timezone.utc)
             self.add_thinking(f"RAG research failed: {e}")
             
             return self._result

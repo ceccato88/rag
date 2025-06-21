@@ -87,7 +87,13 @@ class SecurityConfig(BaseSettings):
     @field_validator('bearer_token')
     @classmethod
     def validate_bearer_token_in_production(cls, v):
-        production_mode = os.getenv("PRODUCTION_MODE", str(PRODUCTION_CONFIG['PRODUCTION_MODE'])).lower() == "true"
+        # Usar DEV_CONFIG que tem PRODUCTION_MODE definido
+        try:
+            from src.core.constants import DEV_CONFIG
+            production_mode = os.getenv("PRODUCTION_MODE", str(DEV_CONFIG.get('PRODUCTION_MODE', True))).lower() == "true"
+        except ImportError:
+            production_mode = os.getenv("PRODUCTION_MODE", "true").lower() == "true"
+            
         if production_mode and not v:
             raise ValueError("Bearer token é obrigatório em modo de produção")
         return v
@@ -123,7 +129,7 @@ class ProductionConfig(BaseSettings):
     monitoring_enabled: bool = Field(default=True, description="Monitoramento habilitado")
     enable_metrics: bool = Field(default=True, description="Habilitar métricas")
     enable_tracing: bool = Field(default=False, description="Habilitar tracing")
-    max_request_size: int = Field(default=16 * 1024 * 1024, description="Tamanho máximo de requisição")
+    max_request_size: int = Field(default=16777216, description="Tamanho máximo de requisição")  # 16MB
     request_timeout: int = Field(default=300, ge=1, description="Timeout de requisição em segundos")
     
     # Timeouts adicionais
@@ -132,6 +138,15 @@ class ProductionConfig(BaseSettings):
     external_api_timeout: int = Field(default=10, ge=1, description="Timeout APIs externas em segundos")
     download_timeout: int = Field(default=30, ge=1, description="Timeout downloads em segundos")
     cache_ttl: int = Field(default=3600, ge=1, description="TTL cache em segundos")
+    
+    @field_validator('max_request_size', mode='before')
+    @classmethod
+    def clean_max_request_size(cls, v):
+        """Remove comentários do valor se for string"""
+        if isinstance(v, str):
+            # Remove comentários (tudo depois de #)
+            v = v.split('#')[0].strip()
+        return int(v)
 
 
 class PathConfig(BaseSettings):

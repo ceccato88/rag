@@ -1,13 +1,15 @@
 # 🤖 RAG Multi-Agent Research System
 
-Sistema avançado de pesquisa baseado em RAG (Retrieval-Augmented Generation) com coordenação multi-agente e reasoning inteligente.
+Sistema avançado de pesquisa baseado em RAG (Retrieval-Augmented Generation) com│  🎯 CONCEPTUAL    ⚖️ COMPARATIVE    🔧 TECHNICAL   │  
+│  (gpt-4.1-mini)  (gpt-4.1-mini)   (gpt-4.1-mini)  │
+│       │               │                │           │ordenação multi-agente e reasoning inteligente.
 
 ## ⚡ Características Principais
 
-- **🧠 Coordenação Multi-Agente**: Sistema hierárquico com coordenador (gpt-4.1) e subagentes especializados (gpt-4.1-mini)
-- **🔍 7 Focus Areas**: Especialização automática em conceptual, technical, comparative, examples, overview, applications, general
+- **🧠 Sistema Multi-Agente Enhanced**: Sistema hierárquico com 5 tipos de especialistas (CONCEPTUAL, TECHNICAL, COMPARATIVE, EXAMPLES, GENERAL)
+- **🎯 7 Focus Areas**: Especialização automática em conceptual, technical, comparative, examples, overview, applications, general
 - **⚡ Execução Paralela**: Subagentes executam simultaneamente para máxima performance
-- **🎯 ReAct Reasoning**: Raciocínio estruturado do planejamento à síntese final
+- **🔍 Query Complexity Detection**: Análise automática de complexidade (SIMPLE, MODERATE, COMPLEX, VERY_COMPLEX)
 - **📊 RAG Multimodal**: Suporte a texto + imagens com embeddings Voyage
 - **🗄️ AstraDB**: Banco vetorial distribuído para escalabilidade
 - **🔒 Segurança**: Rate limiting, autenticação Bearer, validação SSRF/XSS
@@ -18,7 +20,7 @@ Sistema avançado de pesquisa baseado em RAG (Retrieval-Augmented Generation) co
 
 ```bash
 # Clone o repositório
-git clone <repository-url>
+git clone https://github.com/ceccato88/rag.git
 cd rag
 
 # Instale dependências
@@ -39,12 +41,12 @@ ASTRA_DB_API_ENDPOINT=your_astra_endpoint
 ASTRA_DB_APPLICATION_TOKEN=your_astra_token
 
 # Modelos
-OPENAI_MODEL=gpt-4.1-mini          # Subagentes
-COORDINATOR_MODEL=gpt-4.1          # Coordenador
+OPENAI_MODEL=gpt-4.1-mini              # Subagentes
+COORDINATOR_MODEL=gpt-4.1              # Coordenador
 EMBEDDING_MODEL=voyage-multimodal-3
 
 # Sistema Multi-Agente
-MAX_CANDIDATES=5
+MAX_CANDIDATES=3                       # Padrão (varia por complexidade)
 MAX_SUBAGENTS=3
 PARALLEL_EXECUTION=true
 ```
@@ -68,8 +70,10 @@ curl -X POST "http://localhost:8000/api/v1/index" \
   -H "Content-Type: application/json" \
   -d '{"pdf_url": "https://arxiv.org/pdf/2501.13956"}'
 
-# Via script
-python scripts/indexer.py --url "https://arxiv.org/pdf/2501.13956"
+# Via código Python
+from src.core.indexer import DocumentIndexer
+indexer = DocumentIndexer()
+indexer.index_pdf("https://arxiv.org/pdf/2501.13956")
 ```
 
 ## 📖 Uso da API
@@ -81,18 +85,20 @@ curl -X POST "http://localhost:8000/api/v1/research" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "query": "Como Zep implementa temporal knowledge graphs para memória de agentes AI?",
-    "use_multiagent": true
+    "query": "Como Zep implementa temporal knowledge graphs para memória de agentes AI?"
   }'
 ```
 
-### Busca Simples
+### Busca com Focus Areas Específicas
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/simple" \
+curl -X POST "http://localhost:8000/api/v1/research" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"query": "O que é Zep?"}'
+  -d '{
+    "query": "O que é Zep?",
+    "focus_areas": ["conceptual", "examples", "overview"]
+  }'
 ```
 
 ## 🏗️ Arquitetura
@@ -103,43 +109,99 @@ curl -X POST "http://localhost:8000/api/v1/simple" \
 └─────────────────┬───────────────────────────────────┘
                   │
 ┌─────────────────▼───────────────────────────────────┐
-│           🧠 Lead Researcher (gpt-4.1)             │
-│  • ReAct Reasoning • Query Decomposition           │
-│  • Focus Area Selection • Advanced Synthesis       │
+│     🧠 Enhanced Lead Researcher (gpt-4.1)          │
+│  • Query Analysis • Complexity Detection           │
+│  • Specialist Selection • Enhanced Synthesis       │
 └─────────────────┬───────────────────────────────────┘
-                  │ (decompose into specialized tasks)
+                  │ (decompose by complexity)
                   ▼
 ┌─────────────────────────────────────────────────────┐
-│              ⚡ Parallel Execution                  │
+│              ⚡ Specialist Agents                   │
 │                                                     │
-│  🔍 Subagent 1    🔍 Subagent 2    🔍 Subagent 3   │
-│  (conceptual)     (technical)      (examples)      │
-│  gpt-4.1-mini     gpt-4.1-mini     gpt-4.1-mini    │
+│  🎯 CONCEPTUAL    ⚖️ COMPARATIVE    � TECHNICAL   │  
+│  (gpt-4o-mini)   (gpt-4o-mini)    (gpt-4o-mini)   │
 │       │               │                │           │
 │       ▼               ▼                ▼           │
 │  📚 RAG Search   📚 RAG Search   📚 RAG Search     │
-│  (specialized)   (specialized)   (specialized)     │
+│  (focus: conceptual) (focus: comparative) (focus: technical) │
 └─────┬───────────────┬──────────────┬───────────────┘
       │               │              │
       ▼               ▼              ▼
 ┌─────────────────────────────────────────────────────┐
-│         🧠 Advanced AI Synthesis (gpt-4.1)         │
-│  • Cross-reference Analysis • Critical Thinking    │
-│  • Insight Generation • Structured Report          │
+│      🧠 Enhanced Synthesis (gpt-4.1)               │
+│  • Cross-reference Analysis • Quality Assessment    │
+│  • Conflict Resolution • Structured Report          │
 └─────────────────────────────────────────────────────┘
 ```
 
-## 🎯 Focus Areas
+## 🎯 Specialist Types vs Focus Areas
 
-| Focus Area | Descrição | Quando Usar |
-|------------|-----------|-------------|
-| **conceptual** | Definições, conceitos, fundamentos | "O que é...", necessidade de entendimento básico |
-| **technical** | Implementação, arquitetura, algoritmos | "Como implementar...", especificações técnicas |
-| **comparative** | Comparações, diferenças, avaliações | "X vs Y", "qual é melhor..." |
-| **examples** | Casos de uso, exemplos práticos | "Exemplos de...", demonstrações |
-| **overview** | Visão geral, introdução ampla | Contexto geral, getting started |
-| **applications** | Aplicações práticas, uso no mundo real | Uso empresarial, deployment |
-| **general** | Pesquisa abrangente sem foco específico | Queries muito gerais |
+### 📋 Diferença Conceitual
+
+**Specialist Types** e **Focus Areas** são conceitos complementares mas distintos:
+
+- **🤖 Specialist Types**: Define **QUAL agente** será instanciado (classe do agente)
+- **🎯 Focus Areas**: Define **COMO** o agente vai processar a informação
+
+### 🔄 Fluxo de Processamento
+
+```
+Query → Specialist Selection → Focus Area Mapping → Agent Processing
+```
+
+1. **Análise da Query**: Sistema analisa a query para detectar padrões
+2. **Seleção do Specialist**: Escolhe qual tipo de agente usar (CONCEPTUAL, TECHNICAL, etc.)
+3. **Mapeamento de Focus**: Define como o agente deve processar (conceptual, technical, etc.)
+4. **Processamento**: Agente usa o focus area para ajustar busca e formatação
+
+### 🤖 Specialist Types (5 tipos - Define QUAL agente)
+| Specialist | Função | Quando Usar |
+|------------|--------|-------------|
+| **CONCEPTUAL** | Extração de conceitos, definições, teoria | "O que é...", "Defina...", necessidade de base conceitual |
+| **TECHNICAL** | Detalhes técnicos, implementação, arquitetura | "Como implementar...", especificações técnicas |
+| **COMPARATIVE** | Análise comparativa, diferenças, alternativas | "X vs Y", "diferenças entre...", avaliações |
+| **EXAMPLES** | Casos de uso, exemplos práticos, demonstrações | "Exemplos de...", casos práticos, proof-of-concept |
+| **GENERAL** | Pesquisa geral, coordenação, contexto amplo | Queries gerais ou como complemento |
+
+### 🔍 Correspondência 1:1 (Specialist ↔ Focus Area)
+
+Na maioria dos casos, há correspondência direta:
+
+```python
+CONCEPTUAL → focus_area: "conceptual" + ["definitions", "theoretical_background"]
+TECHNICAL → focus_area: "technical" + ["architecture", "implementation"]  
+COMPARATIVE → focus_area: "comparative" + ["alternatives", "differences"]
+EXAMPLES → focus_area: "examples" + ["case_studies", "applications"]
+GENERAL → focus_area: "general" + ["overview", "broad_context"]
+```
+
+## 📊 Query Complexity Detection
+
+O sistema Enhanced detecta automaticamente a complexidade das queries:
+
+### 🟢 SIMPLE
+- **Características**: Perguntas diretas sobre definições/conceitos
+- **Candidatos**: 2 documentos
+- **Estratégia**: Busca direta e focada
+- **Exemplo**: "O que é machine learning?"
+
+### 🟡 MODERATE  
+- **Características**: Perguntas sobre funcionamento/processo
+- **Candidatos**: 3 documentos
+- **Estratégia**: Expansão semântica moderada
+- **Exemplo**: "Como funciona o deep learning?"
+
+### 🟠 COMPLEX
+- **Características**: Comparação/análise de múltiplos aspectos
+- **Candidatos**: 4 documentos
+- **Estratégia**: Múltiplas perspectivas
+- **Exemplo**: "Compare machine learning e deep learning"
+
+### 🔴 VERY_COMPLEX
+- **Características**: Análises avançadas, síntese de múltiplas fontes
+- **Candidatos**: 5 documentos  
+- **Estratégia**: Análise profunda e síntese avançada
+- **Exemplo**: "Analyze the evolution and future of AI reasoning systems"
 
 ## 📁 Estrutura do Projeto
 
@@ -157,6 +219,7 @@ rag/
 ├── multi-agent-researcher/       # Multi-agent system
 │   └── src/researcher/
 │       ├── agents/               # Agent implementations
+│       ├── enhanced/             # Enhanced system components
 │       ├── reasoning/            # ReAct reasoning
 │       └── tools/                # Agent tools
 ├── docs/                         # Documentation
@@ -170,19 +233,33 @@ rag/
 
 ```env
 # Hierarquia de modelos para otimização de custo/qualidade
-OPENAI_MODEL=gpt-4.1-mini          # Subagentes (eficiência)
-COORDINATOR_MODEL=gpt-4.1          # Coordenador (qualidade)
-EMBEDDING_MODEL=voyage-multimodal-3 # Embeddings multimodais
+OPENAI_MODEL=gpt-4.1-mini              # Subagentes (eficiência)
+COORDINATOR_MODEL=gpt-4.1              # Coordenador (qualidade)
+EMBEDDING_MODEL=voyage-multimodal-3    # Embeddings multimodais
 ```
 
 ### Performance
 
 ```env
-# Configurações de performance
-MAX_SUBAGENTS=3                    # Máximo 3 subagentes paralelos
-PARALLEL_EXECUTION=true            # Execução paralela
-SUBAGENT_TIMEOUT=300.0            # Timeout por subagente (5min)
-MAX_CANDIDATES=3                   # Documentos por busca (padrão)
+# Configurações de performance por complexidade
+MAX_CANDIDATES_SIMPLE=2                # Queries simples
+MAX_CANDIDATES_MODERATE=3              # Queries moderadas
+MAX_CANDIDATES_COMPLEX=4               # Queries complexas
+MAX_CANDIDATES_VERY_COMPLEX=5          # Queries muito complexas
+MAX_CANDIDATES=3                       # Fallback geral
+PARALLEL_EXECUTION=true                # Execução paralela
+SUBAGENT_TIMEOUT=300.0                # Timeout por subagente (5min)
+```
+
+### Configuração Unificada
+
+O sistema usa configuração unificada que otimiza automaticamente parâmetros baseado na complexidade da query e tipo de especialista:
+
+```env
+# Configuração automática por complexidade + especialista
+# Exemplo: COMPLEX + TECHNICAL = max_candidates=4, similarity_threshold=0.65
+# Exemplo: SIMPLE + CONCEPTUAL = max_candidates=2, similarity_threshold=0.70
+UNIFIED_CONFIG_ENABLED=true
 ```
 
 ### Segurança
@@ -213,29 +290,33 @@ curl http://localhost:8000/api/v1/stats \
 ## 🧪 Testes
 
 ```bash
-# 🔧 Teste da API
-python tests/test_api.py
-python tests/test_api.py --quick  # Teste rápido
+# 🔧 Teste do Sistema Enhanced
+python scripts/test_enhanced_system.py
 
-# 🚀 Teste Completo do Pipeline  
-python tests/test_full_pipeline.py
+# 🚀 Teste de Integração Enhanced
+python scripts/test_enhanced_integration.py
+
+# �️ Verificar Consistência de Configuração
+python scripts/verify_config_consistency.py
 ```
 
 ### Estrutura de Testes
-- **`tests/test_api.py`** - Teste completo da API com relatório
-- **`tests/test_full_pipeline.py`** - Pipeline end-to-end com indexação real
+- **`scripts/test_enhanced_system.py`** - Teste completo do sistema enhanced
+- **`scripts/test_enhanced_integration.py`** - Teste de integração dos componentes
+- **`scripts/verify_config_consistency.py`** - Verificação de consistência de config
 
-Relatórios salvos em `/logs/`.
+Logs salvos em `/logs/`.
 
 ## 📚 Documentação
 
 - [📖 Guia Completo](docs/README.md)
 - [🏗️ Arquitetura](docs/architecture.md)
+- [🔥 Sistema Enhanced](docs/enhanced-system.md)
 - [🤖 Sistema Multi-Agente](docs/multi-agent.md)
+- [⚡ Quick Start](docs/quick-start.md)
 - [🔍 ReAct Reasoning](docs/reasoning.md)
-- [⚙️ Configuração](docs/configuration.md)
-- [🚀 Deployment](docs/deployment.md)
-- [🔧 Troubleshooting](docs/troubleshooting.md)
+- [📝 Guia da API](docs/api-guide.md)
+- [🧪 Testing](docs/testing.md)
 
 ## 🤝 Contribuição
 

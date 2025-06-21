@@ -16,15 +16,32 @@ except ImportError:
     sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent))
     from src.core.config import SystemConfig
 
-# Import das configurações enhanced
-from .enhanced_config import (
-    SIMILARITY_THRESHOLDS,
-    MAX_CANDIDATES as ENHANCED_MAX_CANDIDATES,
-    SUFFICIENCY_CRITERIA,
-    ITERATION_LIMITS,
-    SPECIALIST_OPTIMIZATIONS,
-    get_optimized_config
-)
+# Import das configurações centralizadas
+try:
+    # Usar configurações centralizadas
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent))
+    from src.core.constants import (
+        ENHANCED_SIMILARITY_THRESHOLDS as SIMILARITY_THRESHOLDS,
+        DYNAMIC_MAX_CANDIDATES as ENHANCED_MAX_CANDIDATES,
+        ENHANCED_SUFFICIENCY_CRITERIA as SUFFICIENCY_CRITERIA,
+        ENHANCED_ITERATION_LIMITS as ITERATION_LIMITS,
+        ENHANCED_SPECIALIST_OPTIMIZATIONS as SPECIALIST_OPTIMIZATIONS,
+        get_enhanced_config as get_optimized_config
+    )
+    CENTRALIZED_CONFIG = True
+except ImportError:
+    # Fallback para enhanced_config local
+    from .enhanced_config import (
+        SIMILARITY_THRESHOLDS,
+        MAX_CANDIDATES as ENHANCED_MAX_CANDIDATES,
+        SUFFICIENCY_CRITERIA,
+        ITERATION_LIMITS,
+        SPECIALIST_OPTIMIZATIONS,
+        get_optimized_config
+    )
+    CENTRALIZED_CONFIG = False
 
 
 class UnifiedEnhancedConfig:

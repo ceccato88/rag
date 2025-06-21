@@ -16,6 +16,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 
 from researcher.memory.base import Memory, MemoryEntry, ResearchMemory
+from researcher.utils.multiagent_logger import get_multiagent_logger
 
 
 class StorageBackend(Enum):
@@ -646,7 +647,8 @@ class CheckpointManager:
             return True
             
         except Exception as e:
-            print(f"Erro ao restaurar checkpoint {checkpoint_id}: {e}")
+            logger = get_multiagent_logger()
+            logger.error(f"Erro ao restaurar checkpoint {checkpoint_id}: {e}")
             return False
     
     async def _restore_incremental_chain(self, agent_id: str, checkpoint_data: Dict[str, Any]):

@@ -3,10 +3,22 @@ ReAct (Reasoning + Acting) pattern implementation for structured reasoning.
 Substitui o sistema "thinking" do Anthropic por uma abordagem estruturada de raciocínio.
 """
 
+import sys
+import os
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 from datetime import datetime
 import json
+
+# Adiciona o diretório raiz ao path para importar config
+sys.path.append(os.path.join(os.path.dirname(__file__), "../../../../../"))
+
+# Import do logger multi-agente (com fallback caso não esteja disponível)
+try:
+    from researcher.utils.multiagent_logger import get_multiagent_logger
+    LOGGER_AVAILABLE = True
+except ImportError:
+    LOGGER_AVAILABLE = False
 
 
 class ReasoningStep(BaseModel):
@@ -55,6 +67,12 @@ class ReActReasoner:
         self.current_plan: Optional[TaskPlan] = None
         self.iteration_count = 0
         self.max_iterations = 10
+        
+        # Configurar logger se disponível
+        if LOGGER_AVAILABLE:
+            self.logger = get_multiagent_logger(f"ReActReasoner-{agent_name}")
+        else:
+            self.logger = None
     
     def add_reasoning_step(
         self, 
@@ -72,6 +90,11 @@ class ReActReasoner:
             next_action=next_action
         )
         self.reasoning_history.append(step)
+        
+        # Log usando o logger multi-agente se disponível
+        if self.logger:
+            self.logger.reasoning_step(step_type, content, observations, next_action)
+        
         return step
     
     def gather_facts(self, task: str, context: str = "") -> FactGathering:

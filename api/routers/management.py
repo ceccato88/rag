@@ -380,8 +380,8 @@ async def get_current_config(
                 "production_mode": config.production.production_mode
             },
             "features_enabled": {
-                "metrics": config.production.enable_metrics,
-                "tracing": config.production.enable_tracing,
+                "metrics": getattr(config.production, 'enable_performance_metrics', False),
+                "tracing": getattr(config.production, 'enable_debug_logs', False),
                 "cors": config.security.enable_cors
             },
             "timestamp": datetime.utcnow().isoformat()

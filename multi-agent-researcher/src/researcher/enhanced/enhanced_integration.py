@@ -22,9 +22,15 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent.parent.parent.parent))
 from src.core.config import SystemConfig
 
+# Import para AgentResult
+from ..agents.base import AgentResult, AgentState
+
 # Configuração
 config = SystemConfig()
-logger = logging.getLogger(__name__)
+
+# Import multiagent logger
+from ..utils.multiagent_logger import get_multiagent_logger
+logger = get_multiagent_logger("EnhancedIntegration")
 
 
 class EnhancedRAGSystem:
@@ -59,36 +65,80 @@ class EnhancedRAGSystem:
             EnhancedRAGResult: Resultado enhanced completo
         """
         logger.info(f"🔍 Iniciando busca enhanced para: '{query[:50]}...'")
+        logger.planning(f"Query recebida: {query}", {"query_length": len(query), "truncated": len(query) > 50})
         start_time = time.time()
         
         try:
             # 1. Decomposição da query
             logger.info("📋 Executando decomposição...")
+            logger.planning("Iniciando decomposição da query")
+            decompose_start = time.time()
+            
             decomposition = self.decomposer.decompose(query)
+            decompose_time = time.time() - decompose_start
+            
+            logger.planning(f"Decomposição concluída", {
+                "complexity": decomposition.approach.complexity.value,
+                "strategy": decomposition.approach.strategy.value,
+                "subagents_count": len(decomposition.subagent_tasks),
+                "refined_query": decomposition.refined_query,
+                "duration": decompose_time
+            })
             
             # 2. Executar tarefas dos subagentes
             logger.info(f"🤖 Executando {len(decomposition.subagent_tasks)} subagentes...")
+            logger.coordination(f"Iniciando execução de {len(decomposition.subagent_tasks)} subagentes")
             subagent_results = []
             
-            for task_spec in decomposition.subagent_tasks:
-                logger.debug(f"Executando {task_spec.specialist_type.value}...")
+            for i, task_spec in enumerate(decomposition.subagent_tasks):
+                logger.info(f"Executando subagente {i+1}/{len(decomposition.subagent_tasks)}: {task_spec.specialist_type.value}")
+                
+                subagent_start = time.time()
                 result = self.executor.execute_task(task_spec, decomposition.refined_query)
+                subagent_time = time.time() - subagent_start
+                
+                logger.subagent_execution(
+                    subagent_id=task_spec.specialist_type.value,
+                    action=f"Processando: {task_spec.semantic_context[:100]}...",
+                    result=f"Resultado obtido com {len(str(result))} caracteres",
+                    duration=subagent_time
+                )
+                
                 subagent_results.append(result)
             
             # 3. Síntese coordenada
             logger.info("🧩 Executando síntese coordenada...")
+            synthesis_start = time.time()
+            
             enhanced_result = self.synthesizer.synthesize_results(
                 decomposition, subagent_results
             )
+            synthesis_time = time.time() - synthesis_start
+            
+            logger.synthesis(f"Síntese concluída", {
+                "subagents_processed": len(subagent_results),
+                "final_answer_length": len(enhanced_result.final_answer),
+                "confidence_score": enhanced_result.confidence_score,
+                "sources_count": len(enhanced_result.sources_cited),
+                "duration": synthesis_time
+            })
             
             total_time = time.time() - start_time
             enhanced_result.total_processing_time = total_time
+            
+            logger.performance("enhanced_search_complete", total_time, {
+                "query": query[:100],
+                "decompose_time": decompose_time,
+                "synthesis_time": synthesis_time,
+                "subagents_used": len(decomposition.subagent_tasks),
+                "confidence_score": enhanced_result.confidence_score
+            })
             
             logger.info(f"✅ Busca enhanced concluída em {total_time:.2f}s")
             return enhanced_result
             
         except Exception as e:
-            logger.error(f"❌ Erro na busca enhanced: {e}")
+            logger.error(f"Erro na busca enhanced: {e}", e, {"query": query, "duration": time.time() - start_time})
             raise
     
     def fallback_to_simple(self, query: str) -> Dict[str, Any]:
@@ -102,10 +152,20 @@ class EnhancedRAGSystem:
             Dict: Resultado simples formatado
         """
         logger.info(f"⚠️ Executando fallback simples para: '{query[:50]}...'")
+        logger.coordination("Fallback para sistema RAG simples ativado", {"query": query[:100]})
+        
+        fallback_start = time.time()
         
         try:
             # Usar sistema RAG atual
             result = self.rag_system.search_and_answer(query)
+            fallback_time = time.time() - fallback_start
+            
+            logger.performance("fallback_simple_complete", fallback_time, {
+                "query": query[:100],
+                "sources_found": len(result.get("selected_pages_details", [])),
+                "answer_length": len(result.get("answer", ""))
+            })
             
             return {
                 "success": True,
@@ -114,11 +174,12 @@ class EnhancedRAGSystem:
                 "enhanced": False,
                 "fallback_reason": "Sistema enhanced indisponível",
                 "sources": result.get("selected_pages_details", []),
-                "processing_time": 0.0
+                "processing_time": fallback_time
             }
             
         except Exception as e:
-            logger.error(f"❌ Erro no fallback simples: {e}")
+            fallback_time = time.time() - fallback_start
+            logger.error(f"Erro no fallback simples: {e}", e, {"query": query, "duration": fallback_time})
             return {
                 "success": False,
                 "query": query,
@@ -261,6 +322,11 @@ class EnhancedLeadResearcher:
                         self.reasoning_trace = []
         
         try:
+            logger.info(f"Enhanced Lead Researcher iniciando processamento da query: {context.query[:100]}...")
+            logger.reasoning_step("INIT", f"Processando query: {context.query}", 
+                                observations="Query recebida pelo Enhanced Lead Researcher",
+                                next_action="Executar sistema enhanced multi-agente")
+            
             # Processar query usando enhanced system
             result = await self.api_adapter.process_research_query(
                 query=context.query,
@@ -269,13 +335,22 @@ class EnhancedLeadResearcher:
             )
             
             if result["success"]:
-                status = AgentStatus.COMPLETED
+                status = AgentState.COMPLETED
                 output = result["result"]
                 error = None
+                
+                logger.reasoning_step("SUCCESS", "Query processada com sucesso",
+                                    observations=f"Resultado obtido com {len(output)} caracteres",
+                                    confidence_score=result.get("confidence_score"),
+                                    sources_count=len(result.get("sources", [])))
             else:
                 status = AgentStatus.FAILED
                 output = None
                 error = result.get("error", "Falha na pesquisa")
+                
+                logger.reasoning_step("FAILURE", "Falha no processamento da query",
+                                    observations=f"Erro: {error}",
+                                    next_action="Retornar resultado de erro")
             
             # Criar AgentResult compatível
             agent_result = AgentResult(
@@ -295,24 +370,36 @@ class EnhancedLeadResearcher:
             )
             
             # Adicionar reasoning trace se disponível
-            # Commented out - AgentResult não tem reasoning_trace
-            # if "reasoning_trace" in result and result["reasoning_trace"]:
-            #     agent_result.reasoning_trace = result["reasoning_trace"]
+            if "reasoning_trace" in result and result["reasoning_trace"]:
+                # Converter lista para string se necessário
+                reasoning_trace = result["reasoning_trace"]
+                if isinstance(reasoning_trace, list):
+                    agent_result.reasoning_trace = "\n".join(reasoning_trace)
+                else:
+                    agent_result.reasoning_trace = str(reasoning_trace)
+            else:
+                # Garantir que sempre há um reasoning_trace (string vazia se não houver)
+                agent_result.reasoning_trace = "Reasoning trace não disponível"
             
             return agent_result
             
         except Exception as e:
-            logger.error(f"❌ Erro no Enhanced Lead Researcher: {e}")
+            logger.error(f"Erro no Enhanced Lead Researcher: {e}", e, {"query": context.query})
+            logger.reasoning_step("ERROR", "Erro crítico no Enhanced Lead Researcher",
+                                observations=f"Exception: {str(e)}",
+                                next_action="Retornar resultado de erro")
             
             # Retornar resultado de erro
-            return AgentResult(
+            error_result = AgentResult(
                 agent_id=self.agent_id,
-                status=AgentStatus.FAILED,
+                status=AgentState.FAILED,
                 output=None,
                 error=str(e),
                 start_time=datetime.utcnow(),  # Campo obrigatório
                 metadata={"enhanced": False, "fallback_attempted": True}
             )
+            error_result.reasoning_trace = f"Erro durante execução: {str(e)}"
+            return error_result
     
     async def plan(self, context) -> List[str]:
         """

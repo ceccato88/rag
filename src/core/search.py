@@ -20,50 +20,96 @@ from ..utils.metrics import ProcessingMetrics, measure_time
 from ..utils.validation import validate_embedding
 from ..utils.cache import SimpleCache
 from .config import SystemConfig
+from .constants import COMPLEXITY_PATTERNS, DYNAMIC_MAX_CANDIDATES
+
+# Importa configurações enhanced para complexidade (fallback)
+try:
+    import sys
+    from pathlib import Path
+    sys.path.append(str(Path(__file__).parent.parent.parent / "multi-agent-researcher" / "src"))
+    from researcher.enhanced.enhanced_unified_config import get_max_candidates_for_complexity
+    ENHANCED_CONFIG_AVAILABLE = True
+except ImportError:
+    ENHANCED_CONFIG_AVAILABLE = False
 
 # Configuração centralizada
 system_config = SystemConfig()
 
-# Configuração de logging específica para o buscador
-def setup_rag_logging():
-    """Configura logging específico para o RAG"""
-    rag_logger = logging.getLogger(__name__)
-    rag_logger.setLevel(logging.DEBUG)
-    
-    # Remove handlers existentes para evitar duplicação
-    for handler in rag_logger.handlers[:]:
-        rag_logger.removeHandler(handler)
-    
-    # Formatter detalhado
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s"
-    )
-    
-    # Handler para console
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)
-    console_handler.setFormatter(formatter)
-    rag_logger.addHandler(console_handler)
-    
-    # Handler para arquivo específico do RAG
-    file_handler = logging.FileHandler("rag_production_debug.log", encoding='utf-8')
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(formatter)
-    rag_logger.addHandler(file_handler)
-    
-    # Não propagar para o logger pai para evitar duplicação
-    rag_logger.propagate = False
-    
-    return rag_logger
-
-logger = setup_rag_logging()
+# Usar multiagent logger para integração completa
+try:
+    sys.path.append(str(Path(__file__).parent.parent.parent / "multi-agent-researcher" / "src"))
+    from researcher.utils.multiagent_logger import get_multiagent_logger
+    logger = get_multiagent_logger("RAGSearch")
+    MULTIAGENT_LOGGER_AVAILABLE = True
+except ImportError:
+    # Fallback para logging padrão se multiagent logger não estiver disponível
+    logger = logging.getLogger(__name__)
+    MULTIAGENT_LOGGER_AVAILABLE = False
 
 # Log inicial para confirmar que o sistema de logging está funcionando
-logger.info("🚀 [INIT] Sistema de logging do RAG inicializado")
+if MULTIAGENT_LOGGER_AVAILABLE:
+    logger.info("🚀 [INIT] Sistema de logging multiagente RAG inicializado")
+else:
+    logger.info("🚀 [INIT] Sistema de logging RAG padrão inicializado")
 
 def get_sao_paulo_time():
     """Retorna datetime atual no fuso horário de São Paulo"""
     return datetime.now(ZoneInfo("America/Sao_Paulo"))
+
+def determine_query_complexity(query: str) -> str:
+    """
+    Determina a complexidade da query para selecionar MAX_CANDIDATES adequado.
+    
+    Args:
+        query: Query do usuário
+        
+    Returns:
+        str: Nível de complexidade ('SIMPLE', 'MODERATE', 'COMPLEX', 'VERY_COMPLEX')
+    """
+    query_lower = query.lower()
+    
+    # Classificação determinística usando constantes centralizadas
+    for complexity, patterns in COMPLEXITY_PATTERNS.items():
+        if any(pattern in query_lower for pattern in patterns):
+            logger.debug(f"[COMPLEXITY] Determinística: {complexity} para '{query[:50]}...'")
+            return complexity
+    
+    # Heurísticas baseadas no tamanho e palavras-chave
+    word_count = len(query.split())
+    
+    if word_count <= 5:
+        return 'SIMPLE'
+    elif word_count <= 10:
+        return 'MODERATE'
+    elif word_count <= 20:
+        return 'COMPLEX'
+    else:
+        return 'VERY_COMPLEX'
+
+def get_dynamic_max_candidates(query: str) -> int:
+    """
+    Obtém número máximo de candidatos baseado na complexidade da query.
+    
+    Args:
+        query: Query do usuário
+        
+    Returns:
+        int: Número de candidatos para buscar
+    """
+    complexity = determine_query_complexity(query)
+    
+    if ENHANCED_CONFIG_AVAILABLE:
+        try:
+            max_candidates = get_max_candidates_for_complexity(complexity)
+            logger.info(f"[DYNAMIC_CANDIDATES] Enhanced config - Complexidade: {complexity} → {max_candidates} candidatos")
+            return max_candidates
+        except Exception as e:
+            logger.warning(f"[DYNAMIC_CANDIDATES] Erro ao obter config enhanced: {e}")
+    
+    # Usar constantes centralizadas
+    max_candidates = DYNAMIC_MAX_CANDIDATES.get(complexity, DYNAMIC_MAX_CANDIDATES['DEFAULT'])
+    logger.info(f"[DYNAMIC_CANDIDATES] Constantes centralizadas - Complexidade: {complexity} → {max_candidates} candidatos")
+    return max_candidates
 
 class ProductionQueryTransformer:
     """
@@ -414,12 +460,18 @@ class ProductionConversationalRAG:
         # Conexão com Astra DB
         self._initialize_database()
         
-        logger.info("Sistema RAG inicializado com sucesso")
+        if MULTIAGENT_LOGGER_AVAILABLE:
+            logger.info("Sistema RAG inicializado com sucesso", {"phase": "initialization", "status": "success"})
+        else:
+            logger.info("Sistema RAG inicializado com sucesso")
 
     def _initialize_database(self):
         """Inicializa conexão com base de dados"""
         try:
-            logger.info("Conectando ao Astra DB...")
+            if MULTIAGENT_LOGGER_AVAILABLE:
+                logger.info("Conectando ao Astra DB...", {"phase": "initialization", "component": "astra_db"})
+            else:
+                logger.info("Conectando ao Astra DB...")
             client = DataAPIClient()
             database = client.get_database(
                 system_config.rag.astra_db_api_endpoint, 
@@ -429,10 +481,18 @@ class ProductionConversationalRAG:
             
             # Teste de conectividade
             list(self.collection.find({}, limit=1))
-            logger.info(f"Conectado ao Astra DB - Collection '{system_config.rag.collection_name}' acessível")
+            if MULTIAGENT_LOGGER_AVAILABLE:
+                logger.info(f"Conectado ao Astra DB - Collection '{system_config.rag.collection_name}' acessível", {
+                    "phase": "initialization", "collection": system_config.rag.collection_name, "status": "connected"
+                })
+            else:
+                logger.info(f"Conectado ao Astra DB - Collection '{system_config.rag.collection_name}' acessível")
                 
         except Exception as e:
-            logger.error(f"Falha ao conectar Astra DB: {e}")
+            if MULTIAGENT_LOGGER_AVAILABLE:
+                logger.error(f"Falha ao conectar Astra DB: {e}", e, {"phase": "initialization", "component": "astra_db"})
+            else:
+                logger.error(f"Falha ao conectar Astra DB: {e}")
             raise
 
     def ask(self, user_message: str) -> str:
@@ -558,10 +618,15 @@ class ProductionConversationalRAG:
             logger.error(f"Erro codificando {image_path}: {e}")
             return None
 
-    def search_candidates(self, query_embedding: List[float], limit: int = None) -> List[dict]:
+    def search_candidates(self, query_embedding: List[float], limit: int = None, query: str = None) -> List[dict]:
         """Busca candidatos no Astra DB"""
         if limit is None:
-            limit = system_config.rag.max_candidates
+            if query:
+                # Usar MAX_CANDIDATES dinâmico baseado na complexidade
+                limit = get_dynamic_max_candidates(query)
+            else:
+                # Fallback para configuração estática
+                limit = system_config.rag.max_candidates
             
         try:
             logger.debug(f"[SEARCH] Buscando similaridade no Astra DB com limite de {limit}...")
@@ -631,79 +696,48 @@ class ProductionConversationalRAG:
             logger.error(f"Erro na verificação de relevância: {e}")
             return True  # Fallback conservador
 
-    def rerank_with_gpt(self, query: str, candidates: List[dict]) -> Tuple[List[dict], str]:
-        """Re-ranking com GPT-4"""
+    def select_best_candidates(self, query: str, candidates: List[dict]) -> Tuple[List[dict], str]:
+        """Seleção eficiente baseada em similaridade (substitui re-ranking)"""
         if not candidates:
             return [], "Nenhuma página disponível."
 
-        if len(candidates) == 1:
-            c = candidates[0]
+        # Ordena por score de similaridade (já vêm ordenados, mas garantimos)
+        sorted_candidates = sorted(candidates, key=lambda x: x['similarity_score'], reverse=True)
+        
+        # Seleciona top candidatos baseado na complexidade da query
+        query_complexity = determine_query_complexity(query)
+        max_candidates = DYNAMIC_MAX_CANDIDATES.get(query_complexity, 3)
+        
+        # Para queries simples, seleciona apenas o melhor candidato
+        if query_complexity == 'SIMPLE':
+            max_candidates = 1
+        
+        # Limita ao número de candidatos disponíveis
+        num_to_select = min(max_candidates, len(sorted_candidates))
+        selected = sorted_candidates[:num_to_select]
+        
+        # Cria justificativa
+        doc_names = []
+        for c in selected:
             doc_name = os.path.basename(c["file_path"]).replace(".png", "")
-            return [c], f"Única página {doc_name}, p.{c['page_num']}."
-
-        try:
-            pages_info = ", ".join(
-                f"{os.path.basename(c['file_path']).replace('.png','')} (p.{c['page_num']})"
-                for c in candidates
-            )
-            
-            prompt_head = (
-                f"Pergunta: '{query}'.\n"
-                f"Páginas ({len(candidates)}): {pages_info}.\n"
-                "Selecione apenas a página mais relevante. "
-                "Máximo 2 páginas se absolutamente necessário.\n\n"
-                "Formato:\n"
-                "Páginas_Selecionadas: [nº] ou [nº1, nº2]\n"
-                "Justificativa: …"
-            )
-            content = [{"type": "text", "text": prompt_head}]
-
-            for cand in candidates:
-                b64 = self.encode_image_to_base64(cand["file_path"])
-                if not b64:
-                    continue
-                    
-                preview = cand["markdown_text"][:300]
-                text_block = (
-                    f"\n=== {os.path.basename(cand['file_path']).replace('.png','').upper()} "
-                    f"- PÁGINA {cand['page_num']} ===\n"
-                    f"Score: {cand['similarity_score']:.4f}\n"
-                    f"Texto: {preview}{'…' if len(cand['markdown_text'])>300 else ''}\n"
-                )
-                content.append({"type": "text", "text": text_block})
-                content.append({"type": "image_url",
-                                "image_url": {"url": f"data:image/png;base64,{b64}"}})
-
-            response = self.openai_client.chat.completions.create(
-                model=system_config.rag.llm_model,
-                messages=[{"role": "user", "content": content}],
-                max_tokens=system_config.rag.max_tokens_rerank,
-                temperature=system_config.rag.temperature
-            )
-            
-            result = response.choices[0].message.content or ""
-            logger.debug(f"Re-ranker: {result}")
-
-            # Parse da resposta
-            selected_nums: List[int] = []
-            justification = "Justificativa ausente."
-            
-            for line in result.splitlines():
-                if line.lower().startswith("páginas_selecionadas"):
-                    selected_nums = [int(n) for n in re.findall(r"\d+", line)]
-                elif line.startswith("Justificativa:"):
-                    justification = line.replace("Justificativa:", "").strip()
-
-            chosen = [c for c in candidates if c["page_num"] in selected_nums]
-            if chosen:
-                return chosen, justification
-                
-            logger.warning("Re-ranker não selecionou páginas válidas")
-            return [candidates[0]], "Fallback: usando candidato mais similar."
-
-        except Exception as e:
-            logger.error(f"Erro re-ranking: {e}")
-            return [candidates[0]], "Fallback: erro no re-ranker."
+            doc_names.append(f"{doc_name} p.{c['page_num']}")
+        
+        justification = (
+            f"Selecionados {len(selected)} candidatos com maior similaridade "
+            f"para query {query_complexity}: {', '.join(doc_names)}. "
+            f"Scores: {[f'{c['similarity_score']:.3f}' for c in selected]}"
+        )
+        
+        if MULTIAGENT_LOGGER_AVAILABLE:
+            logger.debug(f"Seleção eficiente: {len(selected)} candidatos", {
+                "complexity": query_complexity,
+                "max_candidates": max_candidates,
+                "selected_count": len(selected),
+                "top_score": selected[0]['similarity_score'],
+                "method": "similarity_based"
+            })
+        
+        return selected, justification
 
     def generate_conversational_answer(self, query: str, selected: List[dict]) -> str:
         """Gera resposta conversacional otimizada"""
@@ -791,7 +825,7 @@ class ProductionConversationalRAG:
         logger.info(f"[RAG] 🔍 ETAPA 2: Buscando candidatos no Astra DB...")
         search_start = time.time()
         
-        candidates = self.search_candidates(embedding)
+        candidates = self.search_candidates(embedding, query=query)
         search_time = time.time() - search_start
         
         if not candidates:
@@ -808,7 +842,7 @@ class ProductionConversationalRAG:
         logger.info(f"[RAG] 🎯 ETAPA 3: Re-rankeando candidatos com GPT...")
         rerank_start = time.time()
         
-        selected, justification = self.rerank_with_gpt(query, candidates)
+        selected, justification = self.select_best_candidates(query, candidates)
         rerank_time = time.time() - rerank_start
         
         if not selected:
@@ -849,24 +883,29 @@ class ProductionConversationalRAG:
         # Prepara detalhes da resposta
         sel_details = [
             {
-                "document": os.path.basename(c["file_path"]).split("_page_")[0],
+                "document": c.get("doc_source", os.path.basename(c["file_path"]).split("_page_")[0]),
                 "page_number": c["page_num"],
                 "similarity_score": c["similarity_score"],
+                "image_filename": os.path.basename(c["file_path"]) if c.get("file_path") else None,
             }
             for c in selected
         ]
         
         all_details = [
             {
-                "document": os.path.basename(c["file_path"]).split("_page_")[0],
+                "document": c.get("doc_source", os.path.basename(c["file_path"]).split("_page_")[0]),
                 "page_number": c["page_num"],
                 "similarity_score": c["similarity_score"],
+                "image_filename": os.path.basename(c["file_path"]) if c.get("file_path") else None,
             }
             for c in candidates
         ]
         
         sel_str = " + ".join(
-            f"{p['document']} (p.{p['page_number']})" for p in sel_details
+            f"{p['document']}, {p['image_filename']} (p.{p['page_number']})" 
+            if p.get('image_filename') 
+            else f"{p['document']} (p.{p['page_number']})" 
+            for p in sel_details
         )
 
         return {

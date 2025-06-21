@@ -18,6 +18,7 @@ from researcher.reasoning.react_reasoning import (
     ValidationResult
 )
 from researcher.memory.base import Memory, MemoryEntry
+from researcher.utils.multiagent_logger import get_multiagent_logger
 
 
 class LoopSeverity(Enum):
@@ -454,7 +455,8 @@ class PersistentReActReasoner(ReActReasoner):
             return True
             
         except Exception as e:
-            print(f"Erro ao restaurar checkpoint {checkpoint_id}: {e}")
+            logger = get_multiagent_logger()
+            logger.error(f"Erro ao restaurar checkpoint {checkpoint_id}: {e}")
             return False
     
     async def suggest_next_step_intelligent(self, context_type: str = "general") -> Optional[str]:

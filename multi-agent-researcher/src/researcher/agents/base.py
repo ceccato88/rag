@@ -48,6 +48,7 @@ class AgentResult(BaseModel):
     start_time: datetime
     end_time: Optional[datetime] = None
     tokens_used: int = 0
+    reasoning_trace: Optional[str] = None  # Novo campo para trace de reasoning
 
 
 T = TypeVar('T')

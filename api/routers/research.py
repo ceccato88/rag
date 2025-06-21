@@ -134,7 +134,7 @@ async def research_query(
             timestamp=agent_result.end_time.isoformat() if agent_result.end_time else datetime.utcnow().isoformat(),
             confidence_score=confidence_score,
             sources=sources,
-            reasoning_trace=getattr(agent_result, 'reasoning_trace', None),
+            reasoning_trace=agent_result.reasoning_trace,  # Sempre presente no sistema enhanced
             error=agent_result.error if agent_result.status.name == "FAILED" else None
         )
         

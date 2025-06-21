@@ -1,5 +1,5 @@
 """
-Constantes e valores padrão para o sistema RAG Multi-Agente Refatorado v2.0.0
+Constantes e valores padrão para o sistema RAG Multi-Agente
 
 Este arquivo centraliza todas as constantes utilizadas no sistema refatorado,
 fornecendo valores padrão otimizados para as APIs que usam modelos nativos.
@@ -240,6 +240,40 @@ QUERY_COMPLEXITY = {
 }
 
 # =============================================================================
+# CONFIGURAÇÕES DE COMPLEXIDADE DINÂMICA
+# =============================================================================
+
+COMPLEXITY_PATTERNS = {
+    'SIMPLE': [
+        "what is", "define", "meaning of", "explain",
+        "o que é", "definição de", "significado"
+    ],
+    'MODERATE': [
+        "how does", "why", "advantages", "disadvantages",
+        "como funciona", "por que", "vantagens", "desvantagens"
+    ],
+    'COMPLEX': [
+        "compare", "analyze", "evaluate", "assess",
+        "comparar", "analisar", "avaliar", "assessment"
+    ],
+    'VERY_COMPLEX': [
+        "comprehensive analysis", "detailed comparison", "in-depth study",
+        "análise abrangente", "comparação detalhada", "estudo aprofundado"
+    ]
+}
+
+# Centralizado do enhanced_config.py
+DYNAMIC_MAX_CANDIDATES = {
+    'SIMPLE': 2,         # Queries simples precisam de menos documentos
+    'MODERATE': 3,       # Queries moderadas usam padrão atual
+    'COMPLEX': 4,        # Queries complexas precisam de mais contexto
+    'VERY_COMPLEX': 5,   # Queries muito complexas precisam máximo contexto
+    'DEFAULT': 3,        # Fallback para casos não classificados
+    'MINIMUM': 2,        # Limite mínimo absoluto
+    'MAXIMUM': 6         # Limite máximo absoluto
+}
+
+# =============================================================================
 # PADRÕES DE QUERY PARA ESPECIALISTAS
 # =============================================================================
 
@@ -307,7 +341,14 @@ LOGGING_CONFIG = {
     'COMPRESS_ROTATED_LOGS': True,                  # Compressão para economizar espaço
     'ASYNC_LOGGING': True,                          # Logging assíncrono para performance
     'ERROR_NOTIFICATION_THRESHOLD': 10,             # Notificar após 10 erros/minuto
-    'PERFORMANCE_LOG_THRESHOLD': 5.0                # Log operações > 5 segundos
+    'PERFORMANCE_LOG_THRESHOLD': 5.0,               # Log operações > 5 segundos
+    
+    # Multi-Agent System Logging
+    'ENABLE_MULTIAGENT_LOGS': True,                 # Logs do sistema multi-agente
+    'MULTIAGENT_LOG_LEVEL': 'INFO',                 # Level específico para multi-agente
+    'ENABLE_REASONING_TRACE_LOGS': True,            # Logs detalhados do reasoning
+    'ENABLE_SUBAGENT_LOGS': True,                   # Logs dos subagentes
+    'MULTIAGENT_LOG_FILE': 'multiagent.log',        # Arquivo específico para multi-agente
 }
 
 # =============================================================================
@@ -504,6 +545,125 @@ DOCKER_CONFIG = {
 }
 
 # =============================================================================
+# CONFIGURAÇÕES ENHANCED (centralizadas do enhanced_config.py)
+# =============================================================================
+
+# Thresholds de similaridade otimizados por complexidade
+ENHANCED_SIMILARITY_THRESHOLDS = {
+    'SIMPLE': 0.70,      # Mais restritivo para queries simples
+    'MODERATE': 0.65,    # Balanceado para queries moderadas
+    'COMPLEX': 0.55,     # Mais permissivo para queries complexas
+    'VERY_COMPLEX': 0.50, # Muito permissivo para máxima cobertura
+    'DEFAULT': 0.65,
+    'MINIMUM': 0.30,     # Limite mínimo absoluto
+    'MAXIMUM': 0.90      # Limite máximo para alta precisão
+}
+
+# Critérios de suficiência por complexidade
+ENHANCED_SUFFICIENCY_CRITERIA = {
+    'SIMPLE': {
+        'relevance_threshold': 0.70,
+        'coverage_threshold': 0.60,
+        'max_critical_gaps': 1
+    },
+    'MODERATE': {
+        'relevance_threshold': 0.65,
+        'coverage_threshold': 0.70,
+        'max_critical_gaps': 2
+    },
+    'COMPLEX': {
+        'relevance_threshold': 0.60,
+        'coverage_threshold': 0.75,
+        'max_critical_gaps': 2
+    },
+    'VERY_COMPLEX': {
+        'relevance_threshold': 0.55,
+        'coverage_threshold': 0.80,
+        'max_critical_gaps': 3
+    }
+}
+
+# Limites de iterações por complexidade
+ENHANCED_ITERATION_LIMITS = {
+    'SIMPLE': 1,         # Uma iteração é suficiente
+    'MODERATE': 2,       # Máximo 2 iterações
+    'COMPLEX': 2,        # Máximo 2 iterações (otimizado)
+    'VERY_COMPLEX': 3,   # Máximo 3 para casos muito complexos
+    'DEFAULT': 2,
+    'MINIMUM': 1,
+    'MAXIMUM': 3         # Limite absoluto para performance
+}
+
+# Tokens enhanced por operação
+ENHANCED_TOKEN_LIMITS = {
+    'MAX_TOKENS_DECOMPOSITION': 1500,    # Mais tokens para decomposição complexa
+    'MAX_TOKENS_EVALUATION': 800,       # Tokens para avaliação de documentos
+    'MAX_TOKENS_SYNTHESIS': 3000,       # Mais tokens para síntese coordenada
+    'MAX_TOKENS_CONFLICT_RESOLUTION': 500,
+    'MAX_TOKENS_QUALITY_ASSESSMENT': 300,
+    
+    # Por especialista
+    'CONCEPTUAL_MAX_TOKENS': 1200,
+    'COMPARATIVE_MAX_TOKENS': 1500,
+    'TECHNICAL_MAX_TOKENS': 1800,
+    'EXAMPLES_MAX_TOKENS': 1000,
+    'GENERAL_MAX_TOKENS': 1000
+}
+
+# Pesos para métricas de qualidade
+ENHANCED_QUALITY_WEIGHTS = {
+    'query_relevance': 0.30,      # Importância alta - responder à pergunta
+    'completeness': 0.25,         # Importante - cobrir todos os aspectos
+    'coherence': 0.20,           # Importante - resposta coerente
+    'source_utilization': 0.15,  # Moderado - usar fontes adequadamente
+    'clarity': 0.10              # Menor - clareza da escrita
+}
+
+# Configurações de fallback enhanced
+ENHANCED_FALLBACK = {
+    'USE_SIMPLE_TASK_ON_FAILURE': True,
+    'REDUCE_COMPLEXITY_ON_ERROR': True,
+    'FALLBACK_TO_SINGLE_SPECIALIST': True,
+    'EMERGENCY_THRESHOLD_REDUCTION': 0.20,  # Reduzir em 20%
+    'MIN_EMERGENCY_CANDIDATES': 3,
+    'MAX_FALLBACK_ATTEMPTS': 2
+}
+
+# Otimizações por especialista
+ENHANCED_SPECIALIST_OPTIMIZATIONS = {
+    'CONCEPTUAL': {
+        'similarity_threshold': 0.70,  # Muito restritivo - só conceitos precisos
+        'preferred_sections': ['definitions', 'introductions', 'concepts']
+    },
+    'COMPARATIVE': {
+        'similarity_threshold': 0.60,  # Moderado - comparações relevantes
+        'preferred_sections': ['comparisons', 'analysis', 'versus']
+    },
+    'TECHNICAL': {
+        'similarity_threshold': 0.65,  # Moderadamente restritivo - detalhes técnicos
+        'preferred_sections': ['implementation', 'technical', 'methodology']
+    },
+    'EXAMPLES': {
+        'similarity_threshold': 0.55,  # Permissivo - exemplos práticos
+        'preferred_sections': ['examples', 'case_studies', 'applications']
+    },
+    'GENERAL': {
+        'similarity_threshold': 0.50,  # Mais permissivo - informações gerais
+        'preferred_sections': ['overview', 'summary', 'general']
+    }
+}
+
+# Timeouts otimizados enhanced
+ENHANCED_TIMEOUTS = {
+    'DECOMPOSITION_TIMEOUT': 30.0,      # 30s para decomposição
+    'SUBAGENT_TIMEOUT': 60.0,           # 60s por subagente
+    'SYNTHESIS_TIMEOUT': 45.0,          # 45s para síntese
+    'EVALUATION_TIMEOUT': 20.0,         # 20s para avaliação
+    'CONFLICT_RESOLUTION_TIMEOUT': 15.0, # 15s para resolução
+    'QUALITY_ASSESSMENT_TIMEOUT': 10.0   # 10s para qualidade
+}
+
+# =============================================================================
 # HELPER FUNCTIONS
 # =============================================================================
 
@@ -566,6 +726,37 @@ def get_production_config() -> dict:
         'OPTIMIZED_FOR_PERFORMANCE': True,
         'SECURITY_ENHANCED': True
     }
+
+def get_enhanced_config(complexity: str, specialist_type: str = None) -> dict:
+    """
+    Retorna configuração enhanced otimizada baseada na complexidade e especialista
+    CENTRALIZADA - substitui enhanced_config.get_optimized_config()
+    
+    Args:
+        complexity: 'simple', 'moderate', 'complex', 'very_complex'
+        specialist_type: 'conceptual', 'comparative', 'technical', 'examples', 'general'
+    
+    Returns:
+        Dict com configurações otimizadas
+    """
+    config = {
+        'similarity_threshold': ENHANCED_SIMILARITY_THRESHOLDS.get(complexity.upper(), 0.65),
+        'max_candidates': DYNAMIC_MAX_CANDIDATES.get(complexity.upper(), 3),  # Baseado na COMPLEXIDADE
+        'max_iterations': ENHANCED_ITERATION_LIMITS.get(complexity.upper(), 2),
+        'sufficiency_criteria': ENHANCED_SUFFICIENCY_CRITERIA.get(complexity.upper(), ENHANCED_SUFFICIENCY_CRITERIA['MODERATE'])
+    }
+    
+    # Aplicar otimizações específicas do especialista (apenas threshold e seções preferidas)
+    if specialist_type:
+        specialist_opts = ENHANCED_SPECIALIST_OPTIMIZATIONS.get(specialist_type.upper(), {})
+        # NÃO sobrescrever max_candidates - manter baseado na complexidade
+        if 'similarity_threshold' in specialist_opts:
+            config['similarity_threshold'] = specialist_opts['similarity_threshold']
+        if 'preferred_sections' in specialist_opts:
+            config['preferred_sections'] = specialist_opts['preferred_sections']
+    
+    return config
+
 
 def validate_production_config() -> list:
     """

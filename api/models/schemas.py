@@ -68,7 +68,7 @@ class ResearchResponse(BaseModel):
                 "timestamp": "2025-06-19T10:30:00Z",
                 "confidence_score": 0.85,
                 "sources": [{"title": "AI Basics", "url": "https://example.com"}],
-                "reasoning_trace": "1. Analisou query... 2. Buscou informações..."
+                "reasoning_trace": "=== Trace de Raciocínio - OpenAI Lead Researcher (agent-123) ===\n\n🔍 Passo 1: FACT_GATHERING\n⏰ 10:30:01\n💭 Coletando fatos para: Research planning for inteligência artificial\n👁️ Observações: Query complexity: moderate, Technical depth: moderate\n➡️ Próxima ação: Analisar fatos dados e relembrar conhecimento relevante\n\n──────────────────────────────────────────────────\n\n🔍 Passo 2: PLANNING\n⏰ 10:30:02\n💭 Criando plano para: Create comprehensive research plan for IA\n👁️ Observações: Recursos disponíveis: ['OpenAI gpt-4.1-mini', 'RAG subagents']\n➡️ Próxima ação: Desenvolver plano estruturado em etapas"
             }
         }
     )
@@ -82,7 +82,7 @@ class ResearchResponse(BaseModel):
     timestamp: str = Field(description="Timestamp ISO da resposta")
     confidence_score: Optional[float] = Field(default=None, description="Score de confiança (0-1)")
     sources: List[Dict[str, Any]] = Field(default_factory=list, description="Fontes utilizadas")
-    reasoning_trace: Optional[str] = Field(default=None, description="Trace do raciocínio")
+    reasoning_trace: str = Field(description="Trace completo do ReAct reasoning (sempre presente no sistema enhanced)")
     error: Optional[str] = Field(default=None, description="Mensagem de erro se aplicável")
 
 

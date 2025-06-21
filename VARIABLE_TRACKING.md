@@ -348,3 +348,42 @@
 - **Resultado**: Agora usa configuração centralizada através de `system_config.rag.temperature`
 - **Impacto**: Sistema de configuração centralizado preservado
 - **Prioridade**: ✅ RESOLVIDO
+
+---
+
+## 🔧 **NOVAS CONSTANTES ADICIONADAS (2025-06-20)**
+
+### ✅ **CONSTANTE: COMPLEXITY_PATTERNS**
+- **Status**: ✅ IMPLEMENTADO
+- **Localização**: `src/core/constants.py` (linhas 246-263)
+- **Propósito**: Padrões para determinar complexidade de queries automaticamente
+- **Estrutura**: 
+  ```python
+  COMPLEXITY_PATTERNS = {
+      'SIMPLE': ["what is", "define", "o que é", "definição"],
+      'MODERATE': ["how does", "why", "como funciona", "por que"],
+      'COMPLEX': ["compare", "analyze", "comparar", "analisar"],
+      'VERY_COMPLEX': ["comprehensive analysis", "detailed comparison"]
+  }
+  ```
+- **Uso**: `src/core/search.py:92` em `determine_query_complexity()`
+- **Impacto**: Remove valores hardcoded, segue boas práticas de configuração
+
+### ✅ **CONSTANTE: DYNAMIC_MAX_CANDIDATES**
+- **Status**: ✅ IMPLEMENTADO  
+- **Localização**: `src/core/constants.py` (linhas 265-271)
+- **Propósito**: MAX_CANDIDATES dinâmico baseado na complexidade da query
+- **Estrutura**:
+  ```python
+  DYNAMIC_MAX_CANDIDATES = {
+      'SIMPLE': 2,         # Queries simples precisam menos documentos
+      'MODERATE': 3,       # Queries moderadas usam padrão atual
+      'COMPLEX': 4,        # Queries complexas precisam mais contexto
+      'VERY_COMPLEX': 5,   # Queries muito complexas precisam máximo contexto
+      'DEFAULT': 3         # Fallback para casos não classificados
+  }
+  ```
+- **Uso**: `src/core/search.py:130` em `get_dynamic_max_candidates()`
+- **Problema Resolvido**: Sistema sempre usava fallback fixo de 3 candidatos
+- **Resultado**: Agora adapta automaticamente (2-5 candidatos) baseado na complexidade
+- **Impacto**: Melhora qualidade das respostas usando contexto adequado por complexidade

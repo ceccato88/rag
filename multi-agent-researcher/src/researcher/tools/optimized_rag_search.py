@@ -21,6 +21,7 @@ if env_file:
 sys.path.insert(0, str(Path(__file__).parents[4]))
 
 from researcher.tools.base import Tool, ToolDescription, ToolStatus, ToolResult
+from researcher.utils.multiagent_logger import get_multiagent_logger
 
 
 class OptimizedRAGSearchTool(Tool):
@@ -44,27 +45,28 @@ class OptimizedRAGSearchTool(Tool):
         
     def _initialize_rag(self):
         """Lazy initialization of RAG search system."""
-        print(f"🔧 [DEBUG] Initializing RAG. Current rag_system: {type(self.rag_system).__name__ if self.rag_system else 'None'}")
+        logger = get_multiagent_logger()
+        logger.debug(f"Initializing RAG. Current rag_system: {type(self.rag_system).__name__ if self.rag_system else 'None'}")
         
         if self.rag_system is None:
             try:
                 # Se um sistema RAG foi injetado, usar ele
                 if hasattr(self, 'injected_rag_system') and self.injected_rag_system:
-                    print(f"🔧 [DEBUG] Using injected RAG system: {type(self.injected_rag_system).__name__}")
+                    logger.debug(f"Using injected RAG system: {type(self.injected_rag_system).__name__}")
                     self.rag_system = self.injected_rag_system
                     return
                 
                 # Tentar importar sistema padrão
-                print("🔧 [DEBUG] No injected RAG found, trying to import ProductionConversationalRAG")
+                logger.debug("No injected RAG found, trying to import ProductionConversationalRAG")
                 from src.core.search import ProductionConversationalRAG
                 self.rag_system = ProductionConversationalRAG()
-                print("🔧 [DEBUG] ProductionConversationalRAG imported successfully")
+                logger.debug("ProductionConversationalRAG imported successfully")
             except ImportError as e:
                 # Fallback para modo demo se não conseguir importar
-                print(f"🔧 [DEBUG] ImportError: {e}. Falling back to None")
+                logger.debug(f"ImportError: {e}. Falling back to None")
                 self.rag_system = None
         else:
-            print(f"🔧 [DEBUG] RAG system already initialized: {type(self.rag_system).__name__}")
+            logger.debug(f"RAG system already initialized: {type(self.rag_system).__name__}")
         
     def get_description(self) -> ToolDescription:
         return ToolDescription(
@@ -131,7 +133,7 @@ class OptimizedRAGSearchTool(Tool):
                 return await self._generate_mock_results(query, search_top_k, focus_area)
             
             # Executar busca RAG otimizada
-            search_results = await self._perform_optimized_search(query, search_top_k, focus_area)
+            search_results = await self._perform_optimized_search(query, focus_area)
             
             execution_time = time.time() - start_time
             
@@ -162,7 +164,7 @@ class OptimizedRAGSearchTool(Tool):
                 "error": f"Optimized RAG search failed: {str(e)}"
             }
     
-    async def _perform_optimized_search(self, query: str, top_k: int, focus_area: str) -> Dict[str, Any]:
+    async def _perform_optimized_search(self, query: str, focus_area: str) -> Dict[str, Any]:
         """
         Executa busca otimizada usando o sistema RAG de produção.
         Modifica a query baseada no focus_area para melhor direcionamento.
@@ -171,8 +173,8 @@ class OptimizedRAGSearchTool(Tool):
         # Ajustar query baseada no foco
         focused_query = self._adjust_query_for_focus(query, focus_area)
         
-        # Executar busca até o ponto de reranking (sem geração final)
-        rag_result = await self._execute_rag_pipeline_partial(focused_query, top_k)
+        # Executar busca simples por similaridade (sem reranking nem geração final)
+        rag_result = await self._execute_rag_pipeline_partial(focused_query)
         
         if "error" in rag_result:
             raise Exception(rag_result["error"])
@@ -224,24 +226,26 @@ class OptimizedRAGSearchTool(Tool):
         
         return focus_adjustments.get(focus_area, query)
     
-    async def _execute_rag_pipeline_partial(self, query: str, top_k: int) -> Dict[str, Any]:
+    async def _execute_rag_pipeline_partial(self, query: str) -> Dict[str, Any]:
         """
-        Executa pipeline RAG até o ponto de reranking, retornando dados multimodais completos.
-        Os subagentes recebem o conteúdo original do banco vetorial: markdown + imagem base64.
+        Executa pipeline RAG simples (similaridade vetorial apenas), retornando dados multimodais completos.
+        Os subagentes recebem apenas os documentos mais similares sem reranking: markdown + imagem base64.
         """
+        logger = get_multiagent_logger()
         
         try:
             # Usar ProductionConversationalRAG para acessar dados brutos do banco
             if hasattr(self.rag_system, 'search_candidates'):
-                print(f"🔧 [DEBUG] Usando search_candidates para dados multimodais completos")
+                logger.debug("Usando search_candidates para dados multimodais completos")
                 
                 # 1. Gerar embedding da query
                 query_embedding = self.rag_system.get_query_embedding(query)
-                print(f"🔧 [DEBUG] Embedding gerado: {len(query_embedding)} dimensões")
+                logger.debug(f"Embedding gerado: {len(query_embedding)} dimensões")
                 
-                # 2. Buscar candidatos brutos do Astra DB
-                raw_candidates = self.rag_system.search_candidates(query_embedding, limit=top_k)
-                print(f"🔧 [DEBUG] Candidatos brutos encontrados: {len(raw_candidates)}")
+                # 2. Buscar candidatos brutos do Astra DB com MAX_CANDIDATES dinâmico
+                # Não passar limit para usar o sistema dinâmico baseado na complexidade
+                raw_candidates = self.rag_system.search_candidates(query_embedding, query=query)
+                logger.debug(f"Candidatos brutos encontrados: {len(raw_candidates)}")
                 
                 if not raw_candidates:
                     return {
@@ -251,9 +255,10 @@ class OptimizedRAGSearchTool(Tool):
                         "search_successful": False
                     }
                 
-                # 3. Re-ranking para selecionar os melhores
-                selected_candidates, justification = self.rag_system.rerank_with_gpt(query, raw_candidates)
-                print(f"🔧 [DEBUG] Re-ranking selecionou: {len(selected_candidates)} documentos")
+                # 3. Para subagentes: usar TODOS os candidatos retornados SEM reranking (busca simples)
+                # O número já foi determinado dinamicamente pelo sistema de complexidade
+                selected_candidates = raw_candidates  # Todos os candidatos por similaridade
+                logger.debug(f"Subagentes usando {len(selected_candidates)} candidatos por similaridade (sem reranking) - determinado por complexidade")
                 
                 # 4. Preparar dados multimodais completos para subagentes
                 multimodal_documents = []
@@ -274,18 +279,18 @@ class OptimizedRAGSearchTool(Tool):
                         "is_multimodal": True
                     }
                     multimodal_documents.append(multimodal_doc)
-                    print(f"🔧 [DEBUG] Documento multimodal preparado: página {multimodal_doc['page_number']}, imagem: {'Sim' if image_base64 else 'Não'}")
+                    logger.debug(f"Documento multimodal preparado: página {multimodal_doc['page_number']}, imagem: {'Sim' if image_base64 else 'Não'}")
                 
                 return {
                     "selected_pages_details": multimodal_documents,
                     "total_candidates": len(raw_candidates),
-                    "reranking_justification": justification,
+                    "selection_method": f"Busca simples por similaridade - Top {len(selected_candidates)} documentos",
                     "search_successful": True
                 }
             
             # Fallback para SimpleRAG (sem multimodal)
             elif hasattr(self.rag_system, 'search'):
-                print(f"🔧 [DEBUG] Fallback: usando SimpleRAG (sem multimodal)")
+                logger.debug("Fallback: usando SimpleRAG (sem multimodal)")
                 result_text = self.rag_system.search(query)
                 
                 if result_text and "No results" not in result_text:
@@ -353,11 +358,12 @@ class OptimizedRAGSearchTool(Tool):
     
     def set_rag_system(self, rag_system):
         """Inject a RAG system into this tool."""
-        print(f"🔧 [DEBUG] Injecting RAG system into tool: {type(rag_system).__name__}")
+        logger = get_multiagent_logger()
+        logger.debug(f"Injecting RAG system into tool: {type(rag_system).__name__}")
         self.rag_system = rag_system
         # Also set as injected system for reference
         self.injected_rag_system = rag_system
-        print(f"🔧 [DEBUG] RAG system injection complete. Tool now has: {type(self.rag_system).__name__}")
+        logger.debug(f"RAG system injection complete. Tool now has: {type(self.rag_system).__name__}")
 
 
 class DocumentProcessor:

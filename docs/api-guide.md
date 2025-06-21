@@ -22,14 +22,13 @@ grep API_BEARER_TOKEN .env
 
 **Endpoint**: `POST /api/v1/research`
 
-**Descrição**: Pesquisa avançada com sistema multi-agente, reasoning ReAct e síntese crítica.
+**Descrição**: Pesquisa avançada com sistema multi-agente enhanced e síntese crítica.
 
 **Request**:
 ```json
 {
   "query": "Como Zep implementa temporal knowledge graphs para memória de agentes AI?",
-  "use_multiagent": true,
-  "max_subagents": 3,
+  "focus_areas": ["conceptual", "technical", "examples"],
   "timeout": 300
 }
 ```
@@ -39,14 +38,14 @@ grep API_BEARER_TOKEN .env
 {
   "success": true,
   "query": "Como Zep implementa temporal knowledge graphs...",
-  "result": "# 🤖 AI-Coordinated Research Synthesis\n\n**Coordinator Model**: gpt-4.1\n**Synthesis Method**: Advanced AI Critical Analysis\n**Subagents Processed**: 3/3\n**Timestamp**: 2025-06-19 23:46:44\n\n---\n\n## Resumo Executivo\n\nEsta análise compara criticamente...",
+  "result": "# 🤖 Enhanced Multi-Agent Research Synthesis\n\n**Coordinator Model**: gpt-4.1\n**Synthesis Method**: Enhanced AI Critical Analysis\n**Specialists Used**: 3 (CONCEPTUAL, TECHNICAL, EXAMPLES)\n**Timestamp**: 2025-06-19 23:46:44\n\n---\n\n## Resumo Executivo\n\nEsta análise compara criticamente...",
   "agent_id": "abc-123-def-456",
   "status": "COMPLETED",
   "processing_time": 24.5,
   "timestamp": "2025-06-19T23:46:44.123456",
-  "confidence_score": null,
+  "confidence_score": 0.87,
   "sources": [],
-  "reasoning_trace": null,
+  "reasoning_trace": "=== Trace de Raciocínio - OpenAI Lead Researcher (abc-123) ===\n\n🔍 Passo 1: FACT_GATHERING\n⏰ 23:46:12\n💭 Coletando fatos para: Research planning for Zep temporal knowledge graphs\n👁️ Observações: Query complexity: high, Technical depth: high\n➡️ Próxima ação: Analisar fatos dados e relembrar conhecimento relevante\n\n──────────────────────────────────────────────────\n\n🔍 Passo 2: PLANNING\n⏰ 23:46:13\n💭 Criando plano para: Create comprehensive research plan for Zep temporal KG\n👁️ Observações: Recursos disponíveis: ['OpenAI gpt-4.1-mini', 'RAG subagents']\n➡️ Próxima ação: Desenvolver plano estruturado em etapas\n\n──────────────────────────────────────────────────\n\n🔍 Passo 3: EXECUTION\n⏰ 23:46:14\n💭 Executando: LLM-based decomposition informed by ReAct reasoning\n👁️ Observações: Integrating manual reasoning with gpt-4.1-mini for optimal focus area selection\n➡️ Próxima ação: Avaliar resultado e determinar próximo passo",
   "error": null
 }
 ```
@@ -55,9 +54,11 @@ grep API_BEARER_TOKEN .env
 | Campo | Tipo | Obrigatório | Descrição |
 |-------|------|-------------|-----------|
 | `query` | string | ✅ | Query de pesquisa |
-| `use_multiagent` | boolean | ✅ | Ativar sistema multi-agente |
-| `max_subagents` | integer | ❌ | Máximo de subagentes (padrão: 3) |
+| `focus_areas` | array | ❌ | Areas de foco específicas |
+| `max_specialists` | integer | ❌ | Máximo de especialistas (padrão: 3) |
 | `timeout` | integer | ❌ | Timeout em segundos (padrão: 300) |
+
+**Nota**: O parâmetro `include_reasoning` foi removido pois o reasoning está **sempre habilitado** por padrão no sistema enhanced.
 
 **Exemplo cURL**:
 ```bash
@@ -66,22 +67,21 @@ curl -X POST "http://localhost:8000/api/v1/research" \
   -H "Content-Type: application/json" \
   -d '{
     "query": "Explique as vantagens do Zep vs MemGPT para aplicações empresariais",
-    "use_multiagent": true
+    "focus_areas": ["comparative", "applications", "technical"]
   }'
 ```
 
 ### 2. 🔍 Simple Search
 
-**Endpoint**: `POST /api/v1/simple`
+**Endpoint**: `POST /api/v1/research`
 
-**Descrição**: Busca RAG simples e direta, sem multi-agente.
+**Descrição**: Busca RAG simples e direta, usando o endpoint unificado.
 
 **Request**:
 ```json
 {
   "query": "O que é Zep?",
-  "collection_name": "pdf_documents",
-  "top_k": 5
+  "max_candidates": 5
 }
 ```
 
@@ -104,7 +104,7 @@ curl -X POST "http://localhost:8000/api/v1/research" \
 
 **Exemplo cURL**:
 ```bash
-curl -X POST "http://localhost:8000/api/v1/simple" \
+curl -X POST "http://localhost:8000/api/v1/research" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"query": "O que é temporal knowledge graph?"}'
@@ -161,12 +161,11 @@ curl -X POST "http://localhost:8000/api/v1/index" \
 ```json
 {
   "status": "healthy",
-  "uptime_seconds": 3712.6,
-  "components": {
-    "memory": true,
-    "simple_rag": true,
-    "lead_researcher": true
-  },
+  "uptime_seconds": 3712.6,    "components": {
+      "database": true,
+      "simple_rag": true,
+      "enhanced_system": true
+    },
   "metrics": {
     "total_requests": 42,
     "successful_requests": 40,
@@ -197,24 +196,25 @@ curl http://localhost:8000/api/v1/health | jq
   "system_stats": {
     "uptime_hours": 2.4,
     "total_queries": 25,
-    "multiagent_queries": 20,
+    "enhanced_queries": 20,
     "simple_queries": 5,
     "average_processing_time": 12.3
   },
-  "agent_stats": {
-    "total_subagents_spawned": 60,
+  "specialist_stats": {
+    "total_specialists_used": 60,
     "successful_executions": 58,
     "failed_executions": 2,
-    "focus_area_distribution": {
-      "conceptual": 18,
-      "technical": 22,
-      "comparative": 15,
-      "examples": 12
+    "specialist_distribution": {
+      "CONCEPTUAL": 18,
+      "TECHNICAL": 22,
+      "COMPARATIVE": 15,
+      "EXAMPLES": 12,
+      "GENERAL": 8
     }
   },
   "model_usage": {
     "coordinator_calls": 20,
-    "subagent_calls": 60,
+    "specialist_calls": 60,
     "total_tokens": 125000
   }
 }
@@ -275,14 +275,15 @@ curl http://localhost:8000/api/v1/health | jq
 ```json
 {
   "query": "string",                    // Obrigatório
-  "use_multiagent": true,              // Obrigatório para multi-agent
-  "max_subagents": 3,                  // 1-5, padrão: 3
-  "timeout": 300,                      // Segundos, padrão: 300
   "focus_areas": ["technical", "examples"], // Forçar focus areas específicas
-  "reasoning_detail": "full",          // "minimal"|"full", padrão: minimal
+  "max_specialists": 3,                // 1-5, padrão: 3
+  "timeout": 300,                      // Segundos, padrão: 300
+  "complexity": "auto",                // "simple"|"moderate"|"complex"|"very_complex"|"auto"
   "synthesis_model": "gpt-4.1",       // Override coordinator model
   "parallel_execution": true          // true|false, padrão: true
 }
+
+**Nota**: O reasoning está sempre habilitado - não é necessário especificar `include_reasoning`.
 ```
 
 ### Simple Search Parameters
@@ -290,32 +291,39 @@ curl http://localhost:8000/api/v1/health | jq
 ```json
 {
   "query": "string",                   // Obrigatório
-  "collection_name": "pdf_documents", // Padrão: pdf_documents
-  "top_k": 5,                         // 1-10, padrão: 5
-  "similarity_threshold": 0.7,        // 0.0-1.0, padrão: 0.7
+  "max_candidates": 5,                // 1-10, padrão: varies by complexity
+  "similarity_threshold": 0.7,        // 0.0-1.0, padrão: varies by specialist
   "include_images": false             // true|false, padrão: false
 }
 ```
 
 ## 🎯 Focus Areas na API
 
-### Seleção Automática
+### Seleção Automática de Especialistas
 ```json
 {
-  "query": "O que é Zep?",
-  "use_multiagent": true
+  "query": "O que é Zep?"
 }
-// ⬇️ Sistema seleciona: ["conceptual", "overview", "examples"]
+// ⬇️ Sistema detecta padrões "O que é" → Seleciona CONCEPTUAL
+// ⬇️ CONCEPTUAL automaticamente usa focus_area: "conceptual"
 ```
 
-### Seleção Manual
+### Seleção Múltipla (Query Complexa)
+```json
+{
+  "query": "Compare Zep vs MemGPT para implementação em chatbots"
+}
+// ⬇️ Sistema detecta: "Compare" → COMPARATIVE + "implementação" → TECHNICAL
+// ⬇️ 2 especialistas executam em paralelo com focus areas correspondentes
+```
+
+### Override Manual (Opcional)
 ```json
 {
   "query": "Compare Zep vs MemGPT",
-  "use_multiagent": true,
   "focus_areas": ["comparative", "technical", "applications"]
 }
-// ⬇️ Força as focus areas especificadas
+// ⬇️ Força os focus areas especificados (bypassa seleção automática)
 ```
 
 ### Focus Areas Disponíveis
@@ -389,11 +397,13 @@ def api_request_with_retry(url, data, headers, max_retries=3):
 
 ### Multi-Agent Response Structure
 ```markdown
-# 🤖 AI-Coordinated Research Synthesis
+# 🤖 Enhanced Multi-Agent Research Synthesis
 
 **Coordinator Model**: gpt-4.1
-**Synthesis Method**: Advanced AI Critical Analysis  
-**Subagents Processed**: 3/3
+**Synthesis Method**: Enhanced AI Critical Analysis  
+**Specialists Used**: 3 (CONCEPTUAL, TECHNICAL, EXAMPLES)
+**Query Complexity**: MODERATE
+**ReAct Reasoning**: ENABLED (sempre ativo)
 **Timestamp**: 2025-06-19 23:46:44
 
 ---
@@ -402,26 +412,122 @@ def api_request_with_retry(url, data, headers, max_retries=3):
 [Síntese crítica dos achados]
 
 ## Achados Principais
-### 1. [Focus Area 1] 
+### 1. [Specialist: CONCEPTUAL] 
 [Resultados específicos]
 
-### 2. [Focus Area 2]
+### 2. [Specialist: TECHNICAL]
 [Resultados específicos]
 
 ---
 
 ## 📊 Research Metadata
-- **Decomposition**: LLM-based
-- **Total Tasks**: 3
+- **Complexity Detection**: Auto-detected as MODERATE
+- **Total Specialists**: 3
 - **Success Rate**: 3/3 (100%)
-- **AI Models**: Subagents (gpt-4.1-mini) + Coordinator (gpt-4.1)
+- **AI Models**: Specialists (gpt-4.1-mini) + Coordinator (gpt-4.1)
+- **Reasoning Steps**: 12 (fact_gathering, planning, execution, validation)
 ```
+
+### Response Fields
+| Campo | Tipo | Descrição |
+|-------|------|-----------|
+| `success` | boolean | Status da operação |
+| `query` | string | Query original processada |
+| `result` | string | Síntese final estruturada |
+| `agent_id` | string | ID único do agente coordenador |
+| `status` | string | Estado final (COMPLETED/FAILED) |
+| `processing_time` | float | Tempo total em segundos |
+| `timestamp` | string | Timestamp ISO da conclusão |
+| `confidence_score` | float | Nível de confiança do reasoning (0.0-1.0) |
+| `sources` | array | Fontes dos documentos consultados |
+| `reasoning_trace` | string | **Trace completo do ReAct reasoning (sempre presente)** |
+| `error` | string/null | Mensagem de erro se houver falha |
 
 ### Quality Indicators
 - **Coordinator Model**: `gpt-4.1` ← Síntese avançada ativada
-- **Success Rate**: `100%` ← Todos subagentes executaram
+- **Success Rate**: `100%` ← Todos especialistas executaram
 - **Processing Time**: `< 30s` ← Performance aceitável
-- **Synthesis Method**: `Advanced AI Critical Analysis` ← Reasoning sofisticado
+- **Synthesis Method**: `Enhanced AI Critical Analysis` ← Reasoning sofisticado
+- **Query Complexity**: `MODERATE` ← Detecção automática de complexidade
+- **Confidence Score**: `0.87` ← Alta confiança no reasoning
+- **Reasoning Trace**: `Sempre presente` ← Rastreabilidade completa
+
+## 🧠 Reasoning Trace (Sempre Habilitado)
+
+O sistema enhanced **sempre** inclui o trace completo do ReAct reasoning no response, fornecendo transparência total sobre o processo de tomada de decisão.
+
+### Estrutura do Reasoning Trace
+```
+=== Trace de Raciocínio - OpenAI Lead Researcher (agent-id) ===
+
+🔍 Passo 1: FACT_GATHERING
+⏰ 23:46:12
+💭 Coletando fatos para: Research planning for [query]
+👁️ Observações: Query complexity: [level], Technical depth: [level]
+➡️ Próxima ação: Analisar fatos dados e relembrar conhecimento relevante
+
+──────────────────────────────────────────────────
+
+🔍 Passo 2: PLANNING
+⏰ 23:46:13
+💭 Criando plano para: Create comprehensive research plan
+👁️ Observações: Recursos disponíveis: ['OpenAI gpt-4.1-mini', 'RAG subagents']
+➡️ Próxima ação: Desenvolver plano estruturado em etapas
+
+──────────────────────────────────────────────────
+
+🔍 Passo 3: EXECUTION
+⏰ 23:46:14
+💭 Executando: LLM-based/Heuristic decomposition
+👁️ Observações: Integrating reasoning with optimal focus area selection
+➡️ Próxima ação: Avaliar resultado e determinar próximo passo
+
+──────────────────────────────────────────────────
+
+🔍 Passo 4: VALIDATION
+⏰ 23:46:15
+💭 Final reasoning validation: Consistent
+👁️ Observações: Confidence: 0.87, Progress: All steps completed successfully
+➡️ Próxima ação: Processo concluído com sucesso
+```
+
+### Tipos de Steps do Reasoning
+| Step Type | Descrição | Momento |
+|-----------|-----------|---------|
+| `FACT_GATHERING` | Coleta de fatos e contexto | Início do planejamento |
+| `PLANNING` | Criação do plano estruturado | Após fact gathering |
+| `EXECUTION` | Execução de subagentes | Durante processamento |
+| `VALIDATION` | Validação do progresso | Várias etapas |
+| `SYNTHESIS` | Síntese final avançada | Coordenação de resultados |
+| `REFLECTION` | Reflexão sobre problemas | Quando necessário |
+
+### Usando o Reasoning Trace
+```python
+# Exemplo de análise do trace
+response = client.multi_agent_research("Como implementar Zep?")
+
+# Trace completo
+trace = response["reasoning_trace"]
+print("TRACE COMPLETO:")
+print(trace)
+
+# Análise de confiança
+confidence = response["confidence_score"]
+print(f"\nCONFIANÇA: {confidence:.2f}")
+
+# Verificar se houve reflexões (indicam problemas)
+if "REFLECTION" in trace:
+    print("⚠️ ATENÇÃO: Reasoning teve que se ajustar durante execução")
+else:
+    print("✅ SUCESSO: Reasoning executou sem problemas")
+```
+
+### Benefícios do Reasoning Sempre Ativo
+1. **Transparência**: Veja exatamente como o sistema tomou decisões
+2. **Debugging**: Identifique problemas no processo de reasoning
+3. **Confiança**: Avalie a qualidade do raciocínio antes de usar resultados
+4. **Auditoria**: Trace completo para compliance e governança
+5. **Otimização**: Identifique padrões para melhorar queries futuras
 
 ## 📚 Integration Examples
 
@@ -439,8 +545,8 @@ class RAGMultiAgentClient:
         }
     
     def multi_agent_research(self, query: str, **kwargs):
-        """Executa pesquisa multi-agente"""
-        data = {"query": query, "use_multiagent": True, **kwargs}
+        """Executa pesquisa multi-agente enhanced"""
+        data = {"query": query, **kwargs}
         
         response = requests.post(
             f"{self.base_url}/api/v1/research",
@@ -452,11 +558,11 @@ class RAGMultiAgentClient:
         return response.json()
     
     def simple_search(self, query: str, **kwargs):
-        """Executa busca simples"""
+        """Executa busca simples via API unificada"""
         data = {"query": query, **kwargs}
         
         response = requests.post(
-            f"{self.base_url}/api/v1/simple",
+            f"{self.base_url}/api/v1/research",
             json=data,
             headers=self.headers,
             timeout=30
@@ -470,14 +576,16 @@ client = RAGMultiAgentClient(
     api_token="your_bearer_token"
 )
 
-# Pesquisa multi-agente
+# Pesquisa multi-agente enhanced
 result = client.multi_agent_research(
     "Como Zep se compara com MemGPT?",
-    max_subagents=3,
-    focus_areas=["comparative", "technical"]
+    focus_areas=["comparative", "technical"],
+    max_specialists=3
 )
 
 print(result["result"])
+print("\n--- TRACE DE REASONING (SEMPRE PRESENTE) ---")
+print(result["reasoning_trace"])
 ```
 
 ### JavaScript/Node.js Example
@@ -492,7 +600,7 @@ class RAGMultiAgentClient {
     }
     
     async multiAgentResearch(query, options = {}) {
-        const data = { query, use_multiagent: true, ...options };
+        const data = { query, ...options };
         
         const response = await fetch(`${this.baseUrl}/api/v1/research`, {
             method: 'POST',
@@ -512,10 +620,15 @@ const client = new RAGMultiAgentClient(
 
 const result = await client.multiAgentResearch(
     'Explique temporal knowledge graphs no Zep',
-    { max_subagents: 3 }
+    { 
+        focus_areas: ['conceptual', 'technical'], 
+        max_specialists: 3
+    }
 );
 
 console.log(result.result);
+console.log('\n--- TRACE DE REASONING (SEMPRE PRESENTE) ---');
+console.log(result.reasoning_trace);
 ```
 
 ---
@@ -524,6 +637,7 @@ console.log(result.result);
 
 - [⚡ Quick Start](quick-start.md) - Setup rápido
 - [🤖 Sistema Multi-Agente](multi-agent.md) - Como funciona internamente
-- [🔧 Configuração](configuration.md) - Configurações avançadas
-- [🚀 Deployment](deployment.md) - Deploy em produção
-- [🔧 Troubleshooting](troubleshooting.md) - Resolução de problemas
+- [� Sistema Enhanced](enhanced-system.md) - Detalhes do sistema enhanced
+- [🏗️ Arquitetura](architecture.md) - Arquitetura do sistema
+- [� ReAct Reasoning](reasoning.md) - Sistema de reasoning
+- [🧪 Testing](testing.md) - Testes e validação

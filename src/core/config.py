@@ -255,6 +255,13 @@ class ProductionConfig:
     log_rotation_count: int = get_env_int('LOG_ROTATION_COUNT', LOGGING_CONFIG['LOG_ROTATION_COUNT'])
     async_logging: bool = get_env_bool('ASYNC_LOGGING', LOGGING_CONFIG['ASYNC_LOGGING'])
     
+    # Multi-Agent System Logging
+    enable_multiagent_logs: bool = get_env_bool('ENABLE_MULTIAGENT_LOGS', LOGGING_CONFIG['ENABLE_MULTIAGENT_LOGS'])
+    multiagent_log_level: str = os.getenv('MULTIAGENT_LOG_LEVEL', LOGGING_CONFIG['MULTIAGENT_LOG_LEVEL'])
+    enable_reasoning_trace_logs: bool = get_env_bool('ENABLE_REASONING_TRACE_LOGS', LOGGING_CONFIG['ENABLE_REASONING_TRACE_LOGS'])
+    enable_subagent_logs: bool = get_env_bool('ENABLE_SUBAGENT_LOGS', LOGGING_CONFIG['ENABLE_SUBAGENT_LOGS'])
+    multiagent_log_file: str = os.getenv('MULTIAGENT_LOG_FILE', LOGGING_CONFIG['MULTIAGENT_LOG_FILE'])
+    
     # Segurança e Rate Limiting (removido hardcoding)
     # Agora usando SecurityConfig
     

@@ -41,7 +41,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - [%(filename)s:%(lineno)d] - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(config.paths.log_dir / "api_multiagent_v2.log")
+        logging.FileHandler(config.paths.log_dir / "api_multiagent.log")
     ]
 )
 
@@ -112,7 +112,7 @@ app = FastAPI(
          -d '{"url": "https://example.com/document.pdf"}'
     ```
     """,
-    version="2.0.0",
+    version="1.0.0",
     lifespan=lifespan_manager,
     docs_url="/docs",
     redoc_url="/redoc",
@@ -178,7 +178,7 @@ async def root():
         "documentation": "/docs",
         "alternative_docs": "/redoc",
         "health_check": "/api/v1/health",
-        "version": "2.0.0",
+        "version": "1.0.0",
         "architecture": "Multi-Agent RAG",
         "features": [
             "🤖 Sistema Multi-Agente",
