@@ -29,6 +29,9 @@ from .enhanced_unified_config import get_config_for_task, unified_config
 from .enhanced_config import SPECIALIST_OPTIMIZATIONS  # Manter para seções preferidas
 
 # Configuração do sistema
+system_config = SystemConfig()
+
+# Configuração
 config = SystemConfig()
 logger = logging.getLogger(__name__)
 
@@ -124,10 +127,6 @@ Responda apenas com: SIMPLE, MODERATE, COMPLEX ou VERY_COMPLEX
     
     def determine_specialists(self, query: str, complexity: QueryComplexity) -> List[SpecialistType]:
         """Determina especialistas necessários baseado na query"""
-        from src.core.config import SystemConfig
-        config = SystemConfig()
-        max_subagents = config.multiagent.max_subagents
-        
         query_lower = query.lower()
         specialists = []
         
@@ -144,30 +143,12 @@ Responda apenas com: SIMPLE, MODERATE, COMPLEX ou VERY_COMPLEX
         if complexity == QueryComplexity.SIMPLE and len(specialists) > 1:
             # Para queries simples, usar apenas o primeiro especialista
             specialists = specialists[:1]
-        elif complexity in [QueryComplexity.MODERATE, QueryComplexity.COMPLEX, QueryComplexity.VERY_COMPLEX]:
-            # Para queries moderadas ou superiores, garantir múltiplos especialistas
-            if len(specialists) == 1:
-                # Adicionar especialistas complementares baseado na complexidade
-                primary_specialist = specialists[0]
-                
-                if complexity == QueryComplexity.MODERATE:
-                    # Adicionar GENERAL para contexto amplo
-                    if primary_specialist != SpecialistType.GENERAL:
-                        specialists.append(SpecialistType.GENERAL)
-                    # Adicionar TECHNICAL se não for o primário
-                    if primary_specialist != SpecialistType.TECHNICAL:
-                        specialists.append(SpecialistType.TECHNICAL)
-                        
-                elif complexity in [QueryComplexity.COMPLEX, QueryComplexity.VERY_COMPLEX]:
-                    # Para complexidade alta, usar todos os especialistas relevantes
-                    if primary_specialist != SpecialistType.GENERAL:
-                        specialists.append(SpecialistType.GENERAL)
-                    if primary_specialist != SpecialistType.TECHNICAL:
-                        specialists.append(SpecialistType.TECHNICAL)
-                    if len(specialists) < max_subagents and primary_specialist != SpecialistType.CONCEPTUAL:
-                        specialists.append(SpecialistType.CONCEPTUAL)
+        elif complexity == QueryComplexity.VERY_COMPLEX and len(specialists) == 1:
+            # Para queries muito complexas, adicionar especialista complementar
+            if specialists[0] != SpecialistType.GENERAL:
+                specialists.append(SpecialistType.GENERAL)
         
-        return specialists[:max_subagents]  # Máximo baseado na configuração
+        return specialists[:3]  # Máximo 3 especialistas
     
     def extract_key_aspects(self, query: str) -> List[str]:
         """Extrai aspectos-chave da query usando LLM"""
@@ -187,7 +168,7 @@ Formato: lista simples, um aspecto por linha.
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=config.rag.max_tokens_decomposition_item,
-                temperature=config.rag.temperature
+                temperature=system_config.rag.temperature
             )
             
             aspects_text = response.choices[0].message.content.strip()
@@ -274,7 +255,7 @@ Retorne apenas a query refinada, sem explicações.
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=config.rag.max_tokens_subquery,
-                temperature=config.rag.temperature
+                temperature=system_config.rag.temperature
             )
             
             refined = response.choices[0].message.content.strip()
@@ -290,16 +271,12 @@ Retorne apenas a query refinada, sem explicações.
         # Estratégia baseada na complexidade
         strategy = self.strategy_mapping[complexity]
         
-        # Número de subagentes baseado na complexidade (respeitando MAX_SUBAGENTS)
-        from src.core.config import SystemConfig
-        config = SystemConfig()
-        max_subagents = config.multiagent.max_subagents
-        
+        # Número de subagentes baseado na complexidade
         subagent_counts = {
             QueryComplexity.SIMPLE: 1,
-            QueryComplexity.MODERATE: min(2, max_subagents),
-            QueryComplexity.COMPLEX: min(3, max_subagents),
-            QueryComplexity.VERY_COMPLEX: max_subagents
+            QueryComplexity.MODERATE: 1,
+            QueryComplexity.COMPLEX: 2,
+            QueryComplexity.VERY_COMPLEX: 3
         }
         estimated_subagents = subagent_counts[complexity]
         
