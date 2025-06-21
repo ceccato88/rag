@@ -291,7 +291,7 @@ def get_request_validator() -> RequestValidator:
 rate_limiter = None
 
 try:
-    if config.security.enable_rate_limiting:
+    if getattr(config.security, 'enable_rate_limiting', True):
         from slowapi import Limiter, _rate_limit_exceeded_handler
         from slowapi.util import get_remote_address
         from slowapi.errors import RateLimitExceeded

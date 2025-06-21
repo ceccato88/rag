@@ -91,8 +91,7 @@ class IndexRequest(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "url": "https://example.com/document.pdf",
-                "doc_source": "manual-usuario-v1"
+                "url": "https://arxiv.org/pdf/2501.13956.pdf"
             }
         }
     )
@@ -102,11 +101,6 @@ class IndexRequest(BaseModel):
         description="URL do PDF para indexar",
         min_length=VALIDATION_CONFIG['MIN_URL_LENGTH'],
         max_length=VALIDATION_CONFIG['MAX_URL_LENGTH']
-    )
-    doc_source: Optional[str] = Field(
-        default=None,
-        max_length=VALIDATION_CONFIG['MAX_DOC_SOURCE_LENGTH'],
-        description="Nome/identificador do documento"
     )
     
     @field_validator('url')
@@ -130,22 +124,6 @@ class IndexRequest(BaseModel):
         
         return v
     
-    @field_validator('doc_source')
-    @classmethod
-    def validate_doc_source(cls, v):
-        """Valida o nome do documento"""
-        if v is None:
-            return v
-        
-        v = v.strip()
-        if not v:
-            return None
-        
-        # Verificar caracteres permitidos
-        if not all(c.isalnum() or c in "._-" for c in v):
-            raise ValueError("doc_source deve conter apenas letras, números, pontos, underscores e hífens")
-        
-        return v
 
 
 class IndexResponse(BaseModel):

@@ -29,9 +29,6 @@ from .enhanced_unified_config import get_config_for_task, unified_config
 from .enhanced_config import SPECIALIST_OPTIMIZATIONS  # Manter para seções preferidas
 
 # Configuração do sistema
-system_config = SystemConfig()
-
-# Configuração
 config = SystemConfig()
 logger = logging.getLogger(__name__)
 
@@ -190,7 +187,7 @@ Formato: lista simples, um aspecto por linha.
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=config.rag.max_tokens_decomposition_item,
-                temperature=system_config.rag.temperature
+                temperature=config.rag.temperature
             )
             
             aspects_text = response.choices[0].message.content.strip()
@@ -277,7 +274,7 @@ Retorne apenas a query refinada, sem explicações.
                 model=config.rag.llm_model,
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=config.rag.max_tokens_subquery,
-                temperature=system_config.rag.temperature
+                temperature=config.rag.temperature
             )
             
             refined = response.choices[0].message.content.strip()

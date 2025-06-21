@@ -64,6 +64,38 @@ except ImportError as e:
     
     def create_doc_source_name(url: str) -> str:
         return url.split("/")[-1]
+    
+def extract_document_name(url: str) -> str:
+    """
+    Extrai o nome do documento da URL para usar como prefixo.
+    
+    Exemplos:
+    - https://arxiv.org/pdf/2501.13956.pdf -> 2501.13956
+    - https://example.com/document.pdf -> document
+    """
+    import re
+    from urllib.parse import urlparse
+    
+    # Para URLs do arXiv, extrair apenas o número do paper
+    if "arxiv.org" in url:
+        # Padrão: https://arxiv.org/pdf/2501.13956.pdf -> 2501.13956
+        match = re.search(r'/([0-9]+\.[0-9]+)(\.pdf)?$', url)
+        if match:
+            return match.group(1)
+    
+    # Para outras URLs, pegar o nome do arquivo sem extensão
+    parsed = urlparse(url)
+    filename = parsed.path.split('/')[-1]
+    
+    # Remover extensão .pdf
+    if filename.endswith('.pdf'):
+        filename = filename[:-4]
+    
+    # Se ainda estiver vazio, usar 'document'
+    if not filename:
+        filename = 'document'
+    
+    return filename
 
 
 @router.post("", response_model=IndexResponse, summary="Indexar Documento PDF")
@@ -76,15 +108,15 @@ async def index_document(
     Indexa um documento PDF por URL no sistema RAG.
     
     **Parâmetros:**
-    - **url**: URL válida do arquivo PDF (deve começar com http/https e terminar com .pdf)
-    - **doc_source**: Nome identificador do documento (opcional, será gerado se não fornecido)
+    - **url**: URL válida do arquivo PDF (deve começar com http/https)
     
     **Processo de Indexação:**
     1. Download do PDF da URL fornecida
-    2. Extração de texto e imagens
-    3. Criação de chunks semânticos
-    4. Geração de embeddings
-    5. Armazenamento no banco vetorial
+    2. Extração automática do nome do documento
+    3. Extração de texto e imagens
+    4. Criação de chunks semânticos
+    5. Geração de embeddings
+    6. Armazenamento no banco vetorial
     
     **Retorna:**
     - Status da indexação
@@ -94,10 +126,13 @@ async def index_document(
     **Exemplo de uso:**
     ```json
     {
-        "url": "https://arxiv.org/pdf/2301.00001.pdf",
-        "doc_source": "paper-transformers-2023"
+        "url": "https://arxiv.org/pdf/2501.13956.pdf"
     }
     ```
+    
+    **Nomenclatura automática:**
+    - arXiv: `https://arxiv.org/pdf/2501.13956.pdf` → `doc_source: "2501.13956"`
+    - Outros: `https://example.com/document.pdf` → `doc_source: "document"`
     """
     if not INDEXER_AVAILABLE:
         raise ServiceUnavailableError("Indexer", "Sistema de indexação não disponível")
@@ -108,8 +143,8 @@ async def index_document(
         # Validação adicional da URL
         ErrorHandler.validate_url(request.url)
         
-        # Criar nome do documento se não fornecido
-        doc_source = request.doc_source or create_doc_source_name(request.url)
+        # Extrair nome do documento automaticamente da URL
+        doc_source = extract_document_name(request.url)
         
         # Verificar se doc_source é válido
         if not doc_source or not doc_source.strip():

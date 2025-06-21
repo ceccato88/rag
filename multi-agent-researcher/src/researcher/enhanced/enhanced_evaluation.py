@@ -25,7 +25,6 @@ except ImportError:
 
 # Configuração
 config = SystemConfig()
-system_config = SystemConfig()  # Para compatibilidade
 logger = logging.getLogger(__name__)
 
 
@@ -209,7 +208,7 @@ Formato: lista simples, uma descoberta por linha.
                 model=config.rag.llm_model,
                 messages=messages,
                 max_tokens=config.rag.max_tokens_rating,
-                temperature=system_config.rag.temperature
+                temperature=config.rag.temperature
             )
             
             findings_text = response.choices[0].message.content.strip()
@@ -427,9 +426,12 @@ class IterativeRAGEvaluator:
             gaps.append(f"Área não coberta: {area}")
         
         # 2. Verificar qualidade geral baixa
-        avg_quality = sum(doc.quality_score for doc in document_evaluations) / len(document_evaluations)
-        if avg_quality < 0.5:
-            gaps.append("Qualidade geral dos documentos baixa")
+        if len(document_evaluations) > 0:
+            avg_quality = sum(doc.quality_score for doc in document_evaluations) / len(document_evaluations)
+            if avg_quality < 0.5:
+                gaps.append("Qualidade geral dos documentos baixa")
+        else:
+            gaps.append("Nenhum documento foi avaliado")
         
         # 3. Verificar se há documentos suficientes de alta relevância
         highly_relevant_count = sum(

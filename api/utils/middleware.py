@@ -187,7 +187,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         return False, 0
     
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        if not config.security.enable_rate_limiting:
+        if not getattr(config.security, 'enable_rate_limiting', True):
             return await call_next(request)
         
         # Endpoints que não são limitados
@@ -281,7 +281,7 @@ def setup_middlewares(app):
     setup_cors_middleware(app)
     
     # 2. Rate limiting (antes da validação de request)
-    if config.security.enable_rate_limiting:
+    if getattr(config.security, 'enable_rate_limiting', True):
         # Extrair número do formato "100/minute"
         rate_limit = config.security.rate_limit
         if "/minute" in rate_limit:

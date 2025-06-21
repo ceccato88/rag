@@ -296,17 +296,17 @@ class EnhancedLeadResearcher:
         Returns:
             AgentResult: Resultado compatível com sistema atual
         """
-        from datetime import datetime
+        from datetime import datetime, timezone
         
         # Importar classes base com fallback robusto
         try:
-            from ..agents.base import AgentResult, AgentState as AgentStatus
+            from ..agents.base import AgentResult, AgentState
         except ImportError:
             try:
-                from researcher.agents.base import AgentResult, AgentState as AgentStatus
+                from researcher.agents.base import AgentResult, AgentState
             except ImportError:
                 # Criar classes compatíveis se não conseguir importar
-                class AgentStatus:
+                class AgentState:
                     COMPLETED = "completed"
                     FAILED = "failed"
                 
@@ -317,8 +317,8 @@ class EnhancedLeadResearcher:
                         self.output = output
                         self.error = error
                         self.metadata = metadata or {}
-                        self.start_time = datetime.utcnow()  # Campo obrigatório adicionado
-                        self.end_time = datetime.utcnow()
+                        self.start_time = datetime.now(timezone.utc)  # Campo obrigatório adicionado
+                        self.end_time = datetime.now(timezone.utc)
                         self.reasoning_trace = []
         
         try:
@@ -344,7 +344,7 @@ class EnhancedLeadResearcher:
                                     confidence_score=result.get("confidence_score"),
                                     sources_count=len(result.get("sources", [])))
             else:
-                status = AgentStatus.FAILED
+                status = AgentState.FAILED
                 output = None
                 error = result.get("error", "Falha na pesquisa")
                 

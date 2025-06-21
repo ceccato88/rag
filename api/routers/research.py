@@ -7,7 +7,7 @@ Endpoints relacionados à pesquisa e consultas RAG.
 
 import time
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -103,7 +103,7 @@ async def research_query(
             objective=query.objective or f"Pesquisar informações sobre: {query.query}",
             metadata={
                 "api_request": True,
-                "timestamp": datetime.utcnow().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "request_id": getattr(request_context, 'get', lambda x, y: 'unknown')('request_id', 'unknown')
             }
         )
@@ -131,7 +131,7 @@ async def research_query(
             agent_id=agent_result.agent_id,
             status=agent_result.status.name,
             processing_time=processing_time,
-            timestamp=agent_result.end_time.isoformat() if agent_result.end_time else datetime.utcnow().isoformat(),
+            timestamp=agent_result.end_time.isoformat() if agent_result.end_time else datetime.now(timezone.utc).isoformat(),
             confidence_score=confidence_score,
             sources=sources,
             reasoning_trace=agent_result.reasoning_trace,  # Sempre presente no sistema enhanced
@@ -185,7 +185,7 @@ async def research_status(
             "research_system_ready": True,
             "lead_researcher": researcher_info,
             "system_metrics": state_manager.metrics.get_stats(),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -252,7 +252,7 @@ async def simple_search(
             "result_length": len(result) if result else 0,
             "sources": sources,
             "processing_time": processing_time,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "simple_rag_available": simple_rag is not None,
             "diagnostic": {
                 "has_result": bool(result),
@@ -271,7 +271,7 @@ async def simple_search(
             "query": query.query,
             "result": f"Erro: {str(e)}",
             "processing_time": processing_time,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "error": str(e)
         }
 
@@ -331,7 +331,7 @@ async def debug_research_system(
         logger.error(f"❌ Erro no diagnóstico: {e}")
         return {
             "error": str(e),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
 
 
@@ -381,7 +381,7 @@ async def direct_research(
             "agent_id": getattr(lead_researcher, 'agent_id', 'direct-search'),
             "status": "COMPLETED" if success else "NO_RESULTS",
             "processing_time": processing_time,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "confidence_score": 0.8 if success else 0.0,
             "sources": ["SimpleRAG"] if success else [],
             "reasoning_trace": "Direct RAG search without subagents",
@@ -401,7 +401,7 @@ async def direct_research(
             "agent_id": "error",
             "status": "FAILED",
             "processing_time": processing_time,
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "confidence_score": 0.0,
             "sources": [],
             "reasoning_trace": None,
@@ -445,7 +445,7 @@ async def test_reasoning(
             objective=query.objective or f"Pesquisar informações sobre: {query.query}",
             metadata={
                 "api_request": True,
-                "timestamp": datetime.utcnow().isoformat()
+                "timestamp": datetime.now(timezone.utc).isoformat()
             }
         )
         
@@ -468,7 +468,7 @@ async def test_reasoning(
             "rag_info": rag_info,
             "reasoning_available": hasattr(lead_researcher, 'reasoner'),
             "reasoning_type": type(lead_researcher.reasoner).__name__ if hasattr(lead_researcher, 'reasoner') else None,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
     except Exception as e:
@@ -478,5 +478,5 @@ async def test_reasoning(
             "success": False,
             "error": str(e),
             "traceback": traceback.format_exc(),
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat()
         }
